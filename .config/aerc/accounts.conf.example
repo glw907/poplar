@@ -1,0 +1,13 @@
+# Copy this file to accounts.conf and fill in your details.
+#
+# See aerc-accounts(5) for all options.
+
+[Mail]
+source = jmap://you@example.com
+# source-cred-cmd = your-credential-helper
+outgoing = jmap://you@example.com
+# outgoing-cred-cmd = your-credential-helper
+default = Inbox
+from = Your Name <you@example.com>
+copy-to = Sent
+cache-headers = true
