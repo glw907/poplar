@@ -15,10 +15,12 @@ multiple color themes, and optional nvim-mail and kitty integration.
 
 ```
 beautiful-aerc/
+  CLAUDE.md                        # project conventions for Claude Code
   README.md
   go.mod                           # go 1.23 (matches aerc)
   go.sum
   Makefile                         # build + install Go binary
+  .golangci.yml
   cmd/
     beautiful-aerc/
       main.go
@@ -29,6 +31,8 @@ beautiful-aerc/
       headers.go
       html.go
       plain.go
+  e2e/
+    testdata/                      # HTML email fixtures + golden files
   .config/aerc/
     aerc.conf
     binds.conf
@@ -341,6 +345,45 @@ Audience: developers who want to improve or extend the project. Covers:
 - How to add a new filter stage
 - How to add a new theme
 - Code conventions (matches the project's Go style)
+
+## Project CLAUDE.md
+
+The repo includes a CLAUDE.md so that Claude Code has full project
+context when working on the codebase. Contents:
+
+- **Project overview** - what beautiful-aerc is, the aerc filter
+  protocol (stdin/stdout, ANSI escape codes, AERC_COLUMNS env var)
+- **Go conventions** - reference the key rules: no unnecessary
+  interfaces/goroutines, cobra with SilenceUsage, table-driven tests,
+  `fmt.Errorf("context: %w", err)`, `make check` before commits
+- **Project structure** - what lives in cmd/, internal/, .config/,
+  themes/, generated/, e2e/
+- **Theme system** - how themes work, the generator, palette.sh format
+- **Testing** - unit tests (table-driven), e2e golden file tests,
+  tmux live verification for visual rendering
+- **Build** - `make build`, `make check`, `make install`
+- **Dependencies** - pandoc (runtime), aerc built-ins (colorize, wrap)
+
+## Consumer setup (dotfiles integration)
+
+The project is developed at `~/Projects/beautiful-aerc/`. To consume
+it from the dotfiles repo:
+
+- `~/.dotfiles/beautiful-aerc` is a symlink to
+  `~/Projects/beautiful-aerc/`
+- `cd ~/.dotfiles && stow beautiful-aerc` installs everything
+- The old stow packages (`aerc`, `nvim-mail`, mail-related files in
+  `kitty` and `bin`) are retired once beautiful-aerc is working
+- Development happens in `~/Projects/beautiful-aerc/` with its own
+  git history; dotfiles repo just points to it
+
+This means:
+- `git pull` in the project repo gets upstream updates
+- `stow -R beautiful-aerc` re-links after updates
+- Personal overrides (accounts.conf, palette override sections) are
+  unaffected by stow operations
+- The project repo is both the development workspace and the
+  distributable artifact
 
 ## Future ideas (not in scope)
 
