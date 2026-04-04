@@ -351,11 +351,16 @@ Audience: developers who want to improve or extend the project. Covers:
 The repo includes a CLAUDE.md so that Claude Code has full project
 context when working on the codebase. Contents:
 
+- **Go conventions** - `MANDATORY: Read and follow
+  ~/.claude/docs/go-conventions.md before writing ANY Go code.`
+  This is the most important line. It pulls in the full conventions
+  (no unnecessary interfaces/goroutines, cobra with SilenceUsage,
+  table-driven tests, error wrapping, atomic writes, etc.)
+- **Superpowers Go skill** - `MANDATORY: Use superpowers:go skill
+  for all Go development tasks.` Ensures the Go-specific skill is
+  invoked for implementation work.
 - **Project overview** - what beautiful-aerc is, the aerc filter
   protocol (stdin/stdout, ANSI escape codes, AERC_COLUMNS env var)
-- **Go conventions** - reference the key rules: no unnecessary
-  interfaces/goroutines, cobra with SilenceUsage, table-driven tests,
-  `fmt.Errorf("context: %w", err)`, `make check` before commits
 - **Project structure** - what lives in cmd/, internal/, .config/,
   themes/, generated/, e2e/
 - **Theme system** - how themes work, the generator, palette.sh format
