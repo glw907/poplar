@@ -51,7 +51,7 @@ make build    # build ./beautiful-aerc binary
 make vet      # go vet ./...
 make test     # go test ./...
 make check    # vet + test (required before commits)
-make install  # go install ./cmd/beautiful-aerc
+make install  # install to ~/.local/bin/
 make clean    # remove ./beautiful-aerc binary
 ```
 

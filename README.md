@@ -4,7 +4,7 @@ beautiful-aerc is a themeable, distributable email setup for the [aerc](https://
 
 ## What's included
 
-- **Go binary** - three subcommands (`headers`, `html`, `plain`) that aerc calls to render every message. Replaces a tangle of shell scripts, awk, sed, and perl.
+- **Go binary** - three subcommands (`headers`, `html`, `plain`) that aerc calls to render every message. Replaces a tangle of shell scripts, awk, sed, and perl. Noticeably faster message rendering.
 - **Theme system** - 16-slot semantic color definitions that generate both an aerc styleset (UI colors) and a palette file (message rendering colors) from one source file.
 - **Three built-in themes** - Nord, Solarized Dark, and Gruvbox Dark.
 - **aerc config** - `aerc.conf` and `binds.conf` ready to use, with comments. `accounts.conf.example` as a starting point.
@@ -38,10 +38,8 @@ cd beautiful-aerc
 
 ```sh
 make build
-make install   # installs to $GOPATH/bin or $GOBIN
+make install   # installs to ~/.local/bin/
 ```
-
-`beautiful-aerc` must be on your `$PATH` before aerc can call it.
 
 **3. Generate a theme**
 

@@ -74,5 +74,5 @@ make build     # build binary
 make test      # run tests
 make vet       # go vet
 make check     # vet + test (gate before commits)
-make install   # go install
+make install   # install to ~/.local/bin/
 ```
