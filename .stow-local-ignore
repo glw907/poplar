@@ -1,0 +1,16 @@
+# Stow ignore: only install .config/, .local/, and .local/share/
+# Everything else is project development files.
+\.git
+\.gitignore
+\.golangci\.yml
+\.stow-local-ignore
+cmd
+internal
+e2e
+docs
+go\.mod
+go\.sum
+Makefile
+CLAUDE\.md
+README\.md
+beautiful-aerc
