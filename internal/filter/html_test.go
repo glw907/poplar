@@ -148,48 +148,22 @@ func TestHighlightMarkdown(t *testing.T) {
 	}
 }
 
-func TestStyleLinks(t *testing.T) {
-	colors := &linkColors{
-		Text:  "38;2;136;192;208",
-		URL:   "38;2;97;110;136",
-		Reset: "0",
-	}
+func TestStripANSI(t *testing.T) {
 	tests := []struct {
-		name      string
-		input     string
-		clean     bool
-		checkText string
+		name  string
+		input string
+		want  string
 	}{
-		{
-			"markdown mode",
-			"[Click here](https://example.com)",
-			false,
-			"\033[38;2;136;192;208m[Click here]\033[0m\033[38;2;97;110;136m(https://example.com)\033[0m",
-		},
-		{
-			"clean mode",
-			"[Click here](https://example.com)",
-			true,
-			"Click here",
-		},
-		{
-			"strip leading/trailing spaces in text",
-			"[ Click here ](https://example.com)",
-			false,
-			"[Click here]",
-		},
-		{
-			"strip colorize ANSI from URL",
-			"[Click](\033[4;33mhttps://example.com\033[0m)",
-			false,
-			"(https://example.com)",
-		},
+		{"no escapes", "plain text", "plain text"},
+		{"color reset", "\033[0mtext", "text"},
+		{"bold color", "\033[1;32mgreen\033[0m", "green"},
+		{"multiple sequences", "\033[38;2;136;192;208m[Click here]\033[0m", "[Click here]"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := styleLinks(tt.input, colors, tt.clean)
-			if !strings.Contains(got, tt.checkText) {
-				t.Errorf("output %q does not contain %q", got, tt.checkText)
+			got := stripANSI(tt.input)
+			if got != tt.want {
+				t.Errorf("got %q, want %q", got, tt.want)
 			}
 		})
 	}

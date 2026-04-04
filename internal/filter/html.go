@@ -23,13 +23,6 @@ type markdownColors struct {
 	Reset   string
 }
 
-// linkColors holds ANSI parameter strings for link styling.
-type linkColors struct {
-	Text  string
-	URL   string
-	Reset string
-}
-
 // Package-level compiled regexes.
 var (
 	reMozClass         = regexp.MustCompile(` class="moz-[^"]*"`)
@@ -55,7 +48,6 @@ var (
 	reItalic     = regexp.MustCompile(`\*([^*\n]+?)\*`)
 	reRuleDashes = regexp.MustCompile(`(?m)^-{3,}$`)
 	reRuleUnders = regexp.MustCompile(`(?m)^_{3,}$`)
-	reLink       = regexp.MustCompile(`\[([^\]]+)\]\(([^)]+)\)`)
 	reListIndent       = regexp.MustCompile(`(?m)^[ ]{4,}([-*+] )`)
 	reANSI             = regexp.MustCompile(`\x1b\[[0-9;]*m`)
 	reInlineWhitespace = regexp.MustCompile(`\s*\n\s*`)
@@ -218,37 +210,6 @@ func stripANSI(s string) string {
 	return reANSI.ReplaceAllString(s, "")
 }
 
-// styleLinks applies ANSI coloring to markdown-format links [text](url).
-// When clean is true, links are replaced with plain text only (no brackets, no URL).
-func styleLinks(text string, colors *linkColors, clean bool) string {
-	lt := ""
-	lu := ""
-	r := ""
-	if colors.Text != "" {
-		lt = "\033[" + colors.Text + "m"
-	}
-	if colors.URL != "" {
-		lu = "\033[" + colors.URL + "m"
-	}
-	if colors.Reset != "" {
-		r = "\033[" + colors.Reset + "m"
-	}
-
-	return reLink.ReplaceAllStringFunc(text, func(m string) string {
-		groups := reLink.FindStringSubmatch(m)
-		if groups == nil {
-			return m
-		}
-		linkText := strings.TrimSpace(groups[1])
-		url := stripANSI(groups[2])
-
-		if clean {
-			return linkText
-		}
-		return lt + "[" + linkText + "]" + r + lu + "(" + url + ")" + r
-	})
-}
-
 // runPandoc pipes input through pandoc for HTML-to-markdown conversion.
 func runPandoc(input io.Reader, luaFilter string, cols int) (string, error) {
 	args := []string{
@@ -257,6 +218,7 @@ func runPandoc(input io.Reader, luaFilter string, cols int) (string, error) {
 		"-L", luaFilter,
 		"--wrap=auto",
 		fmt.Sprintf("--columns=%d", cols),
+		"--reference-links",
 	}
 	cmd := exec.Command("pandoc", args...)
 	cmd.Stdin = input
@@ -324,10 +286,10 @@ func findLuaFilter() (string, error) {
 }
 
 // HTML converts an HTML email body to styled text, writing to w.
-// It runs the pandoc pipeline, cleans up artifacts, highlights markdown
-// syntax, and styles links using palette p. cols sets pandoc's column width.
-// When cleanLinks is true, links are rendered as plain text without URLs.
-func HTML(r io.Reader, w io.Writer, p *palette.Palette, cols int, cleanLinks bool) error {
+// It runs the pandoc pipeline, cleans up artifacts, converts links to
+// footnotes, and highlights markdown syntax using palette p.
+// cols sets pandoc's column width.
+func HTML(r io.Reader, w io.Writer, p *palette.Palette, cols int) error {
 	if cols < 1 {
 		cols = 72
 	}
@@ -360,14 +322,15 @@ func HTML(r io.Reader, w io.Writer, p *palette.Palette, cols int, cleanLinks boo
 	md = normalizeListIndent(md)
 	md = normalizeWhitespace(md)
 
-	// Link styling (before markdown highlighting so ANSI codes from
-	// heading/bold wrapping don't confuse the link regex)
-	lc := &linkColors{
-		Text:  p.Get("C_LINK_TEXT"),
-		URL:   p.Get("C_LINK_URL"),
-		Reset: "0",
+	// Footnote conversion and styling
+	body, refs := convertToFootnotes(md)
+	fc := &footnoteColors{
+		LinkText: p.Get("C_LINK_TEXT"),
+		Dim:      p.Get("FG_DIM"),
+		LinkURL:  p.Get("C_LINK_URL"),
+		Reset:    "0",
 	}
-	md = styleLinks(md, lc, cleanLinks)
+	md = styleFootnotes(body, refs, cols, fc)
 
 	// Markdown syntax highlighting
 	mc := &markdownColors{

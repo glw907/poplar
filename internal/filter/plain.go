@@ -24,7 +24,7 @@ func detectHTML(text string) bool {
 
 // Plain handles the text/plain filter. If stdin looks like HTML,
 // delegates to HTML filter. Otherwise pipes through wrap | colorize.
-func Plain(r io.Reader, w io.Writer, p *palette.Palette, cols int, cleanLinks bool) error {
+func Plain(r io.Reader, w io.Writer, p *palette.Palette, cols int) error {
 	body, err := io.ReadAll(r)
 	if err != nil {
 		return fmt.Errorf("reading stdin: %w", err)
@@ -34,7 +34,7 @@ func Plain(r io.Reader, w io.Writer, p *palette.Palette, cols int, cleanLinks bo
 	fmt.Fprintln(w) // leading blank line
 
 	if detectHTML(text) {
-		return HTML(strings.NewReader(text), w, p, cols, cleanLinks)
+		return HTML(strings.NewReader(text), w, p, cols)
 	}
 
 	colStr := "80"
