@@ -4,7 +4,7 @@ beautiful-aerc is a themeable, distributable email setup for the [aerc](https://
 
 ## What's included
 
-- **Go binary** - three subcommands (`headers`, `html`, `plain`) that aerc calls to render every message. Replaces a tangle of shell scripts, awk, sed, and perl. Noticeably faster message rendering.
+- **Go binary** - four subcommands (`headers`, `html`, `plain`, `pick-link`) that aerc calls to render every message and provide link navigation. Replaces a tangle of shell scripts, awk, sed, and perl. Noticeably faster message rendering.
 - **Theme system** - 16-slot semantic color definitions that generate both an aerc styleset (UI colors) and a palette file (message rendering colors) from one source file.
 - **Three built-in themes** - Nord, Solarized Dark, and Gruvbox Dark.
 - **aerc config** - `aerc.conf` and `binds.conf` ready to use, with comments. `accounts.conf.example` as a starting point.
@@ -95,31 +95,42 @@ text/plain=beautiful-aerc plain
 ```
 
 - **headers** - reorders headers (From, To, Date, Subject), colorizes field names, wraps long address lines, and prints a separator line.
-- **html** - calls pandoc to convert HTML to markdown, cleans up pandoc artifacts, then applies syntax highlighting for headings, bold, italic, and links.
+- **html** - calls pandoc to convert HTML to markdown, cleans up pandoc artifacts, renders links as footnote references with a numbered URL section at the bottom, and applies syntax highlighting for headings, bold, and italic.
 - **plain** - detects HTML-in-plain-text MIME parts (common with some clients) and routes them through the HTML pipeline. Otherwise pipes through aerc's built-in `wrap | colorize`.
 
 See [docs/filters.md](docs/filters.md) for the full pipeline description.
 
-## Link display modes
+## Footnote-style links
 
-The `html` subcommand supports two modes for rendering links:
-
-**Markdown links (default)** - shows link text and URL:
+Links in HTML emails render as footnote references. Body text stays clean and readable; URLs are collected in a numbered reference section at the bottom:
 
 ```
-[Check activity](https://github.com/notifications/...)
+If you don't recognize this account, remove[^1] it.
+
+Check activity[^2]
+
+See https://myaccount.google.com/notifications
+----------------------------------------
+[^1]: https://accounts.google.com/AccountDisavow?adt=...
+[^2]: https://accounts.google.com/AccountChooser?Email=...
 ```
 
-**Clean links** - shows link text only, URLs hidden:
+Link text is colored, footnote markers are dimmed. Self-referencing links (where the display text is the URL) render as plain URLs with no footnote.
 
-```
-Check activity
-```
+## Link picker
 
-To switch to clean links, edit `aerc.conf`:
+Press Tab in the message viewer to open the link picker. It lists all URLs in the current message with numbered shortcuts:
+
+- 1-9 instantly opens that link
+- 0 opens the 10th link
+- j/k or arrows to navigate, Enter to select
+- q or Escape to cancel
+
+The picker uses theme colors from your palette. Configure the keybinding in `binds.conf`:
 
 ```ini
-text/html=beautiful-aerc html --clean-links
+[view]
+<Tab> = :menu -dc 'beautiful-aerc pick-link' :open-link
 ```
 
 ## Switching themes

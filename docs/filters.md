@@ -66,41 +66,68 @@ The cleaned markdown is scanned line by line. Elements matching markdown syntax 
 
 Colors come from `generated/palette.sh`. See [docs/themes.md](themes.md) for the token reference.
 
-**5. Link styling**
+**5. Footnote-style links**
 
-Links in `[text](url)` format are styled based on the configured mode. See link display modes below.
+Links are rendered as footnote references. Body text stays clean with colored link text and dimmed footnote markers. A numbered reference section at the bottom lists all URLs.
 
-## Link display modes
+Self-referencing links (where the display text is the URL itself) render as plain URLs with no footnote number.
 
-The `html` subcommand supports two link rendering modes, configured in `aerc.conf`.
+pandoc is called with `--reference-links` to produce reference-style output, which is then converted to footnote syntax by `convertToFootnotes` and styled by `styleFootnotes`.
 
-**Markdown links (default)**
+## Footnote link rendering
 
-Shows link text in `C_LINK_TEXT` color followed by the URL in `C_LINK_URL` color (typically dimmed):
+Body text shows colored link text followed by a dimmed footnote marker:
 
 ```
-[Check activity](https://github.com/notifications/...)
+If you don't recognize this account, remove[^1] it.
+
+Check activity[^2]
+
+You can also see security activity at
+https://myaccount.google.com/notifications
 ```
 
-URLs remain visible and ctrl+clickable in kitty terminal.
+A dimmed separator and numbered reference section follow the body:
+
+```
+----------------------------------------
+[^1]: https://accounts.google.com/AccountDisavow?adt=...
+[^2]: https://accounts.google.com/AccountChooser?Email=...
+```
+
+Colors used:
+- Link text: `C_LINK_TEXT`
+- Footnote markers `[^N]`: `FG_DIM` (converted from hex to ANSI)
+- Separator: `FG_DIM`
+- Reference labels `[^N]:`: `FG_DIM`
+- Reference URLs: `C_LINK_URL`
+
+## Link picker
+
+The `beautiful-aerc pick-link` subcommand provides keyboard-driven URL selection. It reads text from stdin, extracts all URLs, and presents a numbered list.
+
+Interaction:
+- Keys 1-9 instantly select that link
+- Key 0 selects the 10th link
+- j/k or arrow keys to navigate
+- Enter to select the highlighted link
+- q or Escape to cancel
+
+The selected URL is printed to stdout.
+
+Keybinding in `binds.conf`:
 
 ```ini
-text/html=beautiful-aerc html
+[view]
+<Tab> = :menu -dc 'beautiful-aerc pick-link' :open-link
 ```
 
-**Clean links**
+aerc's `:menu` pipes the current message through the command and uses the output as the argument to `:open-link`.
 
-Shows link text only. URLs are stripped. Matches the reading experience of aerc's default w3m-based rendering:
-
-```
-Check activity
-```
-
-```ini
-text/html=beautiful-aerc html --clean-links
-```
-
-The `--clean-links` flag also applies when the `plain` subcommand delegates to the HTML pipeline.
+Picker colors come from palette.sh:
+- Number: `ACCENT_PRIMARY`
+- URL text: `FG_DIM`
+- Selected line: `BG_SELECTION` + `FG_BRIGHT`
 
 ## Header formatting
 

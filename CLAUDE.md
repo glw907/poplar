@@ -25,7 +25,8 @@ conform. Key rules:
 ```
 cmd/beautiful-aerc/    CLI wiring (cobra root + subcommands)
 internal/palette/      Parse generated/palette.sh, expose color tokens
-internal/filter/       Filter implementations (headers, html, plain)
+internal/filter/       Filter implementations (headers, html, plain) + footnote rendering
+internal/picker/       Link picker UI (pick-link subcommand)
 e2e/                   End-to-end tests (build binary, pipe fixtures)
 e2e/testdata/          HTML email fixtures + golden output files
 .config/aerc/          aerc configuration files
