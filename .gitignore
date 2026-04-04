@@ -2,3 +2,6 @@
 .config/aerc/accounts.conf
 .config/aerc/fastmail-*.age
 .config/aerc/mailrules.json
+.config/aerc/generated/palette.sh
+.config/aerc/stylesets/*
+!.config/aerc/stylesets/.gitkeep
