@@ -1,13 +1,13 @@
 # beautiful-aerc Design Spec
 
-A themeable, distributable aerc email setup with Nord-based defaults,
-a Go filter binary, and optional nvim-mail and kitty integration.
+A themeable, distributable aerc email setup with a Go filter binary,
+multiple color themes, and optional nvim-mail and kitty integration.
 
 ## Goals
 
 - Single `stow beautiful-aerc` installs the full mail stack
 - Easy theme switching: change one file, regenerate, done
-- Ships with 3 themes (Nord, Solarized Dark, Gruvbox Dark)
+- Ships with 3 themes (Nord, Solarized Dark, Gruvbox Dark) as equal options
 - Users can `git pull` for upstream updates while keeping local overrides
 - Minimal runtime dependencies: aerc, pandoc, Go binary
 
@@ -107,7 +107,7 @@ The binary finds `palette.sh` by checking in order:
 1. `$AERC_CONFIG/generated/palette.sh`
 2. Relative to binary: `../../.config/aerc/generated/palette.sh`
 3. `~/.config/aerc/generated/palette.sh`
-4. Built-in Nord defaults (always works, zero config)
+4. Error: "palette not found - run themes/generate to set up your theme"
 
 Parsing is simple: `KEY=value` and `KEY="value"` lines. Ignores
 comments and blank lines.
@@ -161,8 +161,8 @@ C_RULE="$FG_DIM"
 Usage:
 
 ```sh
-themes/generate                        # uses nord.sh (default)
-themes/generate themes/solarized-dark.sh   # switch theme
+themes/generate themes/nord.sh             # generate Nord theme
+themes/generate themes/solarized-dark.sh   # switch to Solarized
 ```
 
 ### Override mechanism
@@ -175,17 +175,17 @@ User customizations below this line survive re-running the generator.
 
 ### Shipped themes
 
-- `nord.sh` - daily driver, fully tested
-- `solarized-dark.sh` - classic dark theme
-- `gruvbox-dark.sh` - warm dark theme
+- `nord.sh` - cool dark theme (Arctic Ice Studio)
+- `solarized-dark.sh` - classic dark theme (Ethan Schoonover)
+- `gruvbox-dark.sh` - warm dark theme (morhetz)
 
 ## Config Files
 
 ### Tracked (users can fork or use as reference)
 
 - `aerc.conf` - working config with comments. Personal hooks removed.
-  References `beautiful-aerc` binary for filters, `nvim-mail` for editor,
-  `nord-custom` styleset.
+  References `beautiful-aerc` binary for filters, `nvim-mail` for editor.
+  Styleset name is set by the user after running the generator.
 - `binds.conf` - fully generic keybindings, ships as-is.
 
 ### Template
@@ -201,15 +201,14 @@ User customizations below this line survive re-running the generator.
 
 Ships as-is with two changes:
 - Signature block in init.lua replaced with placeholder
-- Hardcoded Nord colors in `syntax/aercmail.vim` documented as
-  "edit these if you change themes" (vim syntax files don't support
-  variable colors)
+- Colors in `syntax/aercmail.vim` should be updated when changing
+  themes (vim syntax files don't support variable colors)
 
 ## kitty-mail
 
-Ships as-is. Nord color block (color0-color15) is hardcoded.
-Documented as "edit to match your theme." kitty and nvim have
-established theme ecosystems -- beautiful-aerc covers the aerc layer.
+Ships as-is. Terminal color block (color0-color15) should be updated
+to match the chosen theme. kitty and nvim have established theme
+ecosystems -- beautiful-aerc covers the aerc layer.
 
 ## Launcher scripts
 
