@@ -106,6 +106,71 @@ func convertToFootnotes(text string) (string, []string) {
 	return body, refs
 }
 
+// footnoteColors holds ANSI parameter strings for footnote styling.
+type footnoteColors struct {
+	LinkText string // body link text color
+	Dim      string // footnote markers and ref labels
+	LinkURL  string // reference section URLs
+	Reset    string
+}
+
+// reFootnoteInBody matches "linktext[^N]" in body text for coloring.
+var reFootnoteInBody = regexp.MustCompile(`(\S[^\[]*?)\[\^(\d+)\]`)
+
+// styleFootnotes applies ANSI colors to footnote-annotated text.
+// Body link text gets link color, [^N] markers get dim color.
+// A separator and colored reference section are appended.
+func styleFootnotes(body string, refs []string, cols int, colors *footnoteColors) string {
+	if len(refs) == 0 {
+		return body
+	}
+
+	lt := ""
+	dim := ""
+	lu := ""
+	r := ""
+	if colors.LinkText != "" {
+		lt = "\033[" + colors.LinkText + "m"
+	}
+	if colors.Dim != "" {
+		dim = "\033[" + colors.Dim + "m"
+	}
+	if colors.LinkURL != "" {
+		lu = "\033[" + colors.LinkURL + "m"
+	}
+	if colors.Reset != "" {
+		r = "\033[" + colors.Reset + "m"
+	}
+
+	// Color body: link text + dimmed marker.
+	body = reFootnoteInBody.ReplaceAllStringFunc(body, func(m string) string {
+		groups := reFootnoteInBody.FindStringSubmatch(m)
+		if groups == nil {
+			return m
+		}
+		text := groups[1]
+		num := groups[2]
+		return lt + text + r + dim + "[^" + num + "]" + r
+	})
+
+	// Build reference section.
+	var sb strings.Builder
+	sb.WriteString(body)
+	sb.WriteString("\n" + dim + strings.Repeat("─", cols) + r + "\n")
+	for _, ref := range refs {
+		// Split "[^N]: url" into label and URL parts.
+		colonIdx := strings.Index(ref, ": ")
+		if colonIdx < 0 {
+			sb.WriteString(ref + "\n")
+			continue
+		}
+		label := ref[:colonIdx]
+		url := ref[colonIdx+2:]
+		sb.WriteString(dim + label + ":" + r + " " + lu + url + r + "\n")
+	}
+	return sb.String()
+}
+
 // isSelfRef returns true when a reference label is effectively its own URL.
 func isSelfRef(label, url string) bool {
 	return strings.TrimPrefix(strings.TrimPrefix(label, "https://"), "http://") ==

@@ -74,3 +74,59 @@ func TestConvertToFootnotes(t *testing.T) {
 		})
 	}
 }
+
+func TestStyleFootnotes(t *testing.T) {
+	colors := &footnoteColors{
+		LinkText: "38;2;136;192;208",
+		Dim:      "38;2;97;110;136",
+		LinkURL:  "38;2;97;110;136",
+		Reset:    "0",
+	}
+
+	t.Run("body link text colored", func(t *testing.T) {
+		body := "click here[^1] to go"
+		refs := []string{"[^1]: https://example.com"}
+		got := styleFootnotes(body, refs, 40, colors)
+		if !strings.Contains(got, "\033[38;2;136;192;208mclick here\033[0m") {
+			t.Errorf("link text not colored: %q", got)
+		}
+	})
+
+	t.Run("footnote marker dimmed", func(t *testing.T) {
+		body := "click here[^1] to go"
+		refs := []string{"[^1]: https://example.com"}
+		got := styleFootnotes(body, refs, 40, colors)
+		if !strings.Contains(got, "\033[38;2;97;110;136m[^1]\033[0m") {
+			t.Errorf("marker not dimmed: %q", got)
+		}
+	})
+
+	t.Run("separator line present", func(t *testing.T) {
+		body := "text[^1]"
+		refs := []string{"[^1]: https://example.com"}
+		got := styleFootnotes(body, refs, 40, colors)
+		if !strings.Contains(got, strings.Repeat("─", 40)) {
+			t.Errorf("separator missing: %q", got)
+		}
+	})
+
+	t.Run("reference URL colored", func(t *testing.T) {
+		body := "text[^1]"
+		refs := []string{"[^1]: https://example.com"}
+		got := styleFootnotes(body, refs, 40, colors)
+		if !strings.Contains(got, "\033[38;2;97;110;136mhttps://example.com\033[0m") {
+			t.Errorf("URL not colored: %q", got)
+		}
+	})
+
+	t.Run("no refs no separator", func(t *testing.T) {
+		body := "just text"
+		got := styleFootnotes(body, nil, 40, colors)
+		if strings.Contains(got, "─") {
+			t.Errorf("separator should not appear with no refs: %q", got)
+		}
+		if got != "just text" {
+			t.Errorf("body changed: %q", got)
+		}
+	})
+}
