@@ -6,3 +6,4 @@
 .config/aerc/stylesets/*
 !.config/aerc/stylesets/.gitkeep
 audit-output/
+corpus/
