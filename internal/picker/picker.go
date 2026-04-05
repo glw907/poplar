@@ -147,8 +147,8 @@ func Run(links []filter.FootnoteLink, w io.Writer, cols int, colors *Colors) (st
 			continue
 		}
 
-		// Enter: select current
-		if len(key) == 1 && (key[0] == '\r' || key[0] == '\n') {
+		// Enter: select current (handle \r, \n, or \r\n)
+		if key[0] == '\r' || key[0] == '\n' {
 			return links[selected].URL, nil
 		}
 
