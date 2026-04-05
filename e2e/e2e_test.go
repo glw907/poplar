@@ -62,6 +62,19 @@ C_LINK_TEXT="38;2;136;192;208"
 C_LINK_URL="38;2;97;110;136"
 C_RULE="38;2;97;110;136"
 C_RESET="0"
+C_HDR_KEY="38;2;129;161;193;1"
+C_HDR_VALUE="38;2;216;222;233"
+C_HDR_DIM="38;2;97;110;136"
+C_PICKER_NUM="38;2;129;161;193"
+C_PICKER_LABEL="38;2;216;222;233"
+C_PICKER_URL="38;2;97;110;136"
+C_PICKER_SEL_BG="38;2;57;67;83"
+C_PICKER_SEL_FG="38;2;229;233;240"
+C_MSG_MARKER="38;2;97;110;136;1"
+C_MSG_TITLE_SUCCESS="38;2;163;190;140;1"
+C_MSG_TITLE_ACCENT="38;2;129;161;193;1"
+C_MSG_DETAIL="38;2;216;222;233"
+C_MSG_DIM="38;2;97;110;136"
 `
 	os.WriteFile(filepath.Join(genDir, "palette.sh"), []byte(palette), 0644)
 
@@ -140,10 +153,15 @@ func TestSaveHTMLFixture(t *testing.T) {
 	}
 
 	// AERC_CONFIG points to a dir; FindDir does AERC_CONFIG/../../corpus
-	// So we need aercDir to be 2 levels deep under corpusDir's parent
+	// So we need aercDir to be 2 levels deep under corpusDir's parent.
+	// Pre-create the target corpus dir so FindDir picks it over ~/corpus.
 	aercDir := filepath.Join(corpusDir, ".config", "aerc")
+	targetCorpus := filepath.Join(corpusDir, "corpus")
 	if err := os.MkdirAll(aercDir, 0755); err != nil {
 		t.Fatalf("creating test dir: %v", err)
+	}
+	if err := os.MkdirAll(targetCorpus, 0755); err != nil {
+		t.Fatalf("creating corpus dir: %v", err)
 	}
 
 	cmd := exec.Command(binary, "save")
@@ -158,7 +176,7 @@ func TestSaveHTMLFixture(t *testing.T) {
 	}
 
 	// Verify a .html file was created in the corpus dir
-	matches, err := filepath.Glob(filepath.Join(corpusDir, "corpus", "*.html"))
+	matches, err := filepath.Glob(filepath.Join(targetCorpus, "*.html"))
 	if err != nil {
 		t.Fatalf("globbing corpus: %v", err)
 	}
@@ -178,8 +196,12 @@ func TestSaveHTMLFixture(t *testing.T) {
 func TestSavePlainText(t *testing.T) {
 	corpusDir := filepath.Join(t.TempDir(), "corpus")
 	aercDir := filepath.Join(corpusDir, ".config", "aerc")
+	targetCorpus := filepath.Join(corpusDir, "corpus")
 	if err := os.MkdirAll(aercDir, 0755); err != nil {
 		t.Fatalf("creating test dir: %v", err)
+	}
+	if err := os.MkdirAll(targetCorpus, 0755); err != nil {
+		t.Fatalf("creating corpus dir: %v", err)
 	}
 
 	input := []byte("Hello, this is a plain text email.\n")
@@ -195,7 +217,7 @@ func TestSavePlainText(t *testing.T) {
 		t.Fatalf("running save: %v\noutput: %s", err, out)
 	}
 
-	matches, err := filepath.Glob(filepath.Join(corpusDir, "corpus", "*.txt"))
+	matches, err := filepath.Glob(filepath.Join(targetCorpus, "*.txt"))
 	if err != nil {
 		t.Fatalf("globbing corpus: %v", err)
 	}
