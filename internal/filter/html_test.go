@@ -14,6 +14,10 @@ func TestCleanPandocArtifacts(t *testing.T) {
 		{"trailing backslash", "hello\\\n", "hello\n"},
 		{"escaped punctuation", "hello\\!", "hello!"},
 		{"escaped period", "end\\.", "end."},
+		{"stray bold stripped", "text\n**\n**\nnext", "text\nnext"},
+		{"stray bold with backslash", "text\n**\\\n**\nnext", "text\nnext"},
+		{"stray bold at end no newline", "text\n**", "text\n"},
+		{"real bold preserved", "this is **bold** text", "this is **bold** text"},
 		{"no change", "normal text", "normal text"},
 	}
 	for _, tt := range tests {
@@ -46,6 +50,34 @@ func TestNormalizeUnicodeBullets(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got := normalizeUnicodeBullets(tt.input)
+			if got != tt.want {
+				t.Errorf("got %q, want %q", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestCompactLooseLists(t *testing.T) {
+	tests := []struct {
+		name  string
+		input string
+		want  string
+	}{
+		{"single item unchanged", "- item one", "- item one"},
+		{"tight list unchanged", "- one\n- two\n- three", "- one\n- two\n- three"},
+		{"loose list compacted", "- one\n\n- two\n\n- three", "- one\n- two\n- three"},
+		{"pandoc wide bullets", "-   one\n\n-   two", "-   one\n-   two"},
+		{"continuation preserved", "-   item long\n    wrap\n\n-   next", "-   item long\n    wrap\n-   next"},
+		{"paragraph after list kept", "- one\n\n- two\n\nnext para", "- one\n- two\n\nnext para"},
+		{"paragraph before list kept", "text\n\n- one\n\n- two", "text\n\n- one\n- two"},
+		{"multi-blank between items", "- one\n\n\n- two", "- one\n- two"},
+		{"trailing blanks in list dropped", "- one\n\n- two\n\n", "- one\n- two"},
+		{"deep continuation", "-   item\n      deep indent\n\n-   next", "-   item\n      deep indent\n-   next"},
+		{"no list unchanged", "hello\n\nworld", "hello\n\nworld"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := compactLooseLists(tt.input)
 			if got != tt.want {
 				t.Errorf("got %q, want %q", got, tt.want)
 			}

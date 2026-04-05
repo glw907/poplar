@@ -30,6 +30,9 @@ var (
 	reMozAttr          = regexp.MustCompile(` moz-do-not-send="[^"]*"`)
 	reTrailingBackslash = regexp.MustCompile(`(?m)\\\n`)
 	reEscapedPunct      = regexp.MustCompile(`\\([^\w\s])`)
+	// Stray bold markers on a line by themselves (pandoc decorative artifact).
+	reStrayBold = regexp.MustCompile(`(?m)^\*\*\s*\n?`)
+	reListItem  = regexp.MustCompile(`^[-*+]\s`)
 	// Unicode space variants: NBSP, en/em space, thin/hair space, etc.
 	reNBSP            = regexp.MustCompile(`[\x{a0}\x{2000}-\x{200a}]+`)
 	// Invisible filler: zero-width, joiners, soft hyphen, word joiner, etc.
@@ -61,12 +64,56 @@ func cleanMozAttributes(html string) string {
 	return html
 }
 
-// cleanPandocArtifacts removes trailing backslash line-breaks and
-// backslash-escaped punctuation that pandoc emits.
+// cleanPandocArtifacts removes trailing backslash line-breaks,
+// backslash-escaped punctuation, and stray bold markers that pandoc emits.
 func cleanPandocArtifacts(text string) string {
 	text = reTrailingBackslash.ReplaceAllString(text, "\n")
 	text = reEscapedPunct.ReplaceAllString(text, "$1")
+	text = reStrayBold.ReplaceAllString(text, "")
 	return text
+}
+
+// compactLooseLists removes blank lines between consecutive list items.
+// Pandoc emits "loose" lists (blank line between items) for HTML <li>
+// elements, which double-spaces the rendered output unnecessarily.
+func compactLooseLists(text string) string {
+	lines := strings.Split(text, "\n")
+	var out []string
+	inList := false
+	pendingBlanks := 0
+	flush := func() {
+		for range pendingBlanks {
+			out = append(out, "")
+		}
+		pendingBlanks = 0
+	}
+	for _, line := range lines {
+		isItem := reListItem.MatchString(line)
+		isBlank := strings.TrimSpace(line) == ""
+		isCont := inList && !isBlank && line[0] == ' '
+		switch {
+		case isItem:
+			if !inList {
+				flush()
+			}
+			pendingBlanks = 0
+			inList = true
+			out = append(out, line)
+		case isCont:
+			flush()
+			out = append(out, line)
+		case isBlank && inList:
+			pendingBlanks++
+		default:
+			inList = false
+			flush()
+			out = append(out, line)
+		}
+	}
+	if !inList {
+		flush()
+	}
+	return strings.Join(out, "\n")
 }
 
 // normalizeUnicodeBullets converts lines starting with Unicode bullet
@@ -307,6 +354,7 @@ func HTML(r io.Reader, w io.Writer, p *palette.Palette, cols int) error {
 	md = cleanPandocArtifacts(md)
 	md = normalizeUnicodeBullets(md)
 	md = normalizeListIndent(md)
+	md = compactLooseLists(md)
 	md = normalizeWhitespace(md)
 
 	// Footnote conversion and styling
