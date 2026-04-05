@@ -137,6 +137,9 @@ func convertToFootnotes(text string) (string, []footnoteRef) {
 		refs = append(refs, footnoteRef{num: n, url: d.url})
 	}
 
+	// usedRefs tracks which footnote numbers actually appear in the body.
+	usedRefs := make(map[int]bool)
+
 	// Replace body references with footnote markers or strip brackets.
 	body = reRefShortcut.ReplaceAllStringFunc(body, func(m string) string {
 		groups := reRefShortcut.FindStringSubmatch(m)
@@ -146,22 +149,47 @@ func convertToFootnotes(text string) (string, []footnoteRef) {
 
 		if numericLabel != "" {
 			if ref, ok := labelMap[numericLabel]; ok {
+				if display == "" {
+					return ""
+				}
+				usedRefs[ref.num] = true
 				return linkTextMarker + display + linkTextMarker + fmt.Sprintf("[^%d]", ref.num)
 			}
 		}
 
 		if ref, ok := labelMap[label]; ok {
+			if display == "" {
+				return ""
+			}
+			usedRefs[ref.num] = true
 			return linkTextMarker + display + linkTextMarker + fmt.Sprintf("[^%d]", ref.num)
 		}
 		// Try trimmed label for pandoc's leading-space cases.
 		if trimmed := strings.TrimSpace(label); trimmed != label {
 			if ref, ok := labelMap[trimmed]; ok {
+				if display == "" {
+					return ""
+				}
+				usedRefs[ref.num] = true
 				return linkTextMarker + display + linkTextMarker + fmt.Sprintf("[^%d]", ref.num)
 			}
 		}
 
 		return display
 	})
+
+	// Remove consecutive adjacent duplicate footnoted links.
+	// e.g. {LT}text{LT}[^1]{LT}text{LT}[^1] → {LT}text{LT}[^1]
+	body = deduplicateAdjacentFootnotes(body)
+
+	// Filter refs to only those actually referenced in the body.
+	var usedRefList []footnoteRef
+	for _, r := range refs {
+		if usedRefs[r.num] {
+			usedRefList = append(usedRefList, r)
+		}
+	}
+	refs = usedRefList
 
 	// Convert autolinks to plain URLs.
 	body = reAutolink.ReplaceAllString(body, "$1")
@@ -183,6 +211,9 @@ type footnoteColors struct {
 
 // reFootnoteMarker matches "[^N]" markers in body text for dimming.
 var reFootnoteMarker = regexp.MustCompile(`\[\^(\d+)\]`)
+
+// reDupFootnoteUnit matches a single footnoted link: linkTextMarker+text+linkTextMarker+[^N].
+var reDupFootnoteUnit = regexp.MustCompile(`\x00LT\x00[^\x00]+\x00LT\x00\[\^\d+\]`)
 
 // styleFootnotes applies ANSI colors to footnote-annotated text.
 // Link text (wrapped in linkTextMarker) gets link color, [^N] markers get dim color.
@@ -218,6 +249,41 @@ func styleFootnotes(body string, refs []footnoteRef, cols int, colors *footnoteC
 	for _, ref := range refs {
 		sb.WriteString(fmt.Sprintf("%s[^%d]:%s %s%s%s\n", dim, ref.num, r, lu, ref.url, r))
 	}
+	return sb.String()
+}
+
+// deduplicateAdjacentFootnotes removes consecutive identical footnoted link
+// sequences. Pandoc sometimes emits duplicate anchors for the same link (e.g.
+// tracking wrappers), resulting in "Text[^1]Text[^1]" after conversion.
+// Only exact back-to-back duplicates are collapsed; non-adjacent occurrences
+// are left untouched.
+func deduplicateAdjacentFootnotes(body string) string {
+	units := reDupFootnoteUnit.FindAllStringIndex(body, -1)
+	if len(units) < 2 {
+		return body
+	}
+	var sb strings.Builder
+	pos := 0 // current write position in body
+	prev := ""
+	prevEnd := 0
+	for i, loc := range units {
+		start, end := loc[0], loc[1]
+		unit := body[start:end]
+		if i > 0 && start == prevEnd && unit == prev {
+			// Adjacent duplicate: advance pos past it without writing.
+			pos = end
+			prevEnd = end
+			continue
+		}
+		// Write any text between pos and this unit's start.
+		sb.WriteString(body[pos:start])
+		sb.WriteString(unit)
+		pos = end
+		prev = unit
+		prevEnd = end
+	}
+	// Write any trailing text after the last unit.
+	sb.WriteString(body[pos:])
 	return sb.String()
 }
 

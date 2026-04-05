@@ -133,6 +133,30 @@ func TestConvertToFootnotes(t *testing.T) {
 			m + "Click here" + m + "[^1]",
 			[]footnoteRef{{1, "https://example.com"}},
 		},
+		{
+			// Social media icon links have space-only link text; they should be
+			// silently dropped with no footnote marker or orphaned ref entry.
+			"empty display text ref produces no marker or footnote",
+			"Before [ ][1] after.\n\n  [1]: https://example.com/icon\n",
+			"Before  after.",
+			nil,
+		},
+		{
+			// When two refs have empty display text, both are dropped and
+			// neither appears in the footnote section.
+			"multiple empty display text refs all dropped",
+			"[ ][1] [ ][2]\n\n  [1]: https://fb.com/\n  [2]: https://twitter.com/\n",
+			"",
+			nil,
+		},
+		{
+			// Pandoc duplicate-anchor pattern: [Text][ ][Text] after space ref
+			// is stripped produces two adjacent identical footnoted links.
+			"adjacent duplicate footnoted links collapsed",
+			"read [Privacy Policy][ ][Privacy Policy] now.\n\n  [Privacy Policy]: https://example.com/privacy\n",
+			"read " + m + "Privacy Policy" + m + "[^1] now.",
+			[]footnoteRef{{1, "https://example.com/privacy"}},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
