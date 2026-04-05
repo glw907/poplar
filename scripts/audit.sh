@@ -170,7 +170,7 @@ while IFS= read -r -d '' blob_file; do
   out_file="$OUTPUT_DIR/${hash}.txt"
 
   # Render through filter
-  if AERC_COLUMNS=80 "$BINARY" html < "$blob_file" > "$out_file" 2>/dev/null; then
+  if AERC_COLUMNS=80 "$BINARY" html < "$blob_file" > "$out_file" 2>>"$ERRORS"; then
     total_rendered=$((total_rendered + 1))
     printf "%-60s  %s\n" "$sig" "${hash}.txt" >> "$INDEX"
   else
