@@ -71,9 +71,6 @@ func convertToFootnotes(text string) (string, []footnoteRef) {
 	// so the alt text becomes footnoted link text.
 	body = reImageLinkRef.ReplaceAllStringFunc(body, func(m string) string {
 		groups := reImageLinkRef.FindStringSubmatch(m)
-		if groups == nil {
-			return m
-		}
 		alt := strings.TrimSpace(groups[1])
 		if alt == "" {
 			return ""
@@ -135,9 +132,6 @@ func convertToFootnotes(text string) (string, []footnoteRef) {
 	// Replace body references with footnote markers or strip brackets.
 	body = reRefShortcut.ReplaceAllStringFunc(body, func(m string) string {
 		groups := reRefShortcut.FindStringSubmatch(m)
-		if groups == nil {
-			return m
-		}
 		label := groups[1]
 		numericLabel := groups[2]
 		display := strings.TrimSpace(stripEmphasis(label))
