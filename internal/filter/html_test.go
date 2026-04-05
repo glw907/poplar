@@ -275,6 +275,28 @@ func TestHighlightMarkdown(t *testing.T) {
 	}
 }
 
+func TestCleanPandocArtifactsSuperscript(t *testing.T) {
+	tests := []struct {
+		name  string
+		input string
+		want  string
+	}{
+		{"single superscript", "text^1^", "text1"},
+		{"multiple superscripts", "Save 3%^1^ Apply now^2^", "Save 3%1 Apply now2"},
+		{"superscript with letters", "Company^TM^", "CompanyTM"},
+		{"no superscript", "plain text", "plain text"},
+		{"empty carets not matched", "price^^ sale", "price^^ sale"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := cleanPandocArtifacts(tt.input)
+			if got != tt.want {
+				t.Errorf("got %q, want %q", got, tt.want)
+			}
+		})
+	}
+}
+
 func TestStripANSI(t *testing.T) {
 	tests := []struct {
 		name  string

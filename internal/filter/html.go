@@ -54,6 +54,10 @@ var (
 	reListIndent     = regexp.MustCompile(`(?m)^[ ]{4,}([-*+] )`)
 	reUnicodeBullet  = regexp.MustCompile(`^[ \t]*[●•◦◆▪▸‣⁃][ \t]*`)
 	reANSI           = regexp.MustCompile(`\x1b\[[0-9;]*m`)
+	// reSuperscript matches pandoc's ^text^ output for HTML <sup> elements.
+	// Superscripts in email are almost always footnote numbers or legal
+	// markers; stripping the carets reads fine in plain terminal output.
+	reSuperscript = regexp.MustCompile(`\^([^^]+)\^`)
 )
 
 // boldPlaceholder is used to hide bold markers during italic processing.
@@ -68,11 +72,13 @@ func cleanMozAttributes(html string) string {
 }
 
 // cleanPandocArtifacts removes trailing backslash line-breaks,
-// backslash-escaped punctuation, and stray bold markers that pandoc emits.
+// backslash-escaped punctuation, stray bold markers, and superscript
+// caret markers (^text^) that pandoc emits for HTML <sup> elements.
 func cleanPandocArtifacts(text string) string {
 	text = reTrailingBackslash.ReplaceAllString(text, "\n")
 	text = reEscapedPunct.ReplaceAllString(text, "$1")
 	text = reStrayBold.ReplaceAllString(text, "")
+	text = reSuperscript.ReplaceAllString(text, "$1")
 	return text
 }
 
