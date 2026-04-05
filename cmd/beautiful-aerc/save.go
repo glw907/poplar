@@ -5,6 +5,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/glw907/beautiful-aerc/internal/corpus"
 	"github.com/spf13/cobra"
@@ -41,9 +42,44 @@ func newSaveCmd() *cobra.Command {
 				return err
 			}
 
-			fmt.Fprintf(os.Stderr, "saved %s\n", filepath.Base(path))
+			// Count pending corpus files.
+			entries, _ := os.ReadDir(dir)
+			count := 0
+			for _, e := range entries {
+				if !e.IsDir() {
+					count++
+				}
+			}
+
+			printSaveNotification(filepath.Base(path), count)
 			return nil
 		},
 	}
 	return cmd
+}
+
+func printSaveNotification(filename string, pending int) {
+	p, _ := loadPalette()
+	marker := ""
+	heading := ""
+	detail := ""
+	dim := ""
+	reset := ""
+	if p != nil {
+		marker = p.ANSI("C_MSG_MARKER")
+		heading = p.ANSI("C_MSG_TITLE_SUCCESS")
+		detail = p.ANSI("C_MSG_DETAIL")
+		dim = p.ANSI("C_MSG_DIM")
+		reset = p.Reset()
+	}
+
+	rows := termRows()
+	pad := (rows - 4) / 3
+	fmt.Print("\033[?25l")
+	fmt.Print(strings.Repeat("\n", pad))
+
+	fmt.Printf(" %s#%s %sSAVED TO CORPUS%s\n", marker, reset, heading, reset)
+	fmt.Println()
+	fmt.Printf(" %s%s%s\n", detail, filename, reset)
+	fmt.Printf(" %s%d pending%s\n", dim, pending, reset)
 }
