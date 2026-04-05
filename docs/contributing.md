@@ -10,12 +10,16 @@ beautiful-aerc/
     headers.go               headers subcommand: flags -> filter.Headers()
     html.go                  html subcommand: flags -> filter.HTML()
     plain.go                 plain subcommand: flags -> filter.Plain()
+    pick-link.go             pick-link subcommand: flags -> picker.Run()
   internal/palette/
     palette.go               load palette.sh, expose ANSI escape sequences
   internal/filter/
     headers.go               header parsing, reordering, colorization
     html.go                  pandoc invocation, cleanup, highlighting, links
     plain.go                 HTML detection, routing to html or wrap|colorize
+    footnotes.go             footnote conversion (convertToFootnotes, styleFootnotes)
+  internal/picker/
+    picker.go                interactive URL picker UI with vim-style navigation
   e2e/
     e2e_test.go              builds binary in TestMain, pipes fixtures
     testdata/                HTML email fixtures
@@ -70,12 +74,13 @@ make clean    # remove ./beautiful-aerc binary
 **HTML filter:**
 
 1. Load palette
-2. Strip pre-pandoc HTML artifacts (moz attributes)
-3. Call pandoc as subprocess: `pandoc -f html -t markdown --wrap=none -L unwrap-tables.lua`
-4. Run post-pandoc cleanup (compiled regexes, applied in order)
-5. Walk lines, applying markdown syntax highlighting
-6. Style links according to mode (markdown or clean)
-7. Write to stdout
+2. Strip pre-pandoc HTML artifacts (moz attributes) - `cleanMozAttributes`
+3. Call pandoc as subprocess: `pandoc -f html -t markdown --reference-links --wrap=none -L unwrap-tables.lua`
+4. Run post-pandoc cleanup: `cleanPandocArtifacts` -> `normalizeListIndent` -> `normalizeWhitespace`
+5. Convert reference-style links to footnote syntax (`convertToFootnotes`): numbers refs, replaces body references, strips emphasis markers from link display text, renders images with alt text as `[image: alt text]` labels, removes images without alt text, strips brackets from unresolved references
+6. Apply ANSI styling to footnotes (`styleFootnotes`) - returns `[]footnoteRef{num, url}` structs directly, avoiding re-parsing
+7. Walk lines, applying markdown syntax highlighting (`highlightMarkdown`)
+8. Write to stdout
 
 **Plain filter:**
 
@@ -93,6 +98,10 @@ Filter stages in the HTML pipeline are sequential transformations on the markdow
 3. Add a table-driven test in `html_test.go` covering the new regex
 
 Keep regexes package-level. Compiling inside a function is wasteful since the filter runs for every message.
+
+### Shared marker helper
+
+`replaceMarkerPairs(text, sentinel, open, close string) string` in `footnotes.go` handles the common pattern of replacing placeholder sentinels with styled open/close wrappers. It replaced the earlier separate `replaceBoldPlaceholders` and `replaceLinkTextMarkers` functions. Use it when adding new marker-based styling rather than duplicating the pattern.
 
 Example: adding a stage that strips `{.class}` attribute syntax pandoc sometimes emits:
 

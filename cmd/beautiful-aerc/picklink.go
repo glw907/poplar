@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/glw907/beautiful-aerc/internal/picker"
@@ -22,7 +23,7 @@ func newPickLinkCmd() *cobra.Command {
 				return err
 			}
 			if url != "" {
-				os.Stdout.WriteString(url + "\n")
+				fmt.Fprintln(os.Stdout, url)
 			}
 			return nil
 		},

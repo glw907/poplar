@@ -31,6 +31,9 @@ beautiful-aerc/
       headers.go
       html.go
       plain.go
+      footnotes.go
+    picker/
+      picker.go
   e2e/
     testdata/                      # HTML email fixtures + golden files
   .config/aerc/
@@ -76,11 +79,13 @@ text/plain=beautiful-aerc plain
 ### Project layout
 
 ```
-cmd/beautiful-aerc/main.go       # cobra root, SilenceUsage: true
-internal/palette/palette.go       # parse palette.sh, expose tokens
-internal/filter/headers.go        # reorder, colorize, wrap, separator
-internal/filter/html.go           # cleanup, exec pandoc, highlight, links
-internal/filter/plain.go          # detect HTML-in-plain, route or wrap
+cmd/beautiful-aerc/main.go        # cobra root, SilenceUsage: true
+internal/palette/palette.go        # parse palette.sh, expose tokens
+internal/filter/headers.go         # reorder, colorize, wrap, separator
+internal/filter/html.go            # cleanup, exec pandoc, highlight, links
+internal/filter/plain.go           # detect HTML-in-plain, route or wrap
+internal/filter/footnotes.go       # convertToFootnotes, styleFootnotes
+internal/picker/picker.go          # interactive URL picker (pick-link subcommand)
 ```
 
 ### Subcommands
@@ -90,31 +95,61 @@ internal/filter/plain.go          # detect HTML-in-plain, route or wrap
 | `headers` | format-headers (sh) + format-headers.awk | No |
 | `html` | html-to-text (sh + perl + sed) | Yes, as subprocess |
 | `plain` | wrap-plain (sh) | Delegates to `html` when HTML detected, otherwise execs `wrap \| colorize` |
+| `pick-link` | (new) | No - reads URLs from stdin, presents interactive picker |
 
-### Link display modes
+### Link rendering
 
-The `html` subcommand supports two link rendering modes:
+The `html` subcommand renders links as footnote references. Body text
+shows colored link text with a dimmed `[^N]` marker inline; a numbered
+reference section at the bottom of the message lists all URLs.
 
-- **markdown** (default) - `[Check activity](https://...)` with ANSI
-  styling (colored link text, dimmed URL). URLs are visible and
-  ctrl+clickable in kitty.
-- **clean** (`--clean-links`) - `Check activity` - link text only,
-  URLs hidden. Matches aerc's default w3m behavior for users who
-  prefer a cleaner reading experience.
+Self-referencing links (where the display text equals the URL) render
+as plain URLs with no footnote number.
+
+pandoc is called with `--reference-links` to produce reference-style
+markdown output. `convertToFootnotes` in `internal/filter/footnotes.go`
+converts it to footnote syntax - handling image labels, emphasis stripping
+from link text, and unresolved reference cleanup - before `styleFootnotes`
+applies ANSI colors. `styleFootnotes` returns `[]footnoteRef` structs
+directly to avoid re-parsing formatted strings.
+
+Example output:
+
+```
+If you don't recognize this account, remove[^1] it.
+
+Check activity[^2]
+
+See https://myaccount.google.com/notifications
+----------------------------------------
+[^1]: https://accounts.google.com/AccountDisavow?adt=...
+[^2]: https://accounts.google.com/AccountChooser?Email=...
+```
+
+### Link picker
+
+The `pick-link` subcommand (`internal/picker/`) provides keyboard-driven
+URL selection. aerc's `:menu` command pipes the current message through
+`beautiful-aerc pick-link` and passes the selected URL to `:open-link`.
+
+Keybinding in `binds.conf`:
 
 ```ini
-# aerc.conf - markdown links (default)
-text/html=beautiful-aerc html
-
-# aerc.conf - clean links (text only, no URLs)
-text/html=beautiful-aerc html --clean-links
+[view]
+<Tab> = :menu -dc 'beautiful-aerc pick-link' :open-link
 ```
+
+Navigation: 1-9 instantly select that link, 0 selects the 10th, j/k
+or arrows to navigate, Enter to confirm, q/Escape to cancel.
+
+Picker colors are read from palette.sh at runtime to match the active theme.
 
 ### What the Go binary absorbs
 
 - All sed/perl regex cleanup (pandoc artifacts, zero-width chars, whitespace)
 - Markdown syntax highlighting (headings, bold, italic, rules)
-- Link styling (colored text, dimmed URL, strip colorize ANSI from URLs)
+- Link rendering (footnote-style references: colored text, dimmed markers, numbered URL section)
+- Interactive link picker (pick-link subcommand with vim-style navigation)
 - Header formatting (reorder, colorize, address wrapping, separator)
 - Palette loading and hex-to-ANSI conversion
 
@@ -329,8 +364,8 @@ Audience: users who want to customize or create themes. Covers:
 Audience: users who want to understand how email renders. Covers:
 - The three subcommands and what each does
 - HTML pipeline stages (pandoc conversion, artifact cleanup,
-  markdown highlighting, link styling)
-- Link display modes (markdown vs. clean) and how to configure
+  markdown highlighting, footnote link rendering)
+- Footnote-style link rendering and the pick-link subcommand
 - Header formatting (reorder, colorize, address wrapping, separator)
 - Plain text handling (HTML detection, reflow, colorize)
 - How palette.sh tokens map to visual output

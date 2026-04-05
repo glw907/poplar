@@ -181,5 +181,5 @@ func makeRaw(fd uintptr) (*unix.Termios, error) {
 }
 
 func restore(fd uintptr, state *unix.Termios) {
-	unix.IoctlSetTermios(int(fd), unix.TCSETS, state) //nolint:errcheck
+	_ = unix.IoctlSetTermios(int(fd), unix.TCSETS, state)
 }

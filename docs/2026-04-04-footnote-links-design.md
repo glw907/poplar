@@ -88,7 +88,7 @@ pandoc (inline) -> cleanup -> styleLinks -> highlightMarkdown -> output
 
 New:
 ```
-pandoc (--reference-links) -> cleanup -> convertToFootnotes -> styleFootnotes -> highlightMarkdown -> output
+pandoc (--reference-links) -> cleanMozAttributes -> cleanPandocArtifacts -> normalizeListIndent -> normalizeWhitespace -> convertToFootnotes -> styleFootnotes -> highlightMarkdown -> output
 ```
 
 ### Pandoc
@@ -109,7 +109,17 @@ Post-processes pandoc's reference output:
 4. Self-referencing links (where text = URL) become plain URLs.
    Autolinks `<url>` become plain URLs. Neither gets a footnote
    number.
-5. Build the reference section: `[^N]: url` for each numbered entry.
+5. Strip emphasis markers (`*...*`) from link display text - pandoc
+   wraps linked `<em>` content in asterisks, but the link color
+   already provides visual distinction.
+6. Render image ref defs as `[image: alt text]` labels when alt text
+   is present; remove images without alt text entirely. Image ref defs
+   do not get footnote numbers.
+7. Strip brackets from unresolved references (labels that don't map to
+   any ref def), so `[CONTACT US]` becomes `CONTACT US`.
+8. Build the reference section: `[^N]: url` for each numbered entry.
+   Returns `[]footnoteRef{num, url}` structs for direct use by
+   `styleFootnotes` without re-parsing.
 
 ### styleFootnotes
 
@@ -134,6 +144,13 @@ contain `#`, `*`, or `_` characters.
 - `styleLinks` function: replaced by `convertToFootnotes` and
   `styleFootnotes`.
 - `reLink` regex: no longer needed in the HTML path.
+- `cleanImages()`: removed - was dead code since pandoc's `--reference-links`
+  produces reference-style markdown, not the inline `![alt](url)` syntax the
+  regex targeted. Image cleanup now happens inside `convertToFootnotes`.
+- `joinMultilineLinks()`: removed - same reason; inline-style `[text](url)`
+  regex was never matched against reference-style output.
+- `replaceBoldPlaceholders` and `replaceLinkTextMarkers`: unified into
+  `replaceMarkerPairs(text, sentinel, open, close string) string`.
 
 ## Scope
 

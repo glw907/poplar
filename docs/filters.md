@@ -46,14 +46,12 @@ pandoc's markdown output contains artifacts that don't render cleanly in a termi
 
 - Trailing backslashes at line ends (pandoc's line-break marker)
 - Backslash-escaped punctuation (e.g., `\.`, `\-`, `\[`)
-- Image links (`[![alt](img)](url)`) - replaced with just the link text
-- Standalone images (`![alt](url)`) - removed entirely
-- Empty link text (`[](url)`) - removed
-- Empty link URLs (`[text]()`) - rendered as plain text
 - Non-breaking spaces (replaced with regular spaces)
 - Zero-width characters (`U+200B`, `U+200C`, `U+FEFF`) - removed
 - Lines containing only spaces - stripped to blank
 - Three or more consecutive blank lines - collapsed to two
+
+Image and empty-link cleanup happens inside `convertToFootnotes` rather than as a separate regex pass, because pandoc's `--reference-links` output is reference-style markdown, not inline-style.
 
 **4. Markdown syntax highlighting**
 
@@ -72,7 +70,12 @@ Links are rendered as footnote references. Body text stays clean with colored li
 
 Self-referencing links (where the display text is the URL itself) render as plain URLs with no footnote number.
 
-pandoc is called with `--reference-links` to produce reference-style output, which is then converted to footnote syntax by `convertToFootnotes` and styled by `styleFootnotes`.
+pandoc is called with `--reference-links` to produce reference-style output. `convertToFootnotes` handles the full conversion: numbering refs, replacing body references, stripping emphasis markers from link display text (pandoc wraps linked `<em>` text in `*...*`), rendering images with alt text as `[image: alt text]` labels, removing images without alt text, and stripping brackets from unresolved references. `styleFootnotes` then applies ANSI colors.
+
+The full pipeline is:
+```
+pandoc (--reference-links) -> cleanMozAttributes -> cleanPandocArtifacts -> normalizeListIndent -> normalizeWhitespace -> convertToFootnotes -> styleFootnotes -> highlightMarkdown
+```
 
 ## Footnote link rendering
 

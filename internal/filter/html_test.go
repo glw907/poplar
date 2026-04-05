@@ -26,27 +26,6 @@ func TestCleanPandocArtifacts(t *testing.T) {
 	}
 }
 
-func TestCleanImages(t *testing.T) {
-	tests := []struct {
-		name  string
-		input string
-		want  string
-	}{
-		{"image link", "[![alt](img.png)](https://example.com)", "[alt](https://example.com)"},
-		{"standalone image", "![logo](logo.png)\n", ""},
-		{"empty text link", "[](https://example.com)\n", ""},
-		{"empty url link", "[click here]()", "click here"},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got := cleanImages(tt.input)
-			if got != tt.want {
-				t.Errorf("got %q, want %q", got, tt.want)
-			}
-		})
-	}
-}
-
 func TestNormalizeListIndent(t *testing.T) {
 	tests := []struct {
 		name  string

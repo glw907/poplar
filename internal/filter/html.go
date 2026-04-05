@@ -30,12 +30,6 @@ var (
 	reMozAttr          = regexp.MustCompile(` moz-do-not-send="[^"]*"`)
 	reTrailingBackslash = regexp.MustCompile(`(?m)\\\n`)
 	reEscapedPunct      = regexp.MustCompile(`\\([^\w\s])`)
-	// image-link: [![alt](img)](url) optionally with whitespace/newlines inside outer brackets
-	reImageLink       = regexp.MustCompile(`\[(\s*!\[([^\]]*)\]\([^)]*\)\s*\n?\s*([^\]]*?)\s*)\]\(([^)]+)\)`)
-	reStandaloneImage = regexp.MustCompile(`!\[[^\]]*\]\([^)]*\)\n?`)
-	reEmptyTextLink   = regexp.MustCompile(`\[\s*\]\([^)]+\)\n?`)
-	reEmptyURLLink    = regexp.MustCompile(`\[([^\]]+)\]\(\)`)
-	reMultilineLink   = regexp.MustCompile(`\[([^\]]+?)\]\(([^)]+)\)`)
 	reNBSP            = regexp.MustCompile(`[\x{a0}]+`)
 	reZeroWidth       = regexp.MustCompile(`[\x{200c}\x{200b}\x{feff}]`)
 	reBlankLineSpaces = regexp.MustCompile(`(?m)^ +$`)
@@ -48,9 +42,8 @@ var (
 	reItalic     = regexp.MustCompile(`\*([^*\n]+?)\*`)
 	reRuleDashes = regexp.MustCompile(`(?m)^-{3,}$`)
 	reRuleUnders = regexp.MustCompile(`(?m)^_{3,}$`)
-	reListIndent       = regexp.MustCompile(`(?m)^[ ]{4,}([-*+] )`)
-	reANSI             = regexp.MustCompile(`\x1b\[[0-9;]*m`)
-	reInlineWhitespace = regexp.MustCompile(`\s*\n\s*`)
+	reListIndent = regexp.MustCompile(`(?m)^[ ]{4,}([-*+] )`)
+	reANSI       = regexp.MustCompile(`\x1b\[[0-9;]*m`)
 )
 
 // boldPlaceholder is used to hide bold markers during italic processing.
@@ -70,47 +63,6 @@ func cleanPandocArtifacts(text string) string {
 	text = reTrailingBackslash.ReplaceAllString(text, "\n")
 	text = reEscapedPunct.ReplaceAllString(text, "$1")
 	return text
-}
-
-// cleanImages removes image constructs: image-links, standalone images,
-// empty-text links, and empty-URL links.
-func cleanImages(text string) string {
-	// Image-link [![alt](img)](url) -> [alt](url) (or empty if no text)
-	text = reImageLink.ReplaceAllStringFunc(text, func(m string) string {
-		groups := reImageLink.FindStringSubmatch(m)
-		if groups == nil {
-			return m
-		}
-		altText := strings.TrimSpace(groups[2])
-		extraText := strings.TrimSpace(groups[3])
-		url := groups[4]
-		combined := strings.TrimSpace(altText + " " + extraText)
-		if combined == "" {
-			return ""
-		}
-		return "[" + combined + "](" + url + ")"
-	})
-	// Standalone images
-	text = reStandaloneImage.ReplaceAllString(text, "")
-	// Empty-text links
-	text = reEmptyTextLink.ReplaceAllString(text, "")
-	// Empty-URL links: [text]() -> text
-	text = reEmptyURLLink.ReplaceAllString(text, "$1")
-	return text
-}
-
-// joinMultilineLinks collapses newlines inside link text to a single space.
-func joinMultilineLinks(text string) string {
-	return reMultilineLink.ReplaceAllStringFunc(text, func(m string) string {
-		groups := reMultilineLink.FindStringSubmatch(m)
-		if groups == nil {
-			return m
-		}
-		linkText := groups[1]
-		url := groups[2]
-		linkText = reInlineWhitespace.ReplaceAllString(linkText, " ")
-		return "[" + linkText + "](" + url + ")"
-	})
 }
 
 // normalizeListIndent strips excessive indentation from list items that
@@ -174,7 +126,7 @@ func highlightMarkdown(text string, colors *markdownColors) string {
 
 	// Restore bold placeholders: pairs of placeholder tokens wrap content.
 	// Replace first placeholder with b, second with r, alternating.
-	text = replaceBoldPlaceholders(text, b, r)
+	text = replaceMarkerPairs(text, boldPlaceholder, b, r)
 
 	// Horizontal rules (dashes and underscores)
 	text = reRuleDashes.ReplaceAllString(text, ru+"$0"+r)
@@ -183,22 +135,20 @@ func highlightMarkdown(text string, colors *markdownColors) string {
 	return text
 }
 
-// replaceBoldPlaceholders converts boldPlaceholder tokens to ANSI sequences.
-// Tokens appear in pairs: first marks start (emit b), second marks end (emit r).
-func replaceBoldPlaceholders(text, b, r string) string {
-	parts := strings.Split(text, boldPlaceholder)
+// replaceMarkerPairs splits text on sentinel and alternates open/close ANSI
+// sequences at each boundary. Odd splits get open, even splits get close.
+func replaceMarkerPairs(text, sentinel, open, close string) string {
+	parts := strings.Split(text, sentinel)
 	var sb strings.Builder
 	for i, part := range parts {
 		if i == 0 {
 			sb.WriteString(part)
 			continue
 		}
-		// Odd index: opening marker (emit b before content).
-		// Even index: closing marker (emit r before content).
 		if i%2 == 1 {
-			sb.WriteString(b)
+			sb.WriteString(open)
 		} else {
-			sb.WriteString(r)
+			sb.WriteString(close)
 		}
 		sb.WriteString(part)
 	}
@@ -317,8 +267,6 @@ func HTML(r io.Reader, w io.Writer, p *palette.Palette, cols int) error {
 	// Post-pandoc cleanup
 	md = html.UnescapeString(md)
 	md = cleanPandocArtifacts(md)
-	md = cleanImages(md)
-	md = joinMultilineLinks(md)
 	md = normalizeListIndent(md)
 	md = normalizeWhitespace(md)
 
