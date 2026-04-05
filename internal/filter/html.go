@@ -30,8 +30,9 @@ var (
 	reMozAttr          = regexp.MustCompile(` moz-do-not-send="[^"]*"`)
 	reTrailingBackslash = regexp.MustCompile(`(?m)\\\n`)
 	reEscapedPunct      = regexp.MustCompile(`\\([^\w\s])`)
-	reNBSP            = regexp.MustCompile(`[\x{a0}]+`)
-	reZeroWidth       = regexp.MustCompile(`[\x{200c}\x{200b}\x{feff}]`)
+	// Unicode space variants: NBSP, en/em space, thin/hair space, etc.
+	reNBSP            = regexp.MustCompile(`[\x{a0}\x{2000}-\x{200a}]+`)
+	reZeroWidth       = regexp.MustCompile(`[\x{200b}-\x{200d}\x{feff}]`)
 	reBlankLineSpaces = regexp.MustCompile(`(?m)^ +$`)
 	reExcessiveBlank  = regexp.MustCompile(`\n{3,}`)
 	reLeadingBlank    = regexp.MustCompile(`\A\n+`)
