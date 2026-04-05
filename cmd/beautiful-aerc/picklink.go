@@ -3,6 +3,7 @@ package main
 import (
 	"os"
 	"os/exec"
+	"syscall"
 
 	"github.com/glw907/beautiful-aerc/internal/filter"
 	"github.com/glw907/beautiful-aerc/internal/picker"
@@ -26,12 +27,14 @@ func newPickLinkCmd() *cobra.Command {
 			}
 
 			colors := picker.ColorsFromPalette(p)
-			url, err := picker.Run(links, os.Stderr, cols, colors)
+			url, err := picker.Run(links, cols, colors)
 			if err != nil {
 				return err
 			}
 			if url != "" {
-				return exec.Command("xdg-open", url).Start()
+				open := exec.Command("xdg-open", url)
+				open.SysProcAttr = &syscall.SysProcAttr{Setsid: true}
+				return open.Start()
 			}
 			return nil
 		},

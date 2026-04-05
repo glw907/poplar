@@ -84,10 +84,10 @@ func ColorsFromPalette(p *palette.Palette) *Colors {
 
 const maxLabelWidth = 30
 
-// Run reads message content from r, extracts footnoted links, and runs the
-// interactive picker. Keyboard input is read from /dev/tty so stdin can be
-// a pipe. Returns the selected URL or empty string if cancelled.
-func Run(links []filter.FootnoteLink, w io.Writer, cols int, colors *Colors) (string, error) {
+// Run presents an interactive picker for the given links. Both keyboard input
+// and UI output go through /dev/tty so stdin/stdout can be pipes. Returns the
+// selected URL or empty string if cancelled.
+func Run(links []filter.FootnoteLink, cols int, colors *Colors) (string, error) {
 	if len(links) == 0 {
 		return "", nil
 	}
@@ -103,7 +103,9 @@ func Run(links []filter.FootnoteLink, w io.Writer, cols int, colors *Colors) (st
 		labelWidth = maxLabelWidth
 	}
 
-	tty, err := os.Open("/dev/tty")
+	// Open /dev/tty for both reading and writing so the picker has full
+	// terminal control independent of aerc's I/O capture.
+	tty, err := os.OpenFile("/dev/tty", os.O_RDWR, 0)
 	if err != nil {
 		return "", fmt.Errorf("opening /dev/tty: %w", err)
 	}
@@ -114,12 +116,11 @@ func Run(links []filter.FootnoteLink, w io.Writer, cols int, colors *Colors) (st
 		return "", fmt.Errorf("setting raw mode: %w", err)
 	}
 	defer restore(tty.Fd(), oldState)
-	defer fmt.Fprint(w, "\033[?25h") // restore cursor on exit
-
-	// Hide cursor and clear screen for initial draw.
-	fmt.Fprint(w, "\033[?25l\033[2J")
+	// Switch to alternate screen buffer so aerc's UI restores on exit.
+	fmt.Fprint(tty, "\033[?1049h\033[2J\033[?25l")
+	defer fmt.Fprint(tty, "\033[?25h\033[?1049l")
 	selected := 0
-	render(w, links, selected, cols, labelWidth, colors)
+	render(tty, links, selected, cols, labelWidth, colors)
 
 	buf := make([]byte, 3)
 	for {
@@ -161,7 +162,7 @@ func Run(links []filter.FootnoteLink, w io.Writer, cols int, colors *Colors) (st
 		if (len(key) == 1 && key[0] == 'j') || (len(key) == 3 && key[0] == 27 && key[1] == '[' && key[2] == 'B') {
 			if selected < len(links)-1 {
 				selected++
-				render(w, links, selected, cols, labelWidth, colors)
+				render(tty, links, selected, cols, labelWidth, colors)
 			}
 			continue
 		}
@@ -170,7 +171,7 @@ func Run(links []filter.FootnoteLink, w io.Writer, cols int, colors *Colors) (st
 		if (len(key) == 1 && key[0] == 'k') || (len(key) == 3 && key[0] == 27 && key[1] == '[' && key[2] == 'A') {
 			if selected > 0 {
 				selected--
-				render(w, links, selected, cols, labelWidth, colors)
+				render(tty, links, selected, cols, labelWidth, colors)
 			}
 			continue
 		}
