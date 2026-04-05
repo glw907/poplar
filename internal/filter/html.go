@@ -58,6 +58,10 @@ var (
 	// Superscripts in email are almost always footnote numbers or legal
 	// markers; stripping the carets reads fine in plain terminal output.
 	reSuperscript = regexp.MustCompile(`\^([^^]+)\^`)
+	// reHiddenDiv matches <div> elements with display:none in their inline
+	// style. Responsive HTML emails include a hidden mobile/desktop duplicate
+	// wrapped in such a div; stripping it prevents double content.
+	reHiddenDiv = regexp.MustCompile(`(?si)<div[^>]+style="[^"]*display:\s*none[^"]*"[^>]*>.*?</div>`)
 )
 
 // boldPlaceholder is used to hide bold markers during italic processing.
@@ -69,6 +73,16 @@ func cleanMozAttributes(html string) string {
 	html = reMozDataAttr.ReplaceAllString(html, "")
 	html = reMozAttr.ReplaceAllString(html, "")
 	return html
+}
+
+// stripHiddenElements removes <div> elements whose inline style contains
+// display:none. Responsive HTML emails embed a hidden duplicate of the
+// body (mobile or desktop version) in such a div; stripping it before
+// pandoc conversion prevents the content from appearing twice.
+// The regex uses a non-greedy .*? so it closes at the first </div>. This
+// works for non-nested hidden containers, which covers the common case.
+func stripHiddenElements(body string) string {
+	return reHiddenDiv.ReplaceAllString(body, "")
 }
 
 // cleanPandocArtifacts removes trailing backslash line-breaks,
@@ -370,8 +384,9 @@ func HTML(r io.Reader, w io.Writer, p *palette.Palette, cols int) error {
 		return fmt.Errorf("reading input: %w", err)
 	}
 
-	// sed stage: strip Mozilla-specific HTML attributes
+	// sed stage: strip Mozilla-specific HTML attributes and hidden elements
 	cleaned := cleanMozAttributes(string(raw))
+	cleaned = stripHiddenElements(cleaned)
 
 	// Find lua filter
 	luaFilter, err := findLuaFilter()

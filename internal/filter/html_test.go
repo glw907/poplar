@@ -275,6 +275,48 @@ func TestHighlightMarkdown(t *testing.T) {
 	}
 }
 
+func TestStripHiddenElements(t *testing.T) {
+	tests := []struct {
+		name  string
+		input string
+		want  string
+	}{
+		{
+			"display:none div removed",
+			`<body><div style="display:none;max-height:0">hidden</div><p>visible</p></body>`,
+			`<body><p>visible</p></body>`,
+		},
+		{
+			"display: none with space removed",
+			`<div style="display: none">hidden</div><p>ok</p>`,
+			`<p>ok</p>`,
+		},
+		{
+			"visible div preserved",
+			`<div style="color:red">visible</div>`,
+			`<div style="color:red">visible</div>`,
+		},
+		{
+			"no style unchanged",
+			`<div>content</div>`,
+			`<div>content</div>`,
+		},
+		{
+			"mso-hide display:none removed",
+			`<div style="display:none;mso-hide:all">hidden content here</div>rest`,
+			`rest`,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := stripHiddenElements(tt.input)
+			if got != tt.want {
+				t.Errorf("got %q, want %q", got, tt.want)
+			}
+		})
+	}
+}
+
 func TestCleanPandocArtifactsSuperscript(t *testing.T) {
 	tests := []struct {
 		name  string
