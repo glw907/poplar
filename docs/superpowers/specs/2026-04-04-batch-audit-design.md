@@ -12,7 +12,7 @@ A shell script at `scripts/audit.sh` that:
 
 1. Reads raw RFC 2822 emails from `~/.cache/aerc/907.life/blobs/`
 2. For each blob, extracts the sender domain and subject from headers
-3. Selects a diverse sample (~50-80 emails) biased toward sender domain variety - at most 2-3 from any single domain
+3. Selects a diverse sample biased toward maximum sender domain variety - at most 1-2 emails per sender domain to maximize breadth of HTML generators encountered
 4. Extracts the HTML body from each selected email, handling MIME multipart boundaries and Content-Transfer-Encoding (base64, quoted-printable)
 5. Pipes the HTML through `beautiful-aerc html`
 6. Writes rendered output to `audit-output/<hash>.txt`, prefixed with sender and subject for context
