@@ -11,8 +11,9 @@ const linkTextMarker = "\x00LT\x00"
 
 // Regexes for reference-style link processing.
 var (
-	// reRefDef matches pandoc reference definitions: "  [label]: url" or "  [label]:" (empty URL)
-	reRefDef = regexp.MustCompile(`(?m)^ {0,3}\[([^\]]+)\]:\s*(.*)$`)
+	// reRefDef matches pandoc reference definitions: "  [label]: url", "  [label]:" (empty URL),
+	// or "  []: url" (empty label, e.g. after zero-width character stripping).
+	reRefDef = regexp.MustCompile(`(?m)^ {0,3}\[([^\]]*)\]:\s*(.*)$`)
 	// reRefTitle matches pandoc ref def title continuation: '    "title"'
 	reRefTitle = regexp.MustCompile(`^\s+"[^"]*"\s*$`)
 	// reRefShortcut matches shortcut reference [text] in body, optionally with [N] or []

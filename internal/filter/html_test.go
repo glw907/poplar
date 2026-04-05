@@ -26,6 +26,33 @@ func TestCleanPandocArtifacts(t *testing.T) {
 	}
 }
 
+func TestNormalizeUnicodeBullets(t *testing.T) {
+	tests := []struct {
+		name  string
+		input string
+		want  string
+	}{
+		{"filled circle", "● Item one", "- Item one"},
+		{"bullet", "• Item two", "- Item two"},
+		{"leading whitespace", "  ● Item", "- Item"},
+		{"multiple bullets", "● First\n● Second", "- First\n- Second"},
+		{"triangle bullet", "▸ Item", "- Item"},
+		{"no bullet", "Normal text", "Normal text"},
+		{"mid-line bullet unchanged", "Click ● here", "Click ● here"},
+		{"continuation indented", "● First line\nsecond line", "- First line\n  second line"},
+		{"continuation stops at blank", "● Item\ncont\n\nNext para", "- Item\n  cont\n\nNext para"},
+		{"multi-item continuation", "● A\nwrap\n● B\nwrap", "- A\n  wrap\n- B\n  wrap"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := normalizeUnicodeBullets(tt.input)
+			if got != tt.want {
+				t.Errorf("got %q, want %q", got, tt.want)
+			}
+		})
+	}
+}
+
 func TestNormalizeListIndent(t *testing.T) {
 	tests := []struct {
 		name  string

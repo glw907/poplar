@@ -43,8 +43,9 @@ var (
 	reItalic     = regexp.MustCompile(`(?s)\*([^*]+?)\*`)
 	reRuleDashes = regexp.MustCompile(`(?m)^-{3,}$`)
 	reRuleUnders = regexp.MustCompile(`(?m)^_{3,}$`)
-	reListIndent = regexp.MustCompile(`(?m)^[ ]{4,}([-*+] )`)
-	reANSI       = regexp.MustCompile(`\x1b\[[0-9;]*m`)
+	reListIndent     = regexp.MustCompile(`(?m)^[ ]{4,}([-*+] )`)
+	reUnicodeBullet  = regexp.MustCompile(`^[ \t]*[●•◦◆▪▸‣⁃][ \t]*`)
+	reANSI           = regexp.MustCompile(`\x1b\[[0-9;]*m`)
 )
 
 // boldPlaceholder is used to hide bold markers during italic processing.
@@ -64,6 +65,28 @@ func cleanPandocArtifacts(text string) string {
 	text = reTrailingBackslash.ReplaceAllString(text, "\n")
 	text = reEscapedPunct.ReplaceAllString(text, "$1")
 	return text
+}
+
+// normalizeUnicodeBullets converts lines starting with Unicode bullet
+// characters (●, •, etc.) into markdown list items with proper
+// continuation-line indentation. Marketing emails often use these
+// instead of <li> elements.
+func normalizeUnicodeBullets(text string) string {
+	lines := strings.Split(text, "\n")
+	inItem := false
+	for i, line := range lines {
+		if replaced := reUnicodeBullet.ReplaceAllString(line, "- "); replaced != line {
+			lines[i] = replaced
+			inItem = true
+		} else if inItem {
+			if strings.TrimSpace(line) == "" {
+				inItem = false
+			} else {
+				lines[i] = "  " + line
+			}
+		}
+	}
+	return strings.Join(lines, "\n")
 }
 
 // normalizeListIndent strips excessive indentation from list items that
@@ -280,6 +303,7 @@ func HTML(r io.Reader, w io.Writer, p *palette.Palette, cols int) error {
 	// Post-pandoc cleanup
 	md = html.UnescapeString(md)
 	md = cleanPandocArtifacts(md)
+	md = normalizeUnicodeBullets(md)
 	md = normalizeListIndent(md)
 	md = normalizeWhitespace(md)
 

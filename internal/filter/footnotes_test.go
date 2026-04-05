@@ -116,10 +116,22 @@ func TestConvertToFootnotes(t *testing.T) {
 			[]footnoteRef{{1, "https://example.com"}},
 		},
 		{
+			"text-label shortcut ref gets footnote",
+			"[REGISTER]\n\n  [REGISTER]: https://example.com/register\n",
+			m + "REGISTER" + m + "[^1]",
+			[]footnoteRef{{1, "https://example.com/register"}},
+		},
+		{
 			"unresolved ref brackets stripped",
 			"Hello [unknown ref] world.\n",
 			"Hello unknown ref world.",
 			nil,
+		},
+		{
+			"empty label ref def does not block scanner",
+			"[Click here]\n\n  []: https://example.com/empty\n  [Click here]: https://example.com\n",
+			m + "Click here" + m + "[^1]",
+			[]footnoteRef{{1, "https://example.com"}},
 		},
 	}
 	for _, tt := range tests {
