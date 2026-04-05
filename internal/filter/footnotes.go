@@ -168,6 +168,7 @@ func convertToFootnotes(text string) (string, []footnoteRef) {
 
 	// Collapse blank lines left behind by image stripping.
 	body = reExcessiveBlank.ReplaceAllString(body, "\n\n")
+	body = reLeadingBlank.ReplaceAllString(body, "")
 
 	return body, refs
 }

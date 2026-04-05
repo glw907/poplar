@@ -85,7 +85,12 @@ func TestNormalizeWhitespace(t *testing.T) {
 	}{
 		{"nbsp", "hello\u00a0world", "hello world"},
 		{"zero-width chars", "he\u200cllo\u200bwor\uFEFFld", "helloworld"},
+		{"combining grapheme joiner", "hello\u034fworld", "helloworld"},
+		{"soft hyphen", "hello\u00adworld", "helloworld"},
+		{"word joiner", "hello\u2060world", "helloworld"},
+		{"preheader filler", "text \u034f \u034f \u034f", "text   "},
 		{"trailing spaces on blank line", "hello\n   \nworld", "hello\n\nworld"},
+		{"filler lines collapse", "hello\n \u034f \u034f\n \u034f\nworld", "hello\n\nworld"},
 		{"excessive blank lines", "hello\n\n\n\nworld", "hello\n\nworld"},
 		{"leading blank lines", "\n\n\nhello", "hello"},
 	}
@@ -148,6 +153,15 @@ func TestHighlightMarkdown(t *testing.T) {
 					strings.Contains(s, "\033[1m\033[3mline two\033[0m\033[0m")
 			},
 			"should apply both bold and italic to each line",
+		},
+		{
+			"stray asterisk no cross-paragraph italic",
+			"products.* Get started\n\nparagraph\n\n*Visit site",
+			func(s string) bool {
+				// Neither stray * should trigger italic across paragraphs
+				return !strings.Contains(s, "\033[3m")
+			},
+			"stray * must not bleed italic across paragraphs",
 		},
 		{
 			"horizontal rule dashes",

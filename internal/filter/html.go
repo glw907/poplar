@@ -32,16 +32,17 @@ var (
 	reEscapedPunct      = regexp.MustCompile(`\\([^\w\s])`)
 	// Unicode space variants: NBSP, en/em space, thin/hair space, etc.
 	reNBSP            = regexp.MustCompile(`[\x{a0}\x{2000}-\x{200a}]+`)
-	reZeroWidth       = regexp.MustCompile(`[\x{200b}-\x{200d}\x{feff}]`)
+	// Invisible filler: zero-width, joiners, soft hyphen, word joiner, etc.
+	reZeroWidth = regexp.MustCompile(`[\x{ad}\x{34f}\x{180e}\x{200b}-\x{200d}\x{2060}-\x{2064}\x{feff}]`)
 	reBlankLineSpaces = regexp.MustCompile(`(?m)^ +$`)
 	reExcessiveBlank  = regexp.MustCompile(`\n{3,}`)
 	reLeadingBlank    = regexp.MustCompile(`\A\n+`)
 	reHeading         = regexp.MustCompile(`(?m)^(#{1,6})\s+(.*)$`)
 	reBold            = regexp.MustCompile(`(?s)\*\*(.+?)\*\*`)
-	// italic: matches *text* where * is not adjacent to another *
-	// handled via bold-placeholder approach; this regex matches single *
-	// (?s) allows matching across newlines for multiline emphasis
-	reItalic     = regexp.MustCompile(`(?s)\*([^*]+?)\*`)
+	// italic: matches *text* allowing newlines within a paragraph but not
+	// across paragraph breaks (double newlines), preventing stray * from
+	// pandoc \* escaping from bleeding italic across paragraphs.
+	reItalic = regexp.MustCompile(`\*([^*\n]+(?:\n[^*\n]+)*)\*`)
 	reRuleDashes = regexp.MustCompile(`(?m)^-{3,}$`)
 	reRuleUnders = regexp.MustCompile(`(?m)^_{3,}$`)
 	reListIndent     = regexp.MustCompile(`(?m)^[ ]{4,}([-*+] )`)
