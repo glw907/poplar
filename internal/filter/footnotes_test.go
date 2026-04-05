@@ -56,9 +56,9 @@ func TestConvertToFootnotes(t *testing.T) {
 			nil,
 		},
 		{
-			"image with alt text becomes label",
-			"![Logo][1]\n\n  [1]: https://example.com/logo.png\n",
-			"image: Logo",
+			"standalone image stripped",
+			"![Logo][1]\n\n  [Logo]: https://example.com/logo.png\n  [1]: https://example.com/logo.png\n",
+			"",
 			nil,
 		},
 		{
@@ -68,9 +68,27 @@ func TestConvertToFootnotes(t *testing.T) {
 			nil,
 		},
 		{
-			"image link ref with alt text",
+			"image link ref becomes footnoted text",
 			"[![Banner]][1]\n\n  [Banner]: https://example.com/banner.png\n  [1]: https://example.com\n",
-			"image: Banner",
+			m + "Banner" + m + "[^1]",
+			[]footnoteRef{{1, "https://example.com"}},
+		},
+		{
+			"mailto link gets footnote",
+			"[CONTACT US]\n\n  [CONTACT US]: mailto:help@example.com\n",
+			m + "CONTACT US" + m + "[^1]",
+			[]footnoteRef{{1, "mailto:help@example.com"}},
+		},
+		{
+			"leading space in label matches trimmed ref def",
+			"[ Reply to Amy]\n\n  [Reply to Amy]: https://example.com/reply\n",
+			m + "Reply to Amy" + m + "[^1]",
+			[]footnoteRef{{1, "https://example.com/reply"}},
+		},
+		{
+			"schemeless self-ref stripped",
+			"[rmd.me/abc123]\n\n  [rmd.me/abc123]: http://rmd.me/abc123\n",
+			"rmd.me/abc123",
 			nil,
 		},
 		{

@@ -67,7 +67,8 @@ func convertToFootnotes(text string) (string, []footnoteRef) {
 
 	body := strings.Join(bodyLines, "\n")
 
-	// Replace image references with alt text label or [image] placeholder.
+	// Convert image-link refs [![alt]][N] to regular text refs [alt][N]
+	// so the alt text becomes footnoted link text.
 	body = reImageLinkRef.ReplaceAllStringFunc(body, func(m string) string {
 		groups := reImageLinkRef.FindStringSubmatch(m)
 		if groups == nil {
@@ -77,27 +78,28 @@ func convertToFootnotes(text string) (string, []footnoteRef) {
 		if alt == "" {
 			return ""
 		}
-		return "image: " + alt
-	})
-	body = reImageRef.ReplaceAllStringFunc(body, func(m string) string {
-		groups := reImageRef.FindStringSubmatch(m)
-		if groups == nil {
-			return m
+		if groups[2] != "" {
+			return "[" + alt + "][" + groups[2] + "]"
 		}
-		alt := strings.TrimSpace(groups[1])
-		if alt == "" {
-			return ""
-		}
-		return "image: " + alt
+		return ""
 	})
+	// Strip standalone image refs ![alt] and ![alt][N] (no wrapping link).
+	body = reImageRef.ReplaceAllString(body, "")
 	body = reEmptyTextRef.ReplaceAllString(body, "")
 
 	// Build a set of labels still referenced in the body after image stripping.
+	// Include trimmed versions to handle pandoc's occasional leading-space labels.
 	bodyRefs := make(map[string]bool)
 	for _, m := range reRefShortcut.FindAllStringSubmatch(body, -1) {
-		bodyRefs[m[1]] = true
 		if m[2] != "" {
+			// [text][N] form: only the numeric label is a ref lookup key.
 			bodyRefs[m[2]] = true
+		} else {
+			// [text] shortcut form: the text is both display and lookup key.
+			bodyRefs[m[1]] = true
+			if trimmed := strings.TrimSpace(m[1]); trimmed != m[1] {
+				bodyRefs[trimmed] = true
+			}
 		}
 	}
 
@@ -138,7 +140,7 @@ func convertToFootnotes(text string) (string, []footnoteRef) {
 		}
 		label := groups[1]
 		numericLabel := groups[2]
-		display := stripEmphasis(label)
+		display := strings.TrimSpace(stripEmphasis(label))
 
 		if numericLabel != "" {
 			if ref, ok := labelMap[numericLabel]; ok {
@@ -148,6 +150,12 @@ func convertToFootnotes(text string) (string, []footnoteRef) {
 
 		if ref, ok := labelMap[label]; ok {
 			return linkTextMarker + display + linkTextMarker + fmt.Sprintf("[^%d]", ref.num)
+		}
+		// Try trimmed label for pandoc's leading-space cases.
+		if trimmed := strings.TrimSpace(label); trimmed != label {
+			if ref, ok := labelMap[trimmed]; ok {
+				return linkTextMarker + display + linkTextMarker + fmt.Sprintf("[^%d]", ref.num)
+			}
 		}
 
 		return display
@@ -208,14 +216,16 @@ func styleFootnotes(body string, refs []footnoteRef, cols int, colors *footnoteC
 }
 
 // isSelfRef returns true when a reference label is effectively its own URL.
+// Handles scheme-less labels like "rmd.me/path" matching "http://rmd.me/path".
 func isSelfRef(label, url string) bool {
-	return strings.TrimPrefix(strings.TrimPrefix(label, "https://"), "http://") ==
-		strings.TrimPrefix(strings.TrimPrefix(url, "https://"), "http://")
+	urlStripped := strings.TrimPrefix(strings.TrimPrefix(url, "https://"), "http://")
+	labelStripped := strings.TrimPrefix(strings.TrimPrefix(label, "https://"), "http://")
+	return labelStripped == urlStripped
 }
 
-// isURL returns true if s looks like a URL.
+// isURL returns true if s looks like a URL or mailto link.
 func isURL(s string) bool {
-	return strings.HasPrefix(s, "http://") || strings.HasPrefix(s, "https://")
+	return strings.HasPrefix(s, "http://") || strings.HasPrefix(s, "https://") || strings.HasPrefix(s, "mailto:")
 }
 
 // stripEmphasis removes markdown emphasis markers from link display text.
