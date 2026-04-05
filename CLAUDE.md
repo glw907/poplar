@@ -61,6 +61,12 @@ It finds palette.sh by checking: `$AERC_CONFIG/generated/palette.sh`,
 then relative to binary, then `~/.config/aerc/generated/palette.sh`.
 If not found, it exits with a clear error.
 
+**Never hardcode ANSI color codes or style modifiers (bold, italic,
+underline) in Go source.** All text styling must use composite
+palette tokens defined in the theme file. If a UI element needs
+styling, add a token to the theme and reference it through the
+palette.
+
 ## Link Picker
 
 The `pick-link` subcommand provides an interactive URL picker for
@@ -96,6 +102,13 @@ with `…` to fit within the terminal width. The full URL is embedded
 in an OSC 8 hyperlink escape sequence so terminals that support it
 can still make the truncated text clickable. The link picker extracts
 full URLs from OSC 8 hrefs, so truncation does not affect link opening.
+
+## Styling
+
+**Read `docs/styling.md` before building any UI element.** It
+defines the visual hierarchy, layout patterns, color token usage,
+and aerc integration patterns. See `docs/themes.md` for the token
+reference and theme file format.
 
 ## Testing
 

@@ -128,9 +128,10 @@ Keybinding in `binds.conf`:
 aerc's `:menu` pipes the current message through the command and uses the output as the argument to `:open-link`.
 
 Picker colors come from palette.sh:
-- Number: `ACCENT_PRIMARY`
-- URL text: `FG_DIM`
-- Selected line: `BG_SELECTION` + `FG_BRIGHT`
+- Number: `C_PICKER_NUM`
+- Label: `C_PICKER_LABEL`
+- URL text: `C_PICKER_URL`
+- Selected line: `C_PICKER_SEL_BG` + `C_PICKER_SEL_FG`
 
 ## Header formatting
 
@@ -150,7 +151,7 @@ All other headers are suppressed. This is a deliberate design choice - aerc's ra
 
 **Colorization**
 
-Header field names (From, To, Date, Subject) are printed in `ACCENT_PRIMARY` bold. Field values use the default foreground color. Angle brackets around email addresses are dimmed.
+Header field names (From, To, Date, Subject) are styled with `C_HDR_KEY`. Field values use `C_HDR_VALUE`. Angle brackets around email addresses use `C_HDR_DIM`.
 
 **Address wrapping**
 

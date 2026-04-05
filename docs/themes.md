@@ -48,6 +48,40 @@ C_LINK_TEXT="$ACCENT_SECONDARY"   # color only
 
 The generator resolves slot references and converts them to ANSI escape parameters. At runtime, the Go binary reads these resolved values from `generated/palette.sh`.
 
+## UI tokens
+
+Beyond markdown, composite tokens control styling for headers,
+the link picker, and message overlays. Like markdown tokens, they
+reference base color slots and can include style modifiers.
+
+| Token | Controls |
+|-------|----------|
+| `C_HDR_KEY` | Header field names (From, Subject, etc.) |
+| `C_HDR_VALUE` | Header field values |
+| `C_HDR_DIM` | Header secondary text (angle brackets, etc.) |
+| `C_PICKER_NUM` | Picker shortcut digits (1-9, 0) |
+| `C_PICKER_LABEL` | Picker link label text |
+| `C_PICKER_URL` | Picker URL text |
+| `C_PICKER_SEL_BG` | Picker selected row background |
+| `C_PICKER_SEL_FG` | Picker selected row foreground |
+| `C_MSG_MARKER` | Message heading `#` marker |
+| `C_MSG_TITLE_SUCCESS` | Success heading (confirmations) |
+| `C_MSG_TITLE_ACCENT` | Interactive heading (picker, prompts) |
+| `C_MSG_DETAIL` | Message detail text (filenames, labels) |
+| `C_MSG_DIM` | Message secondary text (counts, hints) |
+
+Available modifiers: `bold`, `italic`, `underline`. Combine freely:
+
+```sh
+C_HDR_KEY="$ACCENT_PRIMARY bold italic"
+C_MSG_TITLE_SUCCESS="$COLOR_SUCCESS bold underline"
+C_PICKER_LABEL="$FG_BASE underline"
+```
+
+All text styling in the Go binary uses composite tokens. ANSI
+modifiers are never hardcoded — if you need a different style for
+any element, change its token in the theme file.
+
 ## Built-in themes
 
 | File | Theme | Style |
