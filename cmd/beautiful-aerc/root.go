@@ -12,5 +12,6 @@ func newRootCmd() *cobra.Command {
 	cmd.AddCommand(newHTMLCmd())
 	cmd.AddCommand(newPlainCmd())
 	cmd.AddCommand(newPickLinkCmd())
+	cmd.AddCommand(newSaveCmd())
 	return cmd
 }
