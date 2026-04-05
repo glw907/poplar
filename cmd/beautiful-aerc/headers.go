@@ -48,25 +48,12 @@ func loadPalette() (*palette.Palette, error) {
 
 // colorsFromPalette builds a ColorSet from palette entries.
 func colorsFromPalette(p *palette.Palette) *filter.ColorSet {
-	hdrKey := p.Get("ACCENT_PRIMARY")
-	fgBase := p.Get("FG_BASE")
-	fgDim := p.Get("FG_DIM")
-
-	ansiKey, _ := palette.HexToANSI(hdrKey)
-	ansiFG, _ := palette.HexToANSI(fgBase)
-	ansiDim, _ := palette.HexToANSI(fgDim)
-
-	cs := &filter.ColorSet{Reset: p.Reset()}
-	if ansiKey != "" {
-		cs.HdrKey = "\033[1;" + ansiKey + "m"
+	return &filter.ColorSet{
+		HdrKey: p.ANSI("C_HDR_KEY"),
+		HdrFG:  p.ANSI("C_HDR_VALUE"),
+		HdrDim: p.ANSI("C_HDR_DIM"),
+		Reset:  p.Reset(),
 	}
-	if ansiFG != "" {
-		cs.HdrFG = "\033[" + ansiFG + "m"
-	}
-	if ansiDim != "" {
-		cs.HdrDim = "\033[" + ansiDim + "m"
-	}
-	return cs
 }
 
 // termCols returns the terminal column count from AERC_COLUMNS or a default of 80.
@@ -77,4 +64,13 @@ func termCols() int {
 		}
 	}
 	return 80
+}
+
+func termRows() int {
+	if s := os.Getenv("AERC_ROWS"); s != "" {
+		if n, err := strconv.Atoi(s); err == nil && n > 0 {
+			return n
+		}
+	}
+	return 24
 }
