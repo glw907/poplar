@@ -59,10 +59,10 @@ var (
 	// Superscripts in email are almost always footnote numbers or legal
 	// markers; stripping the carets reads fine in plain terminal output.
 	reSuperscript = regexp.MustCompile(`\^([^^]+)\^`)
-	// reHiddenDiv matches <div> elements with display:none in their inline
-	// style. Responsive HTML emails include a hidden mobile/desktop duplicate
-	// wrapped in such a div; stripping it prevents double content.
-	reHiddenDiv = regexp.MustCompile(`(?si)<div[^>]+style="[^"]*display:\s*none[^"]*"[^>]*>.*?</div>`)
+	// reHiddenDivOpen matches the opening tag of a <div> with display:none in
+	// its inline style. Used by stripHiddenElements to find the start of a
+	// hidden section; nesting-aware removal handles finding the matching close.
+	reHiddenDivOpen = regexp.MustCompile(`(?i)<div[^>]+style="[^"]*display:\s*none[^"]*"[^>]*>`)
 )
 
 // boldPlaceholder is used to hide bold markers during italic processing.
@@ -77,13 +77,46 @@ func cleanMozAttributes(html string) string {
 }
 
 // stripHiddenElements removes <div> elements whose inline style contains
-// display:none. Responsive HTML emails embed a hidden duplicate of the
-// body (mobile or desktop version) in such a div; stripping it before
-// pandoc conversion prevents the content from appearing twice.
-// The regex uses a non-greedy .*? so it closes at the first </div>. This
-// works for non-nested hidden containers, which covers the common case.
+// display:none. Responsive HTML emails (Apple receipts, etc.) embed a hidden
+// duplicate of the body in such a div, often containing many nested <div>s.
+// A simple non-greedy regex closes at the first inner </div>, so we use a
+// nesting-aware approach: find each hidden-div open tag, then walk forward
+// counting <div> opens and </div> closes until depth reaches zero.
 func stripHiddenElements(body string) string {
-	return reHiddenDiv.ReplaceAllString(body, "")
+	for {
+		loc := reHiddenDivOpen.FindStringIndex(body)
+		if loc == nil {
+			break
+		}
+		start := loc[0]
+		// Walk from end of opening tag, tracking nesting depth.
+		// Depth starts at 1 (we have already seen the opening <div>).
+		rest := body[loc[1]:]
+		depth := 1
+		pos := 0
+		for depth > 0 && pos < len(rest) {
+			nextOpen := strings.Index(rest[pos:], "<div")
+			nextClose := strings.Index(rest[pos:], "</div>")
+			if nextClose < 0 {
+				// No closing tag found; remove to end of string.
+				pos = len(rest)
+				break
+			}
+			if nextOpen >= 0 && nextOpen < nextClose {
+				depth++
+				pos += nextOpen + len("<div")
+			} else {
+				depth--
+				pos += nextClose + len("</div>")
+			}
+		}
+		end := loc[1] + pos
+		if end > len(body) {
+			end = len(body)
+		}
+		body = body[:start] + body[end:]
+	}
+	return body
 }
 
 // cleanPandocArtifacts removes trailing backslash line-breaks,
