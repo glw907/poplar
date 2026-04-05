@@ -2,6 +2,7 @@ package filter
 
 import (
 	"fmt"
+	"html"
 	"io"
 	"os"
 	"os/exec"
@@ -11,7 +12,10 @@ import (
 	"github.com/glw907/beautiful-aerc/internal/palette"
 )
 
-var htmlTagRe = regexp.MustCompile(`(?i)<(div|html|body|table|span|br|p[ />])`)
+var (
+	htmlTagRe      = regexp.MustCompile(`(?i)<(div|html|body|table|span|br|p[ />])`)
+	reTabListItem  = regexp.MustCompile(`(?m)^\t+([-*+] )`)
+)
 
 func detectHTML(text string) bool {
 	lines := strings.SplitN(text, "\n", 51)
@@ -36,6 +40,11 @@ func Plain(r io.Reader, w io.Writer, p *palette.Palette, cols int) error {
 	if detectHTML(text) {
 		return HTML(strings.NewReader(text), w, p, cols)
 	}
+
+	// Some senders put HTML entities in text/plain parts.
+	text = html.UnescapeString(text)
+	// Normalize tab-indented list items to prevent 8-space expansion.
+	text = reTabListItem.ReplaceAllString(text, "$1")
 
 	colStr := "80"
 	if cols > 0 {
