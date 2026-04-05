@@ -142,7 +142,9 @@ func TestSaveHTMLFixture(t *testing.T) {
 	// AERC_CONFIG points to a dir; FindDir does AERC_CONFIG/../../corpus
 	// So we need aercDir to be 2 levels deep under corpusDir's parent
 	aercDir := filepath.Join(corpusDir, ".config", "aerc")
-	os.MkdirAll(aercDir, 0755)
+	if err := os.MkdirAll(aercDir, 0755); err != nil {
+		t.Fatalf("creating test dir: %v", err)
+	}
 
 	cmd := exec.Command(binary, "save")
 	cmd.Stdin = bytes.NewReader(input)
@@ -156,12 +158,18 @@ func TestSaveHTMLFixture(t *testing.T) {
 	}
 
 	// Verify a .html file was created in the corpus dir
-	matches, _ := filepath.Glob(filepath.Join(corpusDir, "corpus", "*.html"))
+	matches, err := filepath.Glob(filepath.Join(corpusDir, "corpus", "*.html"))
+	if err != nil {
+		t.Fatalf("globbing corpus: %v", err)
+	}
 	if len(matches) != 1 {
 		t.Fatalf("expected 1 html file in corpus, got %d", len(matches))
 	}
 
-	saved, _ := os.ReadFile(matches[0])
+	saved, err := os.ReadFile(matches[0])
+	if err != nil {
+		t.Fatalf("reading saved file: %v", err)
+	}
 	if !bytes.Equal(saved, input) {
 		t.Error("saved content does not match input")
 	}
@@ -170,7 +178,9 @@ func TestSaveHTMLFixture(t *testing.T) {
 func TestSavePlainText(t *testing.T) {
 	corpusDir := filepath.Join(t.TempDir(), "corpus")
 	aercDir := filepath.Join(corpusDir, ".config", "aerc")
-	os.MkdirAll(aercDir, 0755)
+	if err := os.MkdirAll(aercDir, 0755); err != nil {
+		t.Fatalf("creating test dir: %v", err)
+	}
 
 	input := []byte("Hello, this is a plain text email.\n")
 
@@ -185,7 +195,10 @@ func TestSavePlainText(t *testing.T) {
 		t.Fatalf("running save: %v\noutput: %s", err, out)
 	}
 
-	matches, _ := filepath.Glob(filepath.Join(corpusDir, "corpus", "*.txt"))
+	matches, err := filepath.Glob(filepath.Join(corpusDir, "corpus", "*.txt"))
+	if err != nil {
+		t.Fatalf("globbing corpus: %v", err)
+	}
 	if len(matches) != 1 {
 		t.Fatalf("expected 1 txt file in corpus, got %d", len(matches))
 	}
