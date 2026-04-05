@@ -19,6 +19,8 @@ type Colors struct {
 	Label    string // link label text
 	URL      string // URL text (dim)
 	Selected string // highlighted line (bg + fg)
+	Marker   string // heading # marker
+	Title    string // heading text
 	Reset    string
 }
 
@@ -59,30 +61,32 @@ func FormatLine(index int, link filter.FootnoteLink, selected bool, cols int, la
 
 // ColorsFromPalette builds picker colors from a loaded palette.
 func ColorsFromPalette(p *palette.Palette) *Colors {
-	numColor, _ := palette.HexToANSI(p.Get("ACCENT_PRIMARY"))
-	labelColor, _ := palette.HexToANSI(p.Get("FG_PRIMARY"))
-	urlColor, _ := palette.HexToANSI(p.Get("FG_DIM"))
-	selBG, _ := palette.HexToANSI(p.Get("BG_SELECTION"))
-	selFG, _ := palette.HexToANSI(p.Get("FG_BRIGHT"))
-
 	c := &Colors{Reset: "\033[0m"}
-	if numColor != "" {
-		c.Number = "\033[" + numColor + "m"
+	if v := p.ANSI("C_PICKER_NUM"); v != "" {
+		c.Number = v
 	}
-	if labelColor != "" {
-		c.Label = "\033[" + labelColor + "m"
+	if v := p.ANSI("C_PICKER_LABEL"); v != "" {
+		c.Label = v
 	}
-	if urlColor != "" {
-		c.URL = "\033[" + urlColor + "m"
+	if v := p.ANSI("C_PICKER_URL"); v != "" {
+		c.URL = v
 	}
+	selBG := p.Get("C_PICKER_SEL_BG")
+	selFG := p.Get("C_PICKER_SEL_FG")
 	if selBG != "" && selFG != "" {
 		bgParam := strings.Replace(selBG, "38;2;", "48;2;", 1)
 		c.Selected = "\033[" + bgParam + "m\033[" + selFG + "m"
 	}
+	if v := p.ANSI("C_MSG_MARKER"); v != "" {
+		c.Marker = v
+	}
+	if v := p.ANSI("C_MSG_TITLE_ACCENT"); v != "" {
+		c.Title = v
+	}
 	return c
 }
 
-const maxLabelWidth = 30
+const maxLabelWidth = 72
 
 // Run presents an interactive picker for the given links. Both keyboard input
 // and UI output go through /dev/tty so stdin/stdout can be pipes. Returns the
@@ -116,11 +120,19 @@ func Run(links []filter.FootnoteLink, cols int, colors *Colors) (string, error) 
 		return "", fmt.Errorf("setting raw mode: %w", err)
 	}
 	defer restore(tty.Fd(), oldState)
+	rows := 24
+	if ws, err := unix.IoctlGetWinsize(int(tty.Fd()), unix.TIOCGWINSZ); err == nil && ws.Row > 0 {
+		rows = int(ws.Row)
+		if ws.Col > 0 {
+			cols = int(ws.Col)
+		}
+	}
+
 	// Switch to alternate screen buffer so aerc's UI restores on exit.
 	fmt.Fprint(tty, "\033[?1049h\033[2J\033[?25l")
 	defer fmt.Fprint(tty, "\033[?25h\033[?1049l")
 	selected := 0
-	render(tty, links, selected, cols, labelWidth, colors)
+	render(tty, links, selected, rows, cols, labelWidth, colors)
 
 	buf := make([]byte, 3)
 	for {
@@ -162,7 +174,7 @@ func Run(links []filter.FootnoteLink, cols int, colors *Colors) (string, error) 
 		if (len(key) == 1 && key[0] == 'j') || (len(key) == 3 && key[0] == 27 && key[1] == '[' && key[2] == 'B') {
 			if selected < len(links)-1 {
 				selected++
-				render(tty, links, selected, cols, labelWidth, colors)
+				render(tty, links, selected, rows, cols, labelWidth, colors)
 			}
 			continue
 		}
@@ -171,20 +183,36 @@ func Run(links []filter.FootnoteLink, cols int, colors *Colors) (string, error) 
 		if (len(key) == 1 && key[0] == 'k') || (len(key) == 3 && key[0] == 27 && key[1] == '[' && key[2] == 'A') {
 			if selected > 0 {
 				selected--
-				render(tty, links, selected, cols, labelWidth, colors)
+				render(tty, links, selected, rows, cols, labelWidth, colors)
 			}
 			continue
 		}
 	}
 }
 
-func render(w io.Writer, links []filter.FootnoteLink, selected, cols, labelWidth int, colors *Colors) {
+const pickerHeading = "OPEN LINK"
+
+func render(w io.Writer, links []filter.FootnoteLink, selected, rows, cols, labelWidth int, colors *Colors) {
+	// Block height: heading + blank line + links.
+	blockHeight := 2 + len(links)
+	pad := (rows - blockHeight) / 3
+	if pad < 1 {
+		pad = 1
+	}
+
 	// Move cursor home and overwrite in place to avoid flicker.
 	fmt.Fprint(w, "\033[H")
-	fmt.Fprintln(w)
+	for range pad {
+		fmt.Fprint(w, "\033[2K\n")
+	}
+	fmt.Fprintf(w, "\033[2K %s#%s %s%s%s\n", colors.Marker, colors.Reset, colors.Title, pickerHeading, colors.Reset)
+	fmt.Fprint(w, "\033[2K\n")
 	for i, l := range links {
-		// Clear line before writing to remove stale content.
 		fmt.Fprintf(w, "\033[2K%s\n", FormatLine(i+1, l, i == selected, cols, labelWidth, colors))
+	}
+	// Clear remaining lines below the list.
+	for i := pad + blockHeight; i < rows; i++ {
+		fmt.Fprint(w, "\033[2K\n")
 	}
 }
 
