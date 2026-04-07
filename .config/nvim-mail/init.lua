@@ -2,11 +2,7 @@
 --
 -- This profile is isolated via NVIM_APPNAME=nvim-mail, which gives it its own
 -- config, data, and plugin directories separate from any general-purpose Neovim
--- setup. It is launched by the `nvim-mail` wrapper script (~/.local/bin/nvim-mail):
---
---   #!/usr/bin/env bash
---   NVIM_APPNAME=nvim-mail exec nvim "$@"
---
+-- setup. Launched by the nvim-mail wrapper script (~/.local/bin/nvim-mail).
 -- aerc calls nvim-mail as its compose editor (set in aerc.conf: editor=nvim-mail).
 -- The buffer opens with the RFC 2822 message (headers + body) pre-populated by aerc.
 
@@ -14,8 +10,6 @@
 vim.g.mapleader = " "
 
 -- Bootstrap lazy.nvim
--- lazy.nvim is the plugin manager. This block auto-installs it on first launch
--- if it is not already present in the Neovim data directory.
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.loop.fs_stat(lazypath) then
   vim.fn.system({
@@ -27,10 +21,8 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 -- Plugins
--- Only nord.nvim is needed here. Treesitter for markdown syntax highlighting
--- is built into Neovim 0.10+ as a bundled parser, so no treesitter plugin is
--- required. The colorscheme must load first (priority = 1000) so our custom
--- highlight groups defined later in this file override it correctly.
+-- Only nord.nvim is needed. Treesitter for markdown is built into Neovim 0.10+
+-- as a bundled parser, so no treesitter plugin is required.
 require("lazy").setup({
   {
     "shaunsingh/nord.nvim",
@@ -45,15 +37,8 @@ require("lazy").setup({
 -- These are tuned for prose email composition, not code editing.
 
 -- Hard wrap at 72 columns — the standard for email body text.
--- formatoptions "tcrqwn":
---   t = auto-wrap text using textwidth
---   c = auto-wrap comments
---   r = insert comment leader on Enter
---   q = allow gq to format comments
---   w = trailing whitespace = paragraph continues; blank line = new paragraph
---   n = recognize numbered lists
--- This pairs with aerc's format-flowed=true setting: aerc adds RFC 3676
--- reflow markers on send so recipients' clients can reflow the text.
+-- Auto-wrap and reflow; no 'a' flag (avoids reformatting on every keystroke).
+-- Pairs with aerc's format-flowed=true for RFC 3676 reflow on send.
 vim.opt.wrap = true
 vim.opt.linebreak = true
 vim.opt.textwidth = 72
@@ -398,11 +383,7 @@ vim.api.nvim_create_autocmd("BufWritePre", {
 -- the next edit. You can customize the highlight color by redefining this
 -- group in your own config.
 --
--- To remove tidytext entirely: delete the run_tidy function and the
--- vim.keymap.set line for "<leader>t" below.
---
 -- Config: ~/.config/tidytext/config.toml (run `tidytext config init` to create)
--- Source: cmd/tidytext/ in the beautiful-aerc repo
 
 -- Highlight group for tidytext changes: teal undercurl (sp = underline color)
 vim.api.nvim_set_hl(0, "EmailTidyChange", { undercurl = true, sp = "#8fbcbb" })
@@ -589,9 +570,7 @@ vim.keymap.set("n", "<leader>sig", function()
       f:close()
       sig_lines = { "-- " }
       for line in content:gmatch("([^\n]*)\n?") do
-        if line ~= "" or sig_lines then
-          sig_lines[#sig_lines + 1] = line
-        end
+        sig_lines[#sig_lines + 1] = line
       end
       -- Trim trailing empty lines
       while #sig_lines > 0 and sig_lines[#sig_lines] == "" do

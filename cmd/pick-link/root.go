@@ -52,6 +52,8 @@ func newRootCmd() *cobra.Command {
 }
 
 // loadPalette finds and loads the palette file relative to the binary location.
+// Duplicated from cmd/mailrender — pick-link is a standalone binary with no
+// shared cmd/ package.
 func loadPalette() (*palette.Palette, error) {
 	binPath, _ := os.Executable()
 	genDir := ""
