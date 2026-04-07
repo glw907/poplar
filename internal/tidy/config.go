@@ -1,6 +1,7 @@
 package tidy
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"strconv"
@@ -70,7 +71,7 @@ func LoadConfig(path string) (Config, error) {
 	cfg := DefaultConfig()
 
 	data, err := os.ReadFile(path)
-	if os.IsNotExist(err) {
+	if errors.Is(err, os.ErrNotExist) {
 		return cfg, nil
 	}
 	if err != nil {
