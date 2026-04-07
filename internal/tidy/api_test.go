@@ -31,7 +31,9 @@ func TestCallAPI(t *testing.T) {
 				},
 			}
 			w.Header().Set("content-type", "application/json")
-			json.NewEncoder(w).Encode(resp) //nolint:errcheck
+			if err := json.NewEncoder(w).Encode(resp); err != nil {
+					t.Errorf("encode response: %v", err)
+				}
 		}))
 		defer srv.Close()
 
@@ -75,9 +77,11 @@ func TestCallAPI(t *testing.T) {
 		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("content-type", "application/json")
 			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(map[string]any{ //nolint:errcheck
-				"error": map[string]string{"message": "internal server error"},
-			})
+			if err := json.NewEncoder(w).Encode(map[string]any{
+					"error": map[string]string{"message": "internal server error"},
+				}); err != nil {
+					t.Errorf("encode response: %v", err)
+				}
 		}))
 		defer srv.Close()
 

@@ -31,7 +31,7 @@ func newFixCmd() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVar(&f.configPath, "config", "~/.config/tidytext/config.toml", "path to config file")
+	cmd.Flags().StringVar(&f.configPath, "config", defaultConfigPath, "path to config file")
 	cmd.Flags().BoolVar(&f.inPlace, "in-place", false, "overwrite the input file with fixed text")
 	cmd.Flags().BoolVar(&f.noConfig, "no-config", false, "skip loading config file, use defaults")
 	cmd.Flags().StringSliceVar(&f.rules, "rule", nil, "rule override in key=value form (may be repeated)")
@@ -64,7 +64,6 @@ func runFix(f fixFlags, args []string) error {
 		return fmt.Errorf("no input provided (pipe text or pass a file argument)")
 	}
 
-	// Load config.
 	cfg := tidy.DefaultConfig()
 	if !f.noConfig {
 		path := expandHome(f.configPath)
@@ -78,7 +77,6 @@ func runFix(f fixFlags, args []string) error {
 		cfg = loaded
 	}
 
-	// Apply overrides.
 	if err := tidy.ApplyRuleOverrides(&cfg, f.rules); err != nil {
 		return err
 	}
@@ -86,20 +84,16 @@ func runFix(f fixFlags, args []string) error {
 		return err
 	}
 
-	// Resolve API credentials.
 	apiKey := tidy.ResolveAPIKey(cfg)
 	apiURL := os.Getenv("TIDYTEXT_API_URL")
 
-	// Run tidy.
 	result, err := tidy.Tidy(string(input), cfg, apiKey, apiURL)
 	if err != nil {
 		return err
 	}
 
-	// Print status message to stderr.
 	fmt.Fprintln(os.Stderr, result.Message)
 
-	// Write output.
 	if f.inPlace && filePath != "" {
 		if err := writeInPlace(filePath, result.Text); err != nil {
 			return err

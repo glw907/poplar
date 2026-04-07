@@ -102,7 +102,7 @@ func SplitQuoted(input string) (author string, quoted []QuotedBlock) {
 // It walks the original input line by line: quoted lines are preserved
 // verbatim, non-quoted lines are replaced with lines from corrected in order.
 // Any extra corrected lines (if the model split a line) are appended at the end.
-func Reassemble(corrected, _, originalInput string) string {
+func Reassemble(corrected, originalInput string) string {
 	if originalInput == "" {
 		return corrected
 	}

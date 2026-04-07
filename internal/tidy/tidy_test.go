@@ -169,19 +169,3 @@ func TestTidy_APIError(t *testing.T) {
 	}
 }
 
-func TestTidy_DefaultAPIURL(t *testing.T) {
-	// When apiURL is empty, it should use defaultAPIURL.
-	// We just verify the function doesn't panic and returns StatusError
-	// (since the real API won't work in tests).
-	input := "test text.\n"
-	cfg := DefaultConfig()
-	// Pass empty apiURL — this will try to hit the real API with a fake key,
-	// which should return an API error (StatusError), not panic.
-	result, err := Tidy(input, cfg, "fake-key-for-test", "")
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	// We can't predict exactly what comes back from the real API,
-	// but it should not be a zero-value Result.
-	_ = result
-}

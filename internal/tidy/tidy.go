@@ -61,7 +61,7 @@ func Tidy(input string, cfg Config, apiKey, apiURL string) (Result, error) {
 		corrected += "\n"
 	}
 
-	reassembled := Reassemble(corrected, author, input)
+	reassembled := Reassemble(corrected, input)
 
 	if reassembled == input {
 		return Result{

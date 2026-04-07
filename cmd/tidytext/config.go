@@ -72,21 +72,28 @@ func newConfigInitCmd() *cobra.Command {
 func runConfigInit() error {
 	path := expandHome(defaultConfigPath)
 
-	// Error if file already exists.
-	if _, err := os.Stat(path); err == nil {
-		return fmt.Errorf("config file already exists: %s", path)
-	} else if !errors.Is(err, os.ErrNotExist) {
-		return fmt.Errorf("check config path: %w", err)
-	}
-
-	// Create directory if needed.
 	dir := filepath.Dir(path)
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		return fmt.Errorf("create config dir: %w", err)
 	}
 
-	if err := os.WriteFile(path, []byte(defaultConfigTOML), 0o644); err != nil {
-		return fmt.Errorf("write config: %w", err)
+	// O_CREATE|O_EXCL atomically fails if the file already exists.
+	f, err := os.OpenFile(path, os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0o644)
+	if err != nil {
+		if errors.Is(err, os.ErrExist) {
+			return fmt.Errorf("config file already exists: %s", path)
+		}
+		return fmt.Errorf("create config: %w", err)
+	}
+	_, writeErr := f.WriteString(defaultConfigTOML)
+	closeErr := f.Close()
+	if writeErr != nil {
+		os.Remove(path)
+		return fmt.Errorf("write config: %w", writeErr)
+	}
+	if closeErr != nil {
+		os.Remove(path)
+		return fmt.Errorf("write config: %w", closeErr)
 	}
 
 	fmt.Printf("created %s\n", path)

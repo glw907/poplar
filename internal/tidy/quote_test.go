@@ -152,42 +152,36 @@ func TestReassemble(t *testing.T) {
 	tests := []struct {
 		name          string
 		corrected     string
-		originalAuthor string
 		originalInput string
 		want          string
 	}{
 		{
 			name:          "no quotes - all author text replaced",
 			corrected:     "Hello world.\nThis is text.\n",
-			originalAuthor: "Hello world\nThis is text\n",
 			originalInput: "Hello world\nThis is text\n",
 			want:          "Hello world.\nThis is text.\n",
 		},
 		{
 			name:          "all quoted - corrected is empty",
 			corrected:     "",
-			originalAuthor: "",
 			originalInput: "> quoted line\n> another\n",
 			want:          "> quoted line\n> another\n",
 		},
 		{
 			name:          "mixed - corrected author with preserved quotes",
 			corrected:     "My reply.\n",
-			originalAuthor: "My reply\n\n",
 			originalInput: "My reply\n\n> Original text\n> More original\n",
 			want:          "My reply.\n\n> Original text\n> More original\n",
 		},
 		{
 			name:          "corrected has more lines than original author",
 			corrected:     "Line one.\nLine two.\nExtra line.\n",
-			originalAuthor: "Line one\n\n",
 			originalInput: "Line one\n\n> quoted\n",
 			want:          "Line one.\nLine two.\n> quoted\nExtra line.\n",
 		},
 		{
 			name:          "blank lines preserved in position",
 			corrected:     "Author text.\n",
-			originalAuthor: "Author text\n\n",
 			originalInput: "Author text\n\n> quoted line\n",
 			want:          "Author text.\n\n> quoted line\n",
 		},
@@ -195,7 +189,7 @@ func TestReassemble(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			got := Reassemble(tc.corrected, tc.originalAuthor, tc.originalInput)
+			got := Reassemble(tc.corrected, tc.originalInput)
 			if got != tc.want {
 				t.Errorf("Reassemble() =\n%q\nwant:\n%q", got, tc.want)
 			}
