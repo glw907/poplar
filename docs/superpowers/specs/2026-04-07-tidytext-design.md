@@ -9,22 +9,32 @@ the beautiful-aerc repo as a third binary.
 
 ```
 tidytext                              # show help
-echo "text" | tidytext                # piped stdin, write stdout
-tidytext message.txt                  # read file, write stdout
-tidytext --in-place message.txt       # modify file directly
-tidytext --no-config                  # all defaults, skip config file
-tidytext --config /path/to/alt.toml   # alternate config file
-tidytext --rule spelling=false        # override a single rule
-tidytext --style em_dash_spaces=true  # override a single style
+tidytext fix                          # show fix help
+echo "text" | tidytext fix            # piped stdin, write stdout
+tidytext fix message.txt              # read file, write stdout
+tidytext fix --in-place message.txt   # modify file in place
+tidytext fix --no-config              # all defaults, skip config
+tidytext fix --config /path/to.toml   # alternate config file
+tidytext fix --rule spelling=false    # override a single rule
+tidytext fix --style em_dash_spaces=true
+tidytext config                       # show current config
+tidytext config init                  # create default config file
 ```
 
-Running `tidytext` with no arguments and no piped stdin shows help.
-When stdin is a pipe or file argument is provided, it processes
-input. `--in-place` writes back to the file via temp file + rename.
-Without `--in-place`, file mode writes to stdout.
+### Subcommands
 
-Flags override config file values. `--no-config` ignores the config
-file entirely and uses built-in defaults.
+**`fix`** — the primary action. Reads text from stdin or a file,
+fixes errors, writes corrected text to stdout. Running `fix` with
+no arguments and no piped stdin shows its help. `--in-place` writes
+back to the file via temp file + rename. Without `--in-place`, file
+mode writes to stdout. Flags override config file values.
+`--no-config` ignores the config file entirely and uses built-in
+defaults.
+
+**`config`** — manage configuration. `config` with no subcommand
+shows the current effective config (merged defaults + file +
+overrides). `config init` creates a default config file at
+`~/.config/tidytext/config.toml`.
 
 ### Command Help
 
@@ -34,15 +44,30 @@ should produce output along these lines:
 ```
 Tidy prose with AI-powered spelling, grammar, and punctuation fixes.
 
+Usage:
+  tidytext [command]
+
+Available Commands:
+  fix         Fix spelling, grammar, and punctuation
+  config      Show or initialize configuration
+
+Flags:
+  -h, --help      help for tidytext
+  -v, --version   version for tidytext
+```
+
+The `fix` subcommand help:
+
+```
+Fix spelling, grammar, and punctuation in text.
+
 Reads text from stdin or a file, fixes errors using Claude, and
 writes the corrected text to stdout. Quoted lines (> prefixed) and
 code blocks are preserved unchanged. Returns original text on any
 error.
 
-Config: ~/.config/tidytext/config.toml
-
 Usage:
-  tidytext [file] [flags]
+  tidytext fix [file] [flags]
 
 Flags:
       --config string   config file (default ~/.config/tidytext/config.toml)
@@ -50,8 +75,7 @@ Flags:
       --no-config       skip config file, use defaults
       --rule strings    override a rule (e.g. spelling=false)
       --style strings   override a style (e.g. em_dash_spaces=true)
-  -h, --help            help for tidytext
-  -v, --version         version for tidytext
+  -h, --help            help for tidytext fix
 ```
 
 ## Core Flow
@@ -189,7 +213,7 @@ text.
 1. Identify body range: everything after the header separator
    extmark, excluding signature (lines after `-- `)
 2. Save the current buffer lines in that range
-3. Pipe those lines through `tidytext` via `vim.fn.systemlist()`
+3. Pipe those lines through `tidytext fix` via `vim.fn.systemlist()`
 4. Replace the buffer range with the output
 5. Capture stderr, display summary via `vim.notify` at info level
 6. Word-level diff between saved and new lines
@@ -223,7 +247,9 @@ event (next edit clears them).
 ```
 cmd/tidytext/
   main.go              # build root cmd, run, print error, exit
-  root.go              # cobra root: read input, run tidy, write output
+  root.go              # cobra root command (shows help)
+  fix.go               # fix subcommand: read input, run tidy, write output
+  config.go            # config subcommand: show config, init
 
 internal/tidy/
   config.go            # TOML config parsing, defaults
