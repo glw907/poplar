@@ -24,16 +24,6 @@ require("lazy").setup({
       vim.cmd.colorscheme("nord")
     end,
   },
-  {
-    "nvim-treesitter/nvim-treesitter",
-    build = ":TSUpdate",
-    config = function()
-      require("nvim-treesitter.configs").setup({
-        ensure_installed = { "markdown", "markdown_inline" },
-        highlight = { enable = true },
-      })
-    end,
-  },
 }, { ui = { border = "none" } })
 
 -- Editor settings
@@ -70,18 +60,20 @@ end
 
 local function wrap_text(text, prefix, width)
   local result = {}
-  local avail = width - #prefix
-  while #text > avail do
-    local break_at = nil
-    for i = avail, 1, -1 do
-      if text:sub(i, i) == " " then
-        break_at = i
-        break
-      end
+  local avail = width - vim.fn.strdisplaywidth(prefix)
+  while vim.fn.strdisplaywidth(text) > avail do
+    local chars = vim.fn.split(text, [[\zs]])
+    local break_idx = nil
+    local w = 0
+    for ci, ch in ipairs(chars) do
+      w = w + vim.fn.strdisplaywidth(ch)
+      if w > avail then break end
+      if ch == " " then break_idx = ci end
     end
-    if not break_at then break_at = avail end
-    result[#result + 1] = prefix .. text:sub(1, break_at):gsub("%s+$", "")
-    text = text:sub(break_at + 1):gsub("^%s+", "")
+    if not break_idx then break end
+    local first = table.concat(chars, "", 1, break_idx)
+    result[#result + 1] = prefix .. first:gsub("%s+$", "")
+    text = table.concat(chars, "", break_idx + 1):gsub("^%s+", "")
   end
   if #text > 0 then
     result[#result + 1] = prefix .. text
@@ -103,6 +95,19 @@ local function reflow_quoted(lines, width)
       if text:match("^%s*$") then
         result[#result + 1] = canon:gsub("%s+$", "")
         i = i + 1
+      -- Decorative line (no letters/digits) = truncate to width, emit standalone
+      elseif not text:match("[%w]") then
+        local chars = vim.fn.split(text, [[\zs]])
+        local avail = width - vim.fn.strdisplaywidth(canon)
+        local truncated = {}
+        local w = 0
+        for _, ch in ipairs(chars) do
+          w = w + vim.fn.strdisplaywidth(ch)
+          if w > avail then break end
+          truncated[#truncated + 1] = ch
+        end
+        result[#result + 1] = canon .. table.concat(truncated)
+        i = i + 1
       else
         -- Join consecutive lines at the same quote level
         local j = i + 1
@@ -113,6 +118,8 @@ local function reflow_quoted(lines, width)
           local next_text = lines[j]:sub(#next_prefix + 1)
           -- Blank quoted line = paragraph break
           if next_text:match("^%s*$") then break end
+          -- Decorative line = paragraph break
+          if not next_text:match("[%w]") then break end
           text = text:gsub("%s+$", "") .. " " .. next_text:gsub("^%s+", "")
           j = j + 1
         end
@@ -266,6 +273,109 @@ vim.api.nvim_create_autocmd("BufWritePre", {
   end,
 })
 
+-- Highlight group for tidytext changes (teal undercurl)
+vim.api.nvim_set_hl(0, "EmailTidyChange", { undercurl = true, sp = "#8fbcbb" })
+
+-- tidytext: run prose tidier on author's body text
+local function run_tidy()
+  local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
+
+  -- Find body start: first blank line after headers
+  local body_start = 1
+  local in_headers = false
+  for i, line in ipairs(lines) do
+    if line:match("^[A-Za-z-]+:") then
+      in_headers = true
+    elseif in_headers and line == "" then
+      body_start = i + 1
+      break
+    end
+  end
+
+  -- Find body end: exclude signature (line starting with "-- ")
+  local body_end = #lines
+  for i = body_start, #lines do
+    if lines[i] == "-- " then
+      body_end = i - 1
+      break
+    end
+  end
+
+  if body_start > body_end then
+    vim.notify("tidytext: no body text found", vim.log.levels.INFO)
+    return
+  end
+
+  -- Save original lines for diff
+  local original = {}
+  for i = body_start, body_end do
+    original[#original + 1] = lines[i]
+  end
+
+  -- Pipe body through tidytext fix
+  local input = table.concat(original, "\n") .. "\n"
+  local output_lines = vim.fn.systemlist("tidytext fix", input)
+
+  -- If the command failed, notify and return
+  if vim.v.shell_error ~= 0 then
+    vim.notify("tidytext: command failed", vim.log.levels.WARN)
+    return
+  end
+
+  -- Replace body lines with output
+  vim.api.nvim_buf_set_lines(0, body_start - 1, body_end, false, output_lines)
+
+  -- Word-level diff: highlight changes
+  local ns = vim.api.nvim_create_namespace("tidytext_changes")
+  vim.api.nvim_buf_clear_namespace(0, ns, 0, -1)
+
+  for i, new_line in ipairs(output_lines) do
+    local old_line = original[i] or ""
+    if new_line ~= old_line then
+      local old_words = vim.split(old_line, "%s+")
+      local new_words = vim.split(new_line, "%s+")
+      local col = 0
+      for j, nw in ipairs(new_words) do
+        local ow = old_words[j] or ""
+        local word_start = new_line:find(nw, col + 1, true)
+        if word_start and nw ~= ow then
+          vim.api.nvim_buf_set_extmark(0, ns, body_start - 1 + i - 1, word_start - 1, {
+            end_col = word_start - 1 + #nw,
+            hl_group = "EmailTidyChange",
+          })
+        end
+        if word_start then
+          col = word_start + #nw - 1
+        end
+      end
+    end
+  end
+
+  -- Clear highlights on next edit
+  vim.api.nvim_create_autocmd({ "TextChanged", "TextChangedI" }, {
+    buffer = 0,
+    once = true,
+    callback = function()
+      vim.api.nvim_buf_clear_namespace(0, ns, 0, -1)
+    end,
+  })
+
+  -- Notify user
+  local changed = 0
+  for i, new_line in ipairs(output_lines) do
+    if new_line ~= (original[i] or "") then
+      changed = changed + 1
+    end
+  end
+  if changed > 0 then
+    vim.notify("tidytext: " .. changed .. " line(s) changed", vim.log.levels.INFO)
+  else
+    vim.notify("tidytext: no changes needed", vim.log.levels.INFO)
+  end
+end
+
+vim.keymap.set("n", "<leader>t", run_tidy, { desc = "Tidy prose (tidytext)" })
+
 -- Keybindings
 vim.keymap.set("n", "<leader>s", function()
   vim.opt.spell = not vim.opt.spell:get()
@@ -318,9 +428,65 @@ vim.keymap.set("n", "<leader>x", "<cmd>cq<cr>", { desc = "Abort compose" })
 vim.keymap.set("n", "<leader>sig", function()
   local sig = {
     "-- ",
-    "**Your Name**",
-    "your-email@example.com",
+    "**Geoffrey L. Wright**  ",
+    "h 907-277-9397 | m 907-317-8472 (sporadic)",
   }
   local row = vim.api.nvim_win_get_cursor(0)[1]
   vim.api.nvim_buf_set_lines(0, row, row, false, sig)
 end, { desc = "Insert email signature" })
+
+-- Insert-mode undo breakpoints: pressing punctuation ends the current undo chunk.
+-- Without these, `u` undoes the entire insert session (a paragraph or more).
+for _, ch in ipairs({ ".", ",", "!", "?", ":" }) do
+  vim.keymap.set("i", ch, ch .. "<C-g>u", { desc = "Undo breakpoint at " .. ch })
+end
+
+-- Spellcheck navigation (leader aliases for built-ins)
+vim.keymap.set("n", "<leader>]", "]s", { desc = "Next misspelled word" })
+vim.keymap.set("n", "<leader>[", "[s", { desc = "Prev misspelled word" })
+vim.keymap.set("n", "<leader>z", "z=", { desc = "Spelling suggestions" })
+
+-- Paragraph reflow to textwidth=72
+vim.keymap.set("n", "<leader>r", "gqip", { desc = "Reflow paragraph" })
+
+-- khard contact picker: <leader>k inserts a contact address at the cursor.
+-- Works in normal and insert mode. In insert mode, returns to insert after selection.
+local function khard_insert(reenter_insert)
+  local raw = vim.fn.systemlist("khard email --parsable 2>/dev/null")
+  local entries = {}
+  for _, line in ipairs(raw) do
+    local email, name = line:match("^([^\t]+)\t([^\t]*)")
+    if email then
+      name = name and name:match("^%s*(.-)%s*$") or ""
+      local label = name ~= "" and (name .. " <" .. email .. ">") or email
+      entries[#entries + 1] = { label = label, text = label }
+    end
+  end
+  if #entries == 0 then
+    vim.notify("No khard contacts found", vim.log.levels.WARN)
+    if reenter_insert then vim.cmd("startinsert") end
+    return
+  end
+  vim.ui.select(entries, {
+    prompt = "Insert contact: ",
+    format_item = function(e) return e.label end,
+  }, function(choice)
+    if not choice then
+      if reenter_insert then vim.cmd("startinsert") end
+      return
+    end
+    local pos = vim.api.nvim_win_get_cursor(0)
+    local buf_line = vim.api.nvim_buf_get_lines(0, pos[1] - 1, pos[1], false)[1]
+    local new_line = buf_line:sub(1, pos[2]) .. choice.text .. buf_line:sub(pos[2] + 1)
+    vim.api.nvim_buf_set_lines(0, pos[1] - 1, pos[1], false, { new_line })
+    vim.api.nvim_win_set_cursor(0, { pos[1], pos[2] + #choice.text })
+    if reenter_insert then vim.cmd("startinsert") end
+  end)
+end
+
+vim.keymap.set("n", "<leader>k", function() khard_insert(false) end,
+  { desc = "Insert khard contact" })
+vim.keymap.set("i", "<C-k>", function()
+  vim.cmd("stopinsert")
+  vim.schedule(function() khard_insert(true) end)
+end, { desc = "Insert khard contact (insert mode)" })
