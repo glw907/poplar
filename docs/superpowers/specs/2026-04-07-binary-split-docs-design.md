@@ -52,7 +52,16 @@ Dev utility for saving email parts to the corpus directory.
   `save.go`.
 - Delete `cmd/beautiful-aerc/save.go`.
 
-## Config Updates
+## Config Strategy
+
+The repo ships working configs that anyone can stow as-is. Optional
+components (fastmail-cli, tidytext, aerc-save-email) are commented
+out with explanatory comments. `accounts.conf.example` stays as a
+template for credentials.
+
+Personal configs (with everything enabled) live in the `~/.dotfiles/`
+workstation repo, managed separately. CLAUDE.md documents their
+location so this project can update them as needed.
 
 ### aerc.conf
 
@@ -75,9 +84,36 @@ Update commands:
 
 ```ini
 # [view] section
-b = :pipe -m aerc-save-email<Enter>
+# b = :pipe -m aerc-save-email<Enter>      # uncomment if aerc-save-email is installed
 <Tab> = :pipe pick-link<Enter>
 ```
+
+Comment out fastmail-cli bindings in both `[messages]` and `[view]`
+sections with a note that they require `fastmail-cli` and
+`FASTMAIL_API_TOKEN`.
+
+### Signature extraction
+
+The nvim-mail signature is currently hardcoded in `init.lua` with
+personal contact details. Extract it:
+
+- Create `.config/aerc/signature.md` — read by `init.lua` at runtime.
+- Ship `.config/aerc/signature.md.example` with placeholder text
+  (`**Your Name**`, contact info).
+- `.gitignore` the real `signature.md` so personal data is never
+  committed.
+- Update the `<leader>sig` keymap in `init.lua` to read from the
+  file instead of inline text.
+
+### mailrules.json
+
+Remove from repo entirely. All rules are personal. The file lives
+in the user's personal dotfiles. `AERC_RULES_FILE` env var points
+fastmail-cli to it.
+
+### accounts.conf
+
+Already ships as `.example`. No change.
 
 ## Makefile
 
@@ -140,6 +176,10 @@ Update project structure section:
 - Remove `internal/corpus/` line.
 - Update filter protocol section to reference `mailrender`.
 - Update component descriptions.
+- Document personal config location: `~/.dotfiles/` workstation repo
+  (`beautiful-aerc` stow package) contains the author's personal
+  configs with all optional bindings enabled. This project may need
+  to update those files when configs change.
 
 ### contributing.md
 
