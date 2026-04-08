@@ -158,6 +158,20 @@ func TestLoadTokenResolution(t *testing.T) {
 	}
 }
 
+func TestRaw(t *testing.T) {
+	path := writeTheme(t, validTheme)
+	th, err := Load(path)
+	if err != nil {
+		t.Fatalf("Load: %v", err)
+	}
+	// hdr_key = accent_primary (#81a1c1) + bold
+	got := th.Raw("hdr_key")
+	want := "38;2;129;161;193;1"
+	if got != want {
+		t.Errorf("Raw(hdr_key) = %q, want %q", got, want)
+	}
+}
+
 func TestLoadMissingToken(t *testing.T) {
 	path := writeTheme(t, validTheme)
 	th, err := Load(path)

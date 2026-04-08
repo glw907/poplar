@@ -11,7 +11,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/glw907/beautiful-aerc/internal/palette"
+	"github.com/glw907/beautiful-aerc/internal/theme"
 )
 
 // markdownColors holds ANSI parameter strings for markdown syntax highlighting.
@@ -461,29 +461,28 @@ func HTMLLinks(r io.Reader, cols int) ([]FootnoteLink, error) {
 }
 
 // HTML reads raw HTML email from r, converts it to markdown with
-// footnotes, and highlights markdown syntax using palette p.
+// footnotes, and highlights markdown syntax using theme t.
 // cols sets pandoc's column width.
-func HTML(r io.Reader, w io.Writer, p *palette.Palette, cols int) error {
+func HTML(r io.Reader, w io.Writer, t *theme.Theme, cols int) error {
 	body, refs, err := htmlToFootnotes(r, cols)
 	if err != nil {
 		return err
 	}
 
-	dimColor, _ := palette.HexToANSI(p.Get("FG_DIM"))
 	fc := &footnoteColors{
-		LinkText: p.Get("C_LINK_TEXT"),
-		Dim:      dimColor,
-		LinkURL:  p.Get("C_LINK_URL"),
+		LinkText: t.Raw("link_text"),
+		Dim:      t.Raw("msg_dim"),
+		LinkURL:  t.Raw("link_url"),
 		Reset:    "0",
 	}
 	styled := styleFootnotes(body, refs, cols, fc)
 
 	// Markdown syntax highlighting
 	mc := &markdownColors{
-		Heading: p.Get("C_HEADING"),
-		Bold:    p.Get("C_BOLD"),
-		Italic:  p.Get("C_ITALIC"),
-		Rule:    p.Get("C_RULE"),
+		Heading: t.Raw("heading"),
+		Bold:    t.Raw("bold"),
+		Italic:  t.Raw("italic"),
+		Rule:    t.Raw("rule"),
 		Reset:   "0",
 	}
 	styled = highlightMarkdown(styled, mc)

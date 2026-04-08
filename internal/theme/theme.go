@@ -104,6 +104,11 @@ func (t *Theme) Reset() string {
 	return "\033[0m"
 }
 
+// Raw returns the resolved SGR parameter string for a token without escape wrapping.
+func (t *Theme) Raw(name string) string {
+	return t.tokens[name]
+}
+
 // resolveToken converts a token definition to an ANSI SGR parameter string.
 func resolveToken(def tokenDefinition, colors map[string]string) (string, error) {
 	var parts []string
