@@ -382,3 +382,29 @@ func TestFindPathStylesetNameVariants(t *testing.T) {
 		})
 	}
 }
+
+func TestLoadRealThemes(t *testing.T) {
+	themes := []string{
+		"../../.config/aerc/themes/nord.toml",
+		"../../.config/aerc/themes/solarized-dark.toml",
+		"../../.config/aerc/themes/gruvbox-dark.toml",
+	}
+	for _, path := range themes {
+		name := filepath.Base(path)
+		t.Run(name, func(t *testing.T) {
+			th, err := Load(path)
+			if err != nil {
+				t.Fatalf("Load(%s): %v", path, err)
+			}
+			if th.Name == "" {
+				t.Error("theme name is empty")
+			}
+			// Verify all expected tokens resolve
+			for _, tok := range []string{"heading", "bold", "hdr_key", "picker_num", "msg_dim"} {
+				if th.ANSI(tok) == "" {
+					t.Errorf("token %q resolved to empty", tok)
+				}
+			}
+		})
+	}
+}
