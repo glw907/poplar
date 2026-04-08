@@ -606,11 +606,15 @@ vim.keymap.set("n", "<leader>z", "z=", { desc = "Spelling suggestions" })
 -- <leader>r — reflow the current paragraph to textwidth=72 (gqip built-in)
 vim.keymap.set("n", "<leader>r", "gqip", { desc = "Reflow paragraph" })
 
--- khard contact picker
+-- khard contact picker (Telescope)
 --
 -- khard is a CLI address book that syncs contacts from CardDAV (e.g.,
 -- Fastmail). The picker calls `khard email --parsable` to get a tab-separated
--- list of addresses and presents them via vim.ui.select.
+-- list of addresses and presents them via Telescope for fuzzy filtering.
+--
+-- On header lines (To:, Cc:, Bcc:), if the line already has an address,
+-- ", " is prepended to the inserted contact for proper RFC 2822 formatting.
+-- In the body, the contact is inserted bare at the cursor position.
 --
 -- This is optional — if khard is not installed or has no contacts, a warning
 -- is shown and nothing is inserted. To set up khard:
@@ -621,7 +625,7 @@ vim.keymap.set("n", "<leader>r", "gqip", { desc = "Reflow paragraph" })
 -- Keybindings:
 --   <leader>k — insert contact address at cursor (normal mode)
 --   <C-k>     — insert contact address at cursor (insert mode; returns to insert)
-local function khard_insert(reenter_insert)
+local function khard_pick(reenter_insert)
   local raw = vim.fn.systemlist("khard email --parsable 2>/dev/null")
   local entries = {}
   for _, line in ipairs(raw) do
@@ -629,7 +633,7 @@ local function khard_insert(reenter_insert)
     if email then
       name = name and name:match("^%s*(.-)%s*$") or ""
       local label = name ~= "" and (name .. " <" .. email .. ">") or email
-      entries[#entries + 1] = { label = label, text = label }
+      entries[#entries + 1] = label
     end
   end
   if #entries == 0 then
@@ -637,26 +641,51 @@ local function khard_insert(reenter_insert)
     if reenter_insert then vim.cmd("startinsert") end
     return
   end
-  vim.ui.select(entries, {
-    prompt = "Insert contact: ",
-    format_item = function(e) return e.label end,
-  }, function(choice)
-    if not choice then
-      if reenter_insert then vim.cmd("startinsert") end
-      return
-    end
-    local pos = vim.api.nvim_win_get_cursor(0)
-    local buf_line = vim.api.nvim_buf_get_lines(0, pos[1] - 1, pos[1], false)[1]
-    local new_line = buf_line:sub(1, pos[2]) .. choice.text .. buf_line:sub(pos[2] + 1)
-    vim.api.nvim_buf_set_lines(0, pos[1] - 1, pos[1], false, { new_line })
-    vim.api.nvim_win_set_cursor(0, { pos[1], pos[2] + #choice.text })
-    if reenter_insert then vim.cmd("startinsert") end
-  end)
+
+  local pickers = require("telescope.pickers")
+  local finders = require("telescope.finders")
+  local conf = require("telescope.config").values
+  local actions = require("telescope.actions")
+  local action_state = require("telescope.actions.state")
+
+  pickers.new({}, {
+    prompt_title = "Insert contact",
+    finder = finders.new_table({ results = entries }),
+    sorter = conf.generic_sorter({}),
+    attach_mappings = function(prompt_bufnr)
+      actions.select_default:replace(function()
+        local selection = action_state.get_selected_entry()
+        actions.close(prompt_bufnr)
+        if not selection then
+          if reenter_insert then vim.cmd("startinsert") end
+          return
+        end
+
+        local contact = selection[1]
+        local pos = vim.api.nvim_win_get_cursor(0)
+        local buf_line = vim.api.nvim_buf_get_lines(0, pos[1] - 1, pos[1], false)[1]
+
+        -- Auto-prepend ", " on address header lines that already have a recipient
+        local on_address_header = buf_line:match("^To:%s*.+")
+          or buf_line:match("^Cc:%s*.+")
+          or buf_line:match("^Bcc:%s*.+")
+        if on_address_header then
+          contact = ", " .. contact
+        end
+
+        local new_line = buf_line:sub(1, pos[2]) .. contact .. buf_line:sub(pos[2] + 1)
+        vim.api.nvim_buf_set_lines(0, pos[1] - 1, pos[1], false, { new_line })
+        vim.api.nvim_win_set_cursor(0, { pos[1], pos[2] + #contact })
+        if reenter_insert then vim.cmd("startinsert") end
+      end)
+      return true
+    end,
+  }):find()
 end
 
-vim.keymap.set("n", "<leader>k", function() khard_insert(false) end,
+vim.keymap.set("n", "<leader>k", function() khard_pick(false) end,
   { desc = "Insert khard contact" })
 vim.keymap.set("i", "<C-k>", function()
   vim.cmd("stopinsert")
-  vim.schedule(function() khard_insert(true) end)
+  vim.schedule(function() khard_pick(true) end)
 end, { desc = "Insert khard contact (insert mode)" })
