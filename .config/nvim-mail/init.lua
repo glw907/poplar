@@ -331,12 +331,27 @@ vim.api.nvim_create_autocmd("VimEnter", {
 
       -- Insert blank lines after the header block so the cursor lands in
       -- empty space between the bottom separator and any quoted text.
-      local body_start = header_end + 1
-      if body_start <= #lines and lines[body_start] ~= "" then
-        vim.api.nvim_buf_set_lines(0, header_end, header_end, false, { "", "", "" })
-        vim.api.nvim_win_set_cursor(0, { header_end + 2, 0 })
+      vim.api.nvim_buf_set_lines(0, header_end, header_end, false, { "", "", "" })
+
+      -- Smart cursor placement: new compose (empty To:) lands on the To:
+      -- line; replies and forwards (To: populated) land in the body.
+      local to_line_nr = nil
+      local to_empty = false
+      for i = 3, header_end - 1 do
+        local l = vim.api.nvim_buf_get_lines(0, i - 1, i, false)[1]
+        if l:match("^To:") then
+          to_line_nr = i
+          to_empty = not l:match("^To:%s*%S")
+          break
+        end
+      end
+
+      if to_empty and to_line_nr then
+        -- New compose or forward: cursor at end of To: line
+        local to_line = vim.api.nvim_buf_get_lines(0, to_line_nr - 1, to_line_nr, false)[1]
+        vim.api.nvim_win_set_cursor(0, { to_line_nr, #to_line })
       else
-        vim.api.nvim_buf_set_lines(0, header_end, header_end, false, { "", "", "" })
+        -- Reply: cursor in body between separator and quoted text
         vim.api.nvim_win_set_cursor(0, { header_end + 2, 0 })
       end
     end
