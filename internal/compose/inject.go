@@ -2,14 +2,13 @@ package compose
 
 import "strings"
 
-// injectCcBcc inserts empty Cc: and Bcc: headers after the To: block
-// if they are not already present. If Cc already exists, Bcc is inserted
-// after the Cc block instead.
+// injectCcBcc inserts empty Cc: and Bcc: headers after the To: or Cc:
+// block if they are not already present. Handles continuation lines
+// (indented lines) that foldAddresses may have created.
 func injectCcBcc(headers []string) []string {
 	hasCc, hasBcc := false, false
 	toEnd := -1
 	ccEnd := -1
-	lastHeaderEnd := -1 // tracks end of the most recently seen header block
 
 	for i, line := range headers {
 		key, _, ok := splitHeader(line)
@@ -18,22 +17,9 @@ func injectCcBcc(headers []string) []string {
 			case "cc":
 				hasCc = true
 				ccEnd = i
-				lastHeaderEnd = i
 			case "bcc":
 				hasBcc = true
 			case "to":
-				toEnd = i
-				lastHeaderEnd = i
-			default:
-				lastHeaderEnd = i
-			}
-		} else if lastHeaderEnd >= 0 && len(line) > 0 && (line[0] == ' ' || line[0] == '\t') {
-			// Continuation line: extend the most recently seen header block
-			lastHeaderEnd = i
-			if ccEnd >= 0 && !hasBcc {
-				ccEnd = i
-			}
-			if toEnd >= 0 && !hasCc {
 				toEnd = i
 			}
 		}
@@ -46,13 +32,12 @@ func injectCcBcc(headers []string) []string {
 		return headers
 	}
 
-	// Determine insertion point: after Cc block if present, else after To block.
+	// Insert after Cc if present, else after To. Skip past any
+	// continuation lines (indented) that follow the insertion point.
 	insertAfter := toEnd
 	if hasCc && ccEnd >= 0 {
 		insertAfter = ccEnd
 	}
-
-	// Scan forward for any remaining continuation lines after insertAfter.
 	for j := insertAfter + 1; j < len(headers); j++ {
 		if len(headers[j]) > 0 && (headers[j][0] == ' ' || headers[j][0] == '\t') {
 			insertAfter = j

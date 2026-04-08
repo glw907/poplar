@@ -15,7 +15,6 @@ func Prepare(input []byte, opts Options) []byte {
 	text := strings.ReplaceAll(string(input), "\r\n", "\n")
 	lines := strings.Split(text, "\n")
 
-	// strings.Split on trailing \n produces empty last element
 	if len(lines) > 0 && lines[len(lines)-1] == "" {
 		lines = lines[:len(lines)-1]
 	}

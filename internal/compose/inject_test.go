@@ -26,7 +26,7 @@ func TestInjectCcBcc(t *testing.T) {
 			want:  []string{"From: alice@dom", "To: bob@dom", "Cc:", "Bcc:", "Subject: Hi"},
 		},
 		{
-			name: "To with continuation lines",
+			name: "To with continuation lines from folding",
 			input: []string{
 				"From: alice@dom",
 				"To: bob@dom,",
