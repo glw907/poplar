@@ -188,8 +188,10 @@ A dedicated Neovim profile for composing email in aerc. It provides:
 - Custom `aercmail` syntax highlighting (header keys, address fields, quoted text)
 - Hard-wrap at 72 characters with RFC 3676 format=flowed support
 - Spell check on body text, skipping headers and quoted lines
+- Telescope-powered contact picker with fuzzy search (`<C-k>` in insert mode, `<leader>k` in normal mode) — requires [khard](https://github.com/lucc/khard) with CardDAV contacts synced via vdirsyncer
 - tidytext integration via `<leader>t`
 - Address header reformatting and quoted text reflow on buffer open
+- Smart cursor positioning: new compose and forward land on the `To:` line; replies land in the body
 - Signature insertion via `<leader>sig` — copy `signature.md.example` to `signature.md` and edit it
 
 Requires Neovim 0.10+. The stow package puts `nvim-mail` at `~/.local/bin/nvim-mail`.
