@@ -35,6 +35,10 @@ require("lazy").setup({
     "nvim-telescope/telescope.nvim",
     dependencies = { "nvim-lua/plenary.nvim" },
   },
+  {
+    "folke/which-key.nvim",
+    event = "VeryLazy",
+  },
 }, { ui = { border = "none" } })
 
 -- Editor settings
