@@ -31,6 +31,10 @@ require("lazy").setup({
       vim.cmd.colorscheme("nord")
     end,
   },
+  {
+    "nvim-telescope/telescope.nvim",
+    dependencies = { "nvim-lua/plenary.nvim" },
+  },
 }, { ui = { border = "none" } })
 
 -- Editor settings
