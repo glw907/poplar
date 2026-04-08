@@ -123,13 +123,13 @@ func TestNormalizeLists(t *testing.T) {
 		{"single item unchanged", "- item one", "- item one"},
 		{"tight list unchanged", "- one\n- two\n- three", "- one\n- two\n- three"},
 		{"loose list compacted", "- one\n\n- two\n\n- three", "- one\n- two\n- three"},
-		{"pandoc wide bullets", "-   one\n\n-   two", "-   one\n-   two"},
-		{"continuation preserved", "-   item long\n    wrap\n\n-   next", "-   item long\n    wrap\n-   next"},
+		{"pandoc wide bullets", "-   one\n\n-   two", "- one\n- two"},
+		{"continuation preserved", "-   item long\n    wrap\n\n-   next", "- item long\n    wrap\n- next"},
 		{"paragraph after list kept", "- one\n\n- two\n\nnext para", "- one\n- two\n\nnext para"},
 		{"paragraph before list kept", "text\n\n- one\n\n- two", "text\n\n- one\n- two"},
 		{"multi-blank between items", "- one\n\n\n- two", "- one\n- two"},
 		{"trailing blanks in list dropped", "- one\n\n- two\n\n", "- one\n- two"},
-		{"deep continuation", "-   item\n      deep indent\n\n-   next", "-   item\n      deep indent\n-   next"},
+		{"deep continuation", "-   item\n      deep indent\n\n-   next", "- item\n      deep indent\n- next"},
 		{"no list unchanged", "hello\n\nworld", "hello\n\nworld"},
 	}
 	for _, tt := range tests {

@@ -60,6 +60,7 @@ var (
 	reRuleDashes = regexp.MustCompile(`(?m)^-{3,}$`)
 	reRuleUnders = regexp.MustCompile(`(?m)^_{3,}$`)
 	reListIndent     = regexp.MustCompile(`(?m)^[ ]{4,}([-*+] )`)
+	reListSpacing    = regexp.MustCompile(`(?m)^([-*+]) {2,}`)
 	reUnicodeBullet  = regexp.MustCompile(`^[ \t]*[●•◦◆▪▸‣⁃][ \t]*`)
 	reANSI           = regexp.MustCompile(`\x1b\[[0-9;]*m`)
 	// reSuperscript matches pandoc's ^text^ output for HTML <sup> elements.
@@ -195,6 +196,7 @@ func normalizeLists(text string) string {
 			}
 		}
 		lines[i] = reListIndent.ReplaceAllString(lines[i], "$1")
+		lines[i] = reListSpacing.ReplaceAllString(lines[i], "$1 ")
 	}
 
 	// Phase 3: Compact loose lists (drop blank lines between items).
