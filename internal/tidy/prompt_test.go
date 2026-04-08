@@ -192,6 +192,57 @@ func TestBuildPrompt(t *testing.T) {
 			},
 		},
 		{
+			name: "time_format uppercase",
+			cfg: func() Config {
+				cfg := DefaultConfig()
+				cfg.Style.TimeFormat = "uppercase"
+				return cfg
+			}(),
+			contains: []string{
+				`"3pm" → "3 PM"`,
+				`"10:00 a.m." → "10:00 AM"`,
+			},
+			absent: []string{
+				"10:00am",
+				"a.m./p.m.",
+			},
+		},
+		{
+			name: "time_format lowercase",
+			cfg: func() Config {
+				cfg := DefaultConfig()
+				cfg.Style.TimeFormat = "lowercase"
+				return cfg
+			}(),
+			contains: []string{
+				`"3 PM" → "3pm"`,
+				`"10:00 a.m." → "10:00am"`,
+				"no space before lowercase am/pm",
+			},
+		},
+		{
+			name: "time_format periods",
+			cfg: func() Config {
+				cfg := DefaultConfig()
+				cfg.Style.TimeFormat = "periods"
+				return cfg
+			}(),
+			contains: []string{
+				`"3pm" → "3 p.m."`,
+				`"10:00 AM" → "10:00 a.m."`,
+			},
+			absent: []string{
+				"no periods",
+			},
+		},
+		{
+			name: "time_format ignore: no time formatting instruction",
+			cfg:  DefaultConfig(),
+			absent: []string{
+				"Standardize time formatting",
+			},
+		},
+		{
 			name: "punctuation disabled: no em dash or ellipsis instructions",
 			cfg: func() Config {
 				cfg := DefaultConfig()

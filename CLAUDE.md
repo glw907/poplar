@@ -174,6 +174,7 @@ meaning or the author's style.
     tidytext fix --no-config              # skip config, use defaults
     tidytext fix --rule spelling=false    # override a rule
     tidytext fix --style em_dash_spaces=true
+    tidytext fix --style time_format=uppercase
     tidytext config                       # show current config
     tidytext config init                  # create default config
 

@@ -33,6 +33,7 @@ type RulesConfig struct {
 type StyleConfig struct {
 	EmDashSpaces       bool     `toml:"em_dash_spaces"`
 	Ellipsis           string   `toml:"ellipsis"`
+	TimeFormat         string   `toml:"time_format"`
 	CustomInstructions []string `toml:"custom_instructions"`
 }
 
@@ -62,6 +63,7 @@ func DefaultConfig() Config {
 		Style: StyleConfig{
 			EmDashSpaces: false,
 			Ellipsis:     "character",
+			TimeFormat:   "ignore",
 		},
 	}
 }
@@ -87,6 +89,9 @@ func LoadConfig(path string) (Config, error) {
 		return Config{}, err
 	}
 	if err := validateEllipsis(cfg.Style.Ellipsis); err != nil {
+		return Config{}, err
+	}
+	if err := validateTimeFormat(cfg.Style.TimeFormat); err != nil {
 		return Config{}, err
 	}
 
@@ -151,6 +156,11 @@ func ApplyStyleOverrides(cfg *Config, overrides []string) error {
 				return err
 			}
 			cfg.Style.Ellipsis = val
+		case "time_format":
+			if err := validateTimeFormat(val); err != nil {
+				return err
+			}
+			cfg.Style.TimeFormat = val
 		default:
 			return fmt.Errorf("style override: unknown key %q", key)
 		}
@@ -189,6 +199,7 @@ func ConfigString(cfg Config) string {
 	fmt.Fprintf(&b, "Style:\n")
 	fmt.Fprintf(&b, "  em_dash_spaces:      %v\n", cfg.Style.EmDashSpaces)
 	fmt.Fprintf(&b, "  ellipsis:            %s\n", cfg.Style.Ellipsis)
+	fmt.Fprintf(&b, "  time_format:         %s\n", cfg.Style.TimeFormat)
 	if len(cfg.Style.CustomInstructions) > 0 {
 		fmt.Fprintf(&b, "  custom_instructions:\n")
 		for _, s := range cfg.Style.CustomInstructions {
@@ -198,22 +209,25 @@ func ConfigString(cfg Config) string {
 	return b.String()
 }
 
-func validateOxfordComma(v string) error {
-	switch v {
-	case "insert", "remove", "ignore":
-		return nil
-	default:
-		return fmt.Errorf("config: oxford_comma must be insert, remove, or ignore; got %q", v)
+func validateEnum(field, v string, valid ...string) error {
+	for _, s := range valid {
+		if v == s {
+			return nil
+		}
 	}
+	return fmt.Errorf("config: %s must be %s; got %q", field, strings.Join(valid, ", "), v)
+}
+
+func validateOxfordComma(v string) error {
+	return validateEnum("oxford_comma", v, "insert", "remove", "ignore")
 }
 
 func validateEllipsis(v string) error {
-	switch v {
-	case "character", "dots":
-		return nil
-	default:
-		return fmt.Errorf("config: ellipsis must be character or dots; got %q", v)
-	}
+	return validateEnum("ellipsis", v, "character", "dots")
+}
+
+func validateTimeFormat(v string) error {
+	return validateEnum("time_format", v, "uppercase", "lowercase", "periods", "ignore")
 }
 
 func setBool(dst *bool, key, val string) error {

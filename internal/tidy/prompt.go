@@ -32,6 +32,14 @@ func BuildPrompt(cfg Config) string {
 			rules = append(rules, `Convert three dots to ellipsis character: "..." to "…"`)
 		}
 	}
+	switch cfg.Style.TimeFormat {
+	case "uppercase":
+		rules = append(rules, `Standardize time formatting: use a space before uppercase AM/PM with no periods (e.g., "3pm" → "3 PM", "10:00 a.m." → "10:00 AM")`)
+	case "lowercase":
+		rules = append(rules, `Standardize time formatting: use no space before lowercase am/pm with no periods (e.g., "3 PM" → "3pm", "10:00 a.m." → "10:00am")`)
+	case "periods":
+		rules = append(rules, `Standardize time formatting: use a space before lowercase a.m./p.m. with periods (e.g., "3pm" → "3 p.m.", "10:00 AM" → "10:00 a.m.")`)
+	}
 	if cfg.Rules.Whitespace {
 		rules = append(rules, "Fix whitespace errors (double spaces, trailing spaces)")
 	}

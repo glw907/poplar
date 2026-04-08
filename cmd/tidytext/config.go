@@ -30,6 +30,7 @@ oxford_comma        = "ignore"  # insert | remove | ignore
 [style]
 em_dash_spaces = false
 ellipsis       = "character"  # character | dots
+time_format    = "ignore"     # uppercase (10:00 AM) | lowercase (10:00am) | periods (10:00 a.m.) | ignore
 # custom_instructions = [
 #   "Prefer active voice.",
 # ]

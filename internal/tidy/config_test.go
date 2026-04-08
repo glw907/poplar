@@ -38,6 +38,9 @@ func TestDefaultConfig(t *testing.T) {
 	if cfg.Style.Ellipsis != "character" {
 		t.Errorf("default Ellipsis = %q, want %q", cfg.Style.Ellipsis, "character")
 	}
+	if cfg.Style.TimeFormat != "ignore" {
+		t.Errorf("default TimeFormat = %q, want %q", cfg.Style.TimeFormat, "ignore")
+	}
 	if cfg.API.Model != "claude-haiku-4-5-20251001" {
 		t.Errorf("default Model = %q, want %q", cfg.API.Model, "claude-haiku-4-5-20251001")
 	}
@@ -158,6 +161,22 @@ ellipsis = "unicode"
 	}
 }
 
+func TestLoadConfig_InvalidTimeFormat(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "config.toml")
+	content := `[style]
+time_format = "dotted"
+`
+	if err := os.WriteFile(path, []byte(content), 0600); err != nil {
+		t.Fatal(err)
+	}
+
+	_, err := LoadConfig(path)
+	if err == nil {
+		t.Fatal("LoadConfig invalid time_format: got nil error, want error")
+	}
+}
+
 func TestApplyRuleOverrides(t *testing.T) {
 	tests := []struct {
 		name      string
@@ -239,6 +258,21 @@ func TestApplyStyleOverrides(t *testing.T) {
 			check:     func(cfg Config) bool { return cfg.Style.Ellipsis == "dots" },
 		},
 		{
+			name:      "set time_format uppercase",
+			overrides: []string{"time_format=uppercase"},
+			check:     func(cfg Config) bool { return cfg.Style.TimeFormat == "uppercase" },
+		},
+		{
+			name:      "set time_format periods",
+			overrides: []string{"time_format=periods"},
+			check:     func(cfg Config) bool { return cfg.Style.TimeFormat == "periods" },
+		},
+		{
+			name:      "invalid time_format value",
+			overrides: []string{"time_format=dotted"},
+			wantErr:   true,
+		},
+		{
 			name:      "unknown key",
 			overrides: []string{"unknown=true"},
 			wantErr:   true,
@@ -308,7 +342,7 @@ func TestConfigString(t *testing.T) {
 	if s == "" {
 		t.Fatal("ConfigString returned empty string")
 	}
-	for _, want := range []string{"claude-haiku-4-5-20251001", "ignore", "character"} {
+	for _, want := range []string{"claude-haiku-4-5-20251001", "ignore", "character", "time_format"} {
 		if !strings.Contains(s, want) {
 			t.Errorf("ConfigString does not contain %q", want)
 		}
