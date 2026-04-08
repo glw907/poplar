@@ -47,6 +47,8 @@ func Prepare(input []byte, opts Options) []byte {
 		headers = injectCcBcc(headers)
 	}
 
+	body = reflowQuoted(body)
+
 	var result []string
 	result = append(result, headers...)
 	result = append(result, "")
