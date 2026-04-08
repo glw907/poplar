@@ -284,3 +284,101 @@ func TestLoadFileNotFound(t *testing.T) {
 		t.Fatal("expected error for missing file")
 	}
 }
+
+func TestFindPathWithEnv(t *testing.T) {
+	dir := t.TempDir()
+
+	// Write aerc.conf with styleset-name
+	aercConf := "# comment\n[ui]\nstyleset-name=testtheme\n"
+	if err := os.WriteFile(filepath.Join(dir, "aerc.conf"), []byte(aercConf), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	// Write the theme file
+	themesDir := filepath.Join(dir, "themes")
+	os.MkdirAll(themesDir, 0755)
+	if err := os.WriteFile(filepath.Join(themesDir, "testtheme.toml"), []byte(validTheme), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	t.Setenv("AERC_CONFIG", dir)
+	got, err := FindPath()
+	if err != nil {
+		t.Fatalf("FindPath: %v", err)
+	}
+	want := filepath.Join(themesDir, "testtheme.toml")
+	if got != want {
+		t.Errorf("FindPath() = %q, want %q", got, want)
+	}
+}
+
+func TestFindPathNoAercConf(t *testing.T) {
+	t.Setenv("AERC_CONFIG", "/nonexistent/path")
+	t.Setenv("HOME", "/nonexistent/home")
+	_, err := FindPath()
+	if err == nil {
+		t.Fatal("expected error when aerc.conf not found")
+	}
+	if !strings.Contains(err.Error(), "aerc.conf") {
+		t.Errorf("error = %q, want mention of aerc.conf", err)
+	}
+}
+
+func TestFindPathNoStylesetName(t *testing.T) {
+	dir := t.TempDir()
+	aercConf := "[ui]\n# no styleset-name\n"
+	os.WriteFile(filepath.Join(dir, "aerc.conf"), []byte(aercConf), 0644)
+	t.Setenv("AERC_CONFIG", dir)
+	_, err := FindPath()
+	if err == nil {
+		t.Fatal("expected error when styleset-name missing")
+	}
+	if !strings.Contains(err.Error(), "styleset-name") {
+		t.Errorf("error = %q, want mention of styleset-name", err)
+	}
+}
+
+func TestFindPathNoThemeFile(t *testing.T) {
+	dir := t.TempDir()
+	aercConf := "[ui]\nstyleset-name=missing\n"
+	os.WriteFile(filepath.Join(dir, "aerc.conf"), []byte(aercConf), 0644)
+	os.MkdirAll(filepath.Join(dir, "themes"), 0755)
+	t.Setenv("AERC_CONFIG", dir)
+	_, err := FindPath()
+	if err == nil {
+		t.Fatal("expected error when theme file not found")
+	}
+	if !strings.Contains(err.Error(), "missing.toml") {
+		t.Errorf("error = %q, want mention of missing.toml", err)
+	}
+}
+
+func TestFindPathStylesetNameVariants(t *testing.T) {
+	tests := []struct {
+		name     string
+		conf     string
+		wantName string
+	}{
+		{"with spaces", "[ui]\nstyleset-name = nord\n", "nord"},
+		{"no section header", "styleset-name=nord\n", "nord"},
+		{"trailing whitespace", "styleset-name=nord  \n", "nord"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			dir := t.TempDir()
+			os.WriteFile(filepath.Join(dir, "aerc.conf"), []byte(tt.conf), 0644)
+			themesDir := filepath.Join(dir, "themes")
+			os.MkdirAll(themesDir, 0755)
+			os.WriteFile(filepath.Join(themesDir, tt.wantName+".toml"), []byte(validTheme), 0644)
+			t.Setenv("AERC_CONFIG", dir)
+			got, err := FindPath()
+			if err != nil {
+				t.Fatalf("FindPath: %v", err)
+			}
+			want := filepath.Join(themesDir, tt.wantName+".toml")
+			if got != want {
+				t.Errorf("FindPath() = %q, want %q", got, want)
+			}
+		})
+	}
+}

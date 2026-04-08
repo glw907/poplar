@@ -4,6 +4,7 @@ package theme
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -130,6 +131,72 @@ func resolveToken(def tokenDefinition, colors map[string]string) (string, error)
 	}
 
 	return strings.Join(parts, ";"), nil
+}
+
+// FindPath locates the active theme file. Reads styleset-name from
+// aerc.conf, then looks for themes/<name>.toml relative to the
+// aerc.conf directory.
+func FindPath() (string, error) {
+	confDir, err := FindConfigDir()
+	if err != nil {
+		return "", err
+	}
+
+	name, err := readStylesetName(filepath.Join(confDir, "aerc.conf"))
+	if err != nil {
+		return "", err
+	}
+
+	path := filepath.Join(confDir, "themes", name+".toml")
+	if _, err := os.Stat(path); err != nil {
+		return "", fmt.Errorf("theme file not found: %s", path)
+	}
+	return path, nil
+}
+
+// FindConfigDir returns the directory containing aerc.conf.
+func FindConfigDir() (string, error) {
+	if dir := os.Getenv("AERC_CONFIG"); dir != "" {
+		if _, err := os.Stat(filepath.Join(dir, "aerc.conf")); err == nil {
+			return dir, nil
+		}
+	}
+
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return "", fmt.Errorf("cannot determine home directory: %w", err)
+	}
+	dir := filepath.Join(home, ".config", "aerc")
+	if _, err := os.Stat(filepath.Join(dir, "aerc.conf")); err == nil {
+		return dir, nil
+	}
+
+	return "", fmt.Errorf("aerc.conf not found (checked $AERC_CONFIG and ~/.config/aerc/)")
+}
+
+// readStylesetName extracts the styleset-name value from aerc.conf.
+func readStylesetName(path string) (string, error) {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return "", fmt.Errorf("reading aerc.conf: %w", err)
+	}
+	for _, line := range strings.Split(string(data), "\n") {
+		line = strings.TrimSpace(line)
+		if strings.HasPrefix(line, "#") {
+			continue
+		}
+		key, val, ok := strings.Cut(line, "=")
+		if !ok {
+			continue
+		}
+		if strings.TrimSpace(key) == "styleset-name" {
+			name := strings.TrimSpace(val)
+			if name != "" {
+				return name, nil
+			}
+		}
+	}
+	return "", fmt.Errorf("styleset-name not found in %s", path)
 }
 
 // hexToANSI converts "#rrggbb" to "38;2;R;G;B".
