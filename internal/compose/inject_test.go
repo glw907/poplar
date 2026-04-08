@@ -57,6 +57,11 @@ func TestInjectCcBcc(t *testing.T) {
 			input: []string{"From: alice@dom", "To:", "Subject: Hi"},
 			want:  []string{"From: alice@dom", "To:", "Cc:", "Bcc:", "Subject: Hi"},
 		},
+		{
+			name:  "Bcc present Cc missing",
+			input: []string{"From: alice@dom", "To: bob@dom", "Bcc: secret@dom", "Subject: Hi"},
+			want:  []string{"From: alice@dom", "To: bob@dom", "Cc:", "Bcc: secret@dom", "Subject: Hi"},
+		},
 	}
 
 	for _, tt := range tests {

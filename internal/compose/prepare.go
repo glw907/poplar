@@ -1,9 +1,6 @@
 package compose
 
-import (
-	"log"
-	"strings"
-)
+import "strings"
 
 const maxWidth = 72
 
@@ -33,7 +30,6 @@ func Prepare(input []byte, opts Options) []byte {
 	}
 
 	if boundary < 0 {
-		log.Println("no header/body boundary found, passing through")
 		return input
 	}
 
