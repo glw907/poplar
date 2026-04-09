@@ -51,35 +51,61 @@ func hasAlphanumeric(s string) bool {
 }
 
 // wrapText wraps text to fit within width columns when prepended with
-// prefix. Breaks only at spaces. Returns a slice of lines, each
-// starting with prefix.
+// prefix, using minimum-raggedness line breaking. Returns a slice of
+// lines, each starting with prefix.
 func wrapText(text, prefix string, width int) []string {
 	avail := width - runewidth.StringWidth(prefix)
 	if avail <= 0 {
 		return []string{prefix + text}
 	}
 
-	var result []string
-	for runewidth.StringWidth(text) > avail {
-		breakIdx := -1
-		w := 0
-		for i, r := range text {
-			w += runewidth.RuneWidth(r)
-			if w > avail {
+	words := strings.Fields(text)
+	if len(words) == 0 {
+		return []string{prefix}
+	}
+
+	n := len(words)
+	wordLen := make([]int, n)
+	for i, w := range words {
+		wordLen[i] = runewidth.StringWidth(w)
+	}
+
+	// Minimum-raggedness DP: minimize sum of squared slack per line.
+	const inf = 1 << 62
+	cost := make([]int, n+1)
+	breaks := make([]int, n)
+	cost[n] = 0
+
+	for i := n - 1; i >= 0; i-- {
+		lineLen := -1
+		best := inf
+		bestBreak := n
+		for j := i; j < n; j++ {
+			lineLen += 1 + wordLen[j]
+			if lineLen > avail && j > i {
 				break
 			}
-			if r == ' ' {
-				breakIdx = i
+			var c int
+			if j == n-1 {
+				c = cost[j+1]
+			} else {
+				slack := avail - lineLen
+				c = slack*slack + cost[j+1]
+			}
+			if c < best {
+				best = c
+				bestBreak = j + 1
 			}
 		}
-		if breakIdx < 0 {
-			break // word exceeds available width, emit as-is
-		}
-		result = append(result, prefix+strings.TrimRight(text[:breakIdx+1], " "))
-		text = strings.TrimLeft(text[breakIdx+1:], " ")
+		cost[i] = best
+		breaks[i] = bestBreak
 	}
-	if len(text) > 0 {
-		result = append(result, prefix+text)
+
+	var result []string
+	for i := 0; i < n; {
+		j := breaks[i]
+		result = append(result, prefix+strings.Join(words[i:j], " "))
+		i = j
 	}
 	return result
 }
