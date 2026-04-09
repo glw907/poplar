@@ -1,5 +1,7 @@
 # Themes
 
+This document covers the theme system in detail — color slots, tokens, custom theme creation, and styleset generation. For a quick overview of switching themes, see the [Theme system](../README.md#theme-system) section of the README.
+
 beautiful-aerc's theme system drives colors across three layers from a single source file: the aerc UI (message list, sidebar, tabs), the message viewer (header rendering, markdown highlighting, link colors), and optionally the kitty terminal and nvim-mail editor.
 
 ## Theme file format
