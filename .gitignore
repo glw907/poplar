@@ -2,7 +2,7 @@
 /pick-link
 /fastmail-cli
 /tidytext
-/compose-prep
+
 .config/aerc/signature.md
 .config/aerc/accounts.conf
 .config/aerc/fastmail-*.age

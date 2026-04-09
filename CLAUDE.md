@@ -27,8 +27,7 @@ cmd/mailrender/        CLI wiring: filters (cobra)
 cmd/pick-link/         CLI wiring: interactive URL picker (cobra)
 cmd/fastmail-cli/      CLI wiring: rules, masked, folders (cobra)
 cmd/tidytext/          CLI wiring: fix, config (cobra)
-cmd/compose-prep/      CLI wiring: compose buffer normalizer (cobra)
-internal/compose/      Compose buffer normalization pipeline
+internal/compose/      Compose buffer normalization pipeline (mailrender compose)
 internal/theme/        Load TOML theme files, resolve color tokens to ANSI
 internal/filter/       Filter implementations (headers, html, plain) + footnote rendering
 internal/picker/       Link picker UI
@@ -195,39 +194,14 @@ headers and signature). Changed words are highlighted with teal
 undercurl extmarks (`EmailTidyChange` highlight group) that clear
 on next edit.
 
-## compose-prep
-
-Stdin/stdout buffer normalizer for the nvim-mail compose editor.
-Reads an aerc compose buffer from stdin, normalizes headers and
-reflows quoted text, writes the result to stdout. Called by
-nvim-mail's VimEnter autocmd via `vim.fn.systemlist`.
-
-### Pipeline
-
-1. **Unfold** RFC 2822 continuation lines (space/tab prefix)
-2. **Strip brackets** from bare `<email>` addresses (uses `net/mail`)
-3. **Fold** To/Cc/Bcc at 120-column recipient boundaries
-4. **Inject** empty Cc:/Bcc: headers when absent
-5. **Reflow** quoted text paragraphs at 72 columns
-
-### Flags
-
-    --no-cc-bcc    Suppress empty Cc/Bcc header injection
-    --debug        Write diagnostic messages to stderr
-
-### Error Behavior
-
-On any processing error, the original input is passed through
-unchanged. Exit code is always 0. The compose window always opens.
-
 ## Build
 
 ```
-make build     # build all five binaries
+make build     # build all four binaries
 make test      # run tests
 make vet       # go vet
 make check     # vet + test (gate before commits)
-make install   # install all five to ~/.local/bin/
+make install   # install all four to ~/.local/bin/
 ```
 
 ## Corpus
@@ -251,9 +225,17 @@ repo defaults:
 - `mailrules.json` — personal mail rules (not in this repo)
 - `accounts.conf` — personal credentials (repo ships `.example` only)
 
-When configs change in this project, the corresponding personal
-configs in `~/.dotfiles/beautiful-aerc/` need manual sync. The Go
-binaries are installed via `make install` (not stowed).
+**MANDATORY: When changing any file under `.config/aerc/`, apply the
+same change to both locations:**
+- **Project repo**: `.config/aerc/` (this repo)
+- **Personal dotfiles**: `~/.dotfiles/beautiful-aerc/.config/aerc/`
+
+The live config is symlinked from `~/.dotfiles/`, so project-only
+changes don't take effect. The dotfiles copy may have additional
+personal customizations — apply the same logical fix without
+overwriting personal additions.
+
+The Go binaries are installed via `make install` (not stowed).
 
 ## Filter Testing
 

@@ -87,14 +87,14 @@ aerc opens nvim-mail with the compose buffer.
 
 ### 2. Buffer preparation
 
-When the editor opens, the `compose-prep` binary normalizes the raw buffer:
+When the editor opens, `mailrender compose` normalizes the raw buffer:
 
 - **Unfolds** RFC 2822 continuation lines (headers that wrap with leading whitespace)
 - **Strips bare angle brackets** — `<email@dom>` without a name becomes `email@dom`
 - **Folds address headers** — long To/Cc/Bcc lines wrap at recipient boundaries, aligned at 120 columns
 - **Reflows quoted text** — jagged quoted lines from the original sender are joined into paragraphs and re-wrapped at 72 columns
 
-After compose-prep runs, visual separator lines (thin horizontal rules) appear above and below the headers.
+After normalization, visual separator lines (thin horizontal rules) appear above and below the headers.
 
 ### 3. Cursor placement
 
@@ -257,13 +257,13 @@ vim.opt.spelllang = "en_us"
 
 Change to `en_gb`, `de`, `fr`, etc. as needed. Neovim downloads spell files automatically on first use.
 
-### compose-prep isn't running / headers look raw
+### Buffer normalization isn't running / headers look raw
 
-compose-prep falls back gracefully — if it's not installed or fails, the raw buffer is shown unchanged. Verify it's installed:
+`mailrender compose` falls back gracefully — if it's not installed or fails, the raw buffer is shown unchanged. Verify it's installed:
 
 ```sh
-which compose-prep
-compose-prep --help
+which mailrender
+mailrender compose --help
 ```
 
 If missing, run `make install` from the project directory.

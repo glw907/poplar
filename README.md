@@ -176,8 +176,6 @@ func stripHiddenElements(body string) string {
 }
 ```
 
-**compose-prep** — Normalizes the compose buffer before Neovim opens it. Unfolds RFC 2822 header continuations, strips bare angle brackets from email addresses, folds long address lists at 120-column boundaries, and reflows quoted text paragraphs at 72 columns. Falls back gracefully if not installed.
-
 **pick-link** — Interactive URL picker for the message viewer. Reads the raw message, runs the HTML filter internally to extract clean footnoted URLs, then opens a full-screen picker UI where you select a link by number or with j/k navigation. Opens URLs via `xdg-open`.
 
 ### Go binaries (optional)
@@ -366,7 +364,7 @@ nvim-mail uses five Neovim plugins, all managed by [lazy.nvim](https://github.co
 ### The compose flow
 
 1. **Open compose** — press `C` or `m` in the message list, or `rr` to reply. aerc opens nvim-mail.
-2. **Headers are reformatted** — compose-prep normalizes the raw RFC 2822 headers: unfolds continuation lines, cleans up angle brackets, wraps long address lists. You see clean, readable headers.
+2. **Headers are reformatted** — `mailrender compose` normalizes the raw RFC 2822 headers: unfolds continuation lines, cleans up angle brackets, wraps long address lists. You see clean, readable headers.
 3. **Write your message** in markdown. Text wraps automatically at 72 characters.
 4. **Exit to review** — press `<Space>q` to save and exit. If there are misspelled words, you'll be prompted: fix them, send anyway, or go back.
 5. **Review and send** — aerc shows a review screen. Press `y` to convert your markdown to HTML and send, `e` to re-edit, `n` to abort, or `p` to postpone as a draft.

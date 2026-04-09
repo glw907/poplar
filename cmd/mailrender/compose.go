@@ -11,20 +11,19 @@ import (
 	"golang.org/x/term"
 )
 
-type flags struct {
+type composeFlags struct {
 	noCcBcc bool
 	debug   bool
 }
 
-func newRootCmd() *cobra.Command {
-	f := flags{}
+func newComposeCmd() *cobra.Command {
+	f := composeFlags{}
 
 	cmd := &cobra.Command{
-		Use:          "compose-prep",
-		Short:        "Normalize aerc compose buffers for editing",
-		SilenceUsage: true,
+		Use:   "compose",
+		Short: "Normalize aerc compose buffers for editing",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return run(f)
+			return runCompose(f)
 		},
 	}
 
@@ -34,9 +33,9 @@ func newRootCmd() *cobra.Command {
 	return cmd
 }
 
-func run(f flags) error {
+func runCompose(f composeFlags) error {
 	if f.debug {
-		log.SetPrefix("compose-prep: ")
+		log.SetPrefix("mailrender compose: ")
 		log.SetFlags(0)
 	} else {
 		log.SetOutput(io.Discard)
@@ -48,7 +47,7 @@ func run(f flags) error {
 
 	input, err := io.ReadAll(os.Stdin)
 	if err != nil {
-		return fmt.Errorf("read stdin: %w", err)
+		return fmt.Errorf("reading stdin: %w", err)
 	}
 
 	opts := compose.Options{
@@ -58,7 +57,7 @@ func run(f flags) error {
 	output := compose.Prepare(input, opts)
 
 	if _, err := os.Stdout.Write(output); err != nil {
-		return fmt.Errorf("write output: %w", err)
+		return fmt.Errorf("writing output: %w", err)
 	}
 	return nil
 }

@@ -97,13 +97,13 @@ vim.api.nvim_create_autocmd("VimEnter", {
 --
 -- When aerc opens the compose editor, the raw buffer has RFC 2822
 -- formatted headers (folded continuation lines, bare angle brackets,
--- etc.). This pipes the buffer through compose-prep to normalize
+-- etc.). This pipes the buffer through mailrender compose to normalize
 -- headers and reflow quoted text, then adds visual separator lines
 -- and positions the cursor.
 vim.api.nvim_create_autocmd("VimEnter", {
   callback = function()
     local raw_lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
-    local result = vim.fn.systemlist("compose-prep", raw_lines)
+    local result = vim.fn.systemlist("mailrender compose", raw_lines)
     if vim.v.shell_error == 0 and #result > 0 then
       vim.api.nvim_buf_set_lines(0, 0, -1, false, result)
     else
