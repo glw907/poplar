@@ -1,11 +1,7 @@
-
-Image link: [38;2;136;192;208mLogo[0m[38;2;97;110;136m[^1][0m
-
-Empty link: 
-
-Empty URL: Click here
-
-Normal link: [38;2;136;192;208mVisit site[0m[38;2;97;110;136m[^1][0m
-
-[38;2;97;110;136m────────────────────────────────────────────────────────────────────────────────[0m
-[38;2;97;110;136m[^1]:[0m [38;2;97;110;136m]8;;https://example.com\https://example.com]8;;\[0m
+Image link: [38;2;136;192;208mLogo /logo.png[0m https://example.com                                  
+                                                                                
+Empty link: https://example.com                                                 
+                                                                                
+Empty URL: [38;2;136;192;208mClick here[0m                                                           
+                                                                                
+Normal link: [38;2;136;192;208mVisit site[0m https://example.com                                     

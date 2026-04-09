@@ -1,12 +1,6 @@
-
-## [38;2;163;190;140;1mBig Sale![0m
-
-Check out our [38;2;136;192;208mamazing deals[0m[38;2;97;110;136m[^1][0m today.
-
-Don't miss [1m50% off[0m everything in store.
-
-[38;2;136;192;208mUnsubscribe[0m[38;2;97;110;136m[^2][0m
-
-[38;2;97;110;136m────────────────────────────────────────────────────────────────────────────────[0m
-[38;2;97;110;136m[^1]:[0m [38;2;97;110;136m]8;;https://example.com/sale\https://example.com/sale]8;;\[0m
-[38;2;97;110;136m[^2]:[0m [38;2;97;110;136m]8;;https://example.com/unsubscribe\https://example.com/unsubscribe]8;;\[0m
+[38;2;163;190;140;1m[0m[38;2;163;190;140;1m[0m[38;2;163;190;140;1mBig Sale[0m[38;2;163;190;140;1m![0m                                                                       
+Check out our [38;2;136;192;208mamazing deals[0m https://example.com/sale today.                     
+                                                                                
+Don't miss [1m50% off[0m everything in store.                                         
+                                                                                
+[38;2;136;192;208m[0m[38;2;136;192;208m[0m[38;2;136;192;208mUnsubscribe[0m https://example.com/unsubscribe                                     
