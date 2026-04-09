@@ -18,6 +18,15 @@ var (
 	reHiddenDivOpen = regexp.MustCompile(`(?i)<div[^>]+style="[^"]*display:\s*none[^"]*"[^>]*>`)
 	reZeroImg       = regexp.MustCompile(`(?i)<img[^>]*(?:width:\s*0|height:\s*0|width="0"|height="0")[^>]*/?>`)
 	reANSI          = regexp.MustCompile(`\x1b\[[0-9;]*m`)
+
+	// Post-conversion whitespace normalization: strip invisible filler
+	// characters that email senders embed for preheader text, collapse
+	// excessive blank lines, and strip leading blanks.
+	reNBSP          = regexp.MustCompile(`[\x{a0}\x{2000}-\x{200a}]+`)
+	reZeroWidth     = regexp.MustCompile(`[\x{ad}\x{34f}\x{180e}\x{200b}-\x{200d}\x{2060}-\x{2064}\x{feff}]`)
+	reBlankSpaces   = regexp.MustCompile(`(?m)^ +$`)
+	reExcessiveBlanks = regexp.MustCompile(`\n{3,}`)
+	reLeadingBlanks = regexp.MustCompile(`\A\n+`)
 )
 
 // prepareHTML cleans the raw HTML before conversion: strips Mozilla-specific
@@ -74,6 +83,18 @@ func stripHiddenElements(body string) string {
 	return body
 }
 
+// normalizeWhitespace collapses non-breaking spaces, zero-width filler
+// characters (preheader padding), blank lines with only spaces, excessive
+// blank lines, and leading blank lines.
+func normalizeWhitespace(text string) string {
+	text = reNBSP.ReplaceAllString(text, " ")
+	text = reZeroWidth.ReplaceAllString(text, "")
+	text = reBlankSpaces.ReplaceAllString(text, "")
+	text = reExcessiveBlanks.ReplaceAllString(text, "\n\n")
+	text = reLeadingBlanks.ReplaceAllString(text, "")
+	return text
+}
+
 // stripANSI removes ANSI escape sequences from s.
 func stripANSI(s string) string {
 	return reANSI.ReplaceAllString(s, "")
@@ -92,6 +113,7 @@ func Markdown(r io.Reader, w io.Writer, cols int) error {
 	if err != nil {
 		return fmt.Errorf("converting html: %w", err)
 	}
+	md = normalizeWhitespace(md)
 
 	if _, err := fmt.Fprint(w, md+"\n"); err != nil {
 		return fmt.Errorf("writing output: %w", err)
@@ -113,6 +135,7 @@ func HTML(r io.Reader, w io.Writer, t *theme.Theme, cols int) error {
 	if err != nil {
 		return fmt.Errorf("converting html: %w", err)
 	}
+	md = normalizeWhitespace(md)
 
 	style := t.GlamourStyle()
 	renderer, err := glamour.NewTermRenderer(
