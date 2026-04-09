@@ -39,7 +39,12 @@ The README tells a story before it becomes a reference:
 3. **What beautiful-aerc gives you.** The same polished email
    experience GUI users get, but in your terminal. Specific
    deliverables: clean rendered HTML, numbered footnote links,
-   interactive link picker, consistent theming, a proper compose editor.
+   interactive link picker, consistent theming, a proper compose
+   editor. Note that this pipeline was trained on real personal
+   email over many hours of iteration — every edge case fix
+   came from an actual broken email in the author's inbox. The
+   project is actively maintained with ongoing improvements as
+   new sender patterns surface.
 4. **The markdown-forward design.** Markdown is the core
    abstraction throughout beautiful-aerc. Reading email: HTML is
    converted to clean markdown with ANSI styling. Writing email:
