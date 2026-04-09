@@ -30,8 +30,9 @@ var (
 	reExcessiveBlanks = regexp.MustCompile(`\n{3,}`)
 	reLeadingBlanks = regexp.MustCompile(`\A\n+`)
 
-	// Markdown link pattern for URL extraction.
-	reMdLink = regexp.MustCompile(`\[([^\]]+)\]\(([^)]+)\)`)
+	// Markdown link patterns for URL extraction.
+	reMdLink      = regexp.MustCompile(`\[([^\]]+)\]\(([^)]+)\)`)
+	reEmptyMdLink = regexp.MustCompile(`\[\]\([^)]+\)`)
 
 	// Marker replacement after Glamour rendering.
 	reLinkMarkerOpen = regexp.MustCompile("\x02(\\d+);")
@@ -107,8 +108,10 @@ func normalizeWhitespace(text string) string {
 // returns the modified text plus the extracted URLs. Glamour suppresses
 // display of fragment-only URLs (#) while still styling the link text.
 // The STX/ETX markers survive Glamour rendering and are replaced with
-// OSC 8 hyperlink sequences by resolveLinks.
+// OSC 8 hyperlink sequences by resolveLinks. Empty-text links [](url)
+// are removed entirely — they have no useful display content.
 func markLinks(text string) (string, []string) {
+	text = reEmptyMdLink.ReplaceAllString(text, "")
 	var urls []string
 	idx := 0
 	marked := reMdLink.ReplaceAllStringFunc(text, func(match string) string {

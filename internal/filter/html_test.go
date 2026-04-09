@@ -169,6 +169,11 @@ func TestMarkLinks(t *testing.T) {
 			[]string{"https://a.com", "https://b.com"},
 		},
 		{
+			"empty text link stripped",
+			"Title\n\n[](https://tracking.example.com/click?id=abc)\n\nBody",
+			nil,
+		},
+		{
 			"no links",
 			"Plain text with no links.",
 			nil,
