@@ -1,87 +1,27 @@
 package filter
 
 import (
-	"bytes"
 	"fmt"
-	"html"
 	"io"
-	"os"
-	"os/exec"
 	"regexp"
 	"strings"
 
+	"github.com/charmbracelet/glamour"
 	"github.com/glw907/beautiful-aerc/internal/theme"
 )
 
-// markdownColors holds ANSI parameter strings for markdown syntax highlighting.
-type markdownColors struct {
-	Heading string // e.g. "1;38;2;163;190;140"
-	Bold    string
-	Italic  string
-	Rule    string
-	Reset   string
-}
-
 // Package-level compiled regexes.
 var (
-	reMozClass         = regexp.MustCompile(` class="moz-[^"]*"`)
-	reMozDataAttr      = regexp.MustCompile(` data-moz-do-not-send="[^"]*"`)
-	reMozAttr          = regexp.MustCompile(` moz-do-not-send="[^"]*"`)
-	reTrailingBackslash = regexp.MustCompile(`(?m)\\\n`)
-	reEscapedPunct      = regexp.MustCompile(`\\([^\w\s])`)
-	// Stray bold markers on a line by themselves (pandoc decorative artifact).
-	// The $ before \n? anchors to end-of-line so lines like **text** are preserved.
-	reStrayBold = regexp.MustCompile(`(?m)^\*\*\s*$\n?`)
-	// reConsecutiveBold matches **** (close+reopen bold with nothing between).
-	// Pandoc emits this from consecutive <strong> blocks separated by <br>.
-	reConsecutiveBold = regexp.MustCompile(`\*{4,}`)
-	reListItem        = regexp.MustCompile(`^[-*+]\s`)
-	// Unicode space variants: NBSP, en/em space, thin/hair space, etc.
-	reNBSP            = regexp.MustCompile(`[\x{a0}\x{2000}-\x{200a}]+`)
-	// Invisible filler: zero-width, joiners, soft hyphen, word joiner, etc.
-	reZeroWidth = regexp.MustCompile(`[\x{ad}\x{34f}\x{180e}\x{200b}-\x{200d}\x{2060}-\x{2064}\x{feff}]`)
-	reBlankLineSpaces = regexp.MustCompile(`(?m)^ +$`)
-	reExcessiveBlank  = regexp.MustCompile(`\n{3,}`)
-	reLeadingBlank    = regexp.MustCompile(`\A\n+`)
-	// reNestedHeading matches pandoc heading markers repeated from nested <hN> tags.
-	reNestedHeading = regexp.MustCompile(`(?m)^(#{1,6})\s+(?:#{1,6}\s+)+`)
-	// reEmptyHeading matches heading lines with no content (from empty <hN> tags).
-	reEmptyHeading = regexp.MustCompile(`(?m)^#{1,6}[ \t]*$\n?`)
-	reHeading      = regexp.MustCompile(`(?m)^(#{1,6})[ \t]+(.*)$`)
-	// reBold matches **text** allowing newlines. normalizeBoldMarkers strips
-	// unpaired markers before this runs, so cross-paragraph matches cannot
-	// occur: any ** that would span a blank line has already been removed.
-	reBold = regexp.MustCompile(`(?s)\*\*(.+?)\*\*`)
-	// italic: matches *text* allowing newlines within a paragraph but not
-	// across paragraph breaks (double newlines), preventing stray * from
-	// pandoc \* escaping from bleeding italic across paragraphs.
-	reItalic = regexp.MustCompile(`\*([^*\n]+(?:\n[^*\n]+)*)\*`)
-	reRuleDashes = regexp.MustCompile(`(?m)^-{3,}$`)
-	reRuleUnders = regexp.MustCompile(`(?m)^_{3,}$`)
-	reListIndent     = regexp.MustCompile(`(?m)^[ ]{4,}([-*+] )`)
-	reListSpacing    = regexp.MustCompile(`(?m)^([-*+]) {2,}`)
-	reUnicodeBullet  = regexp.MustCompile(`^[ \t]*[●•◦◆▪▸‣⁃][ \t]*`)
-	reANSI           = regexp.MustCompile(`\x1b\[[0-9;]*m`)
-	// reSuperscript matches pandoc's ^text^ output for HTML <sup> elements.
-	// Superscripts in email are almost always footnote numbers or legal
-	// markers; stripping the carets reads fine in plain terminal output.
-	reSuperscript = regexp.MustCompile(`\^([^^]+)\^`)
-	// reHiddenDivOpen matches the opening tag of a <div> with display:none in
-	// its inline style. Used by stripHiddenElements to find the start of a
-	// hidden section; nesting-aware removal handles finding the matching close.
+	reMozClass      = regexp.MustCompile(` class="moz-[^"]*"`)
+	reMozDataAttr   = regexp.MustCompile(` data-moz-do-not-send="[^"]*"`)
+	reMozAttr       = regexp.MustCompile(` moz-do-not-send="[^"]*"`)
 	reHiddenDivOpen = regexp.MustCompile(`(?i)<div[^>]+style="[^"]*display:\s*none[^"]*"[^>]*>`)
-	// reZeroImg matches <img> tags with zero width or height (tracking pixels).
-	// Bank of America and similar senders embed these between URL parts,
-	// causing pandoc to split the URL across multiple paragraphs.
-	reZeroImg = regexp.MustCompile(`(?i)<img[^>]*(?:width:\s*0|height:\s*0|width="0"|height="0")[^>]*/?>`)
+	reZeroImg       = regexp.MustCompile(`(?i)<img[^>]*(?:width:\s*0|height:\s*0|width="0"|height="0")[^>]*/?>`)
+	reANSI          = regexp.MustCompile(`\x1b\[[0-9;]*m`)
 )
 
-// boldPlaceholder is used to hide bold markers during italic processing.
-const boldPlaceholder = "\x00BOLD\x00"
-
-// prepareHTML cleans the raw HTML before pandoc conversion: strips
-// Mozilla-specific attributes, hidden elements (display:none divs),
-// and zero-size tracking images.
+// prepareHTML cleans the raw HTML before conversion: strips Mozilla-specific
+// attributes, hidden elements (display:none divs), and zero-size tracking images.
 func prepareHTML(body string) string {
 	body = reMozClass.ReplaceAllString(body, "")
 	body = reMozDataAttr.ReplaceAllString(body, "")
@@ -134,392 +74,61 @@ func stripHiddenElements(body string) string {
 	return body
 }
 
-// cleanPandocArtifacts removes trailing backslash line-breaks,
-// backslash-escaped punctuation, stray bold markers, and superscript
-// caret markers (^text^) that pandoc emits for HTML <sup> elements.
-func cleanPandocArtifacts(text string) string {
-	text = reTrailingBackslash.ReplaceAllString(text, "\n")
-	text = reEscapedPunct.ReplaceAllString(text, "$1")
-	text = reConsecutiveBold.ReplaceAllString(text, "**")
-	text = reStrayBold.ReplaceAllString(text, "")
-	text = reSuperscript.ReplaceAllString(text, "$1")
-	text = reNestedHeading.ReplaceAllString(text, "$1 ")
-	text = reEmptyHeading.ReplaceAllString(text, "")
-	return text
-}
-
-// normalizeBoldMarkers ensures bold markers (**) are balanced within each
-// paragraph. It handles two pandoc artifacts:
-//
-//  1. Cross-paragraph bold: pandoc emits ** that opens in one paragraph and
-//     closes in another. Since reBold no longer uses (?s), these would render
-//     as stray markers. This function strips any unpaired trailing ** per
-//     paragraph, which also eliminates them.
-//
-//  2. Unpaired trailing **: pandoc sometimes emits a ** at the end of a phrase
-//     with no matching opener. The odd-count check strips the last one.
-func normalizeBoldMarkers(text string) string {
-	paragraphs := strings.Split(text, "\n\n")
-	for i, para := range paragraphs {
-		// Count ** occurrences (not escaped, just literal occurrences).
-		// strings.Count counts non-overlapping instances of "**".
-		count := strings.Count(para, "**")
-		if count%2 == 0 {
-			// Balanced; nothing to do.
-			continue
-		}
-		// Odd count: strip the last occurrence of ** in this paragraph.
-		idx := strings.LastIndex(para, "**")
-		paragraphs[i] = para[:idx] + para[idx+2:]
-	}
-	return strings.Join(paragraphs, "\n\n")
-}
-
-// normalizeLists handles all list cleanup: converts Unicode bullets to
-// markdown items, strips excessive indentation from deeply nested HTML,
-// and compacts pandoc's loose lists (blank lines between items).
-func normalizeLists(text string) string {
-	// Phase 1: Per-line fixes — convert Unicode bullets to markdown items
-	// and strip excessive indentation (4+ spaces before list markers).
-	lines := strings.Split(text, "\n")
-	inBulletItem := false
-	for i, line := range lines {
-		if replaced := reUnicodeBullet.ReplaceAllString(line, "- "); replaced != line {
-			lines[i] = replaced
-			inBulletItem = true
-		} else if inBulletItem {
-			if strings.TrimSpace(line) == "" {
-				inBulletItem = false
-			} else {
-				lines[i] = "  " + line
-			}
-		}
-		lines[i] = reListIndent.ReplaceAllString(lines[i], "$1")
-		lines[i] = reListSpacing.ReplaceAllString(lines[i], "$1 ")
-	}
-
-	// Phase 2: Compact loose lists (drop blank lines between items).
-	var out []string
-	inList := false
-	pendingBlanks := 0
-	flush := func() {
-		for range pendingBlanks {
-			out = append(out, "")
-		}
-		pendingBlanks = 0
-	}
-	for _, line := range lines {
-		isItem := reListItem.MatchString(line)
-		isBlank := strings.TrimSpace(line) == ""
-		isCont := inList && !isBlank && line[0] == ' '
-		switch {
-		case isItem:
-			if !inList {
-				flush()
-			}
-			pendingBlanks = 0
-			inList = true
-			out = append(out, line)
-		case isCont:
-			flush()
-			out = append(out, line)
-		case isBlank && inList:
-			pendingBlanks++
-		default:
-			inList = false
-			flush()
-			out = append(out, line)
-		}
-	}
-	if !inList {
-		flush()
-	}
-	return strings.Join(out, "\n")
-}
-
-// normalizeWhitespace collapses non-breaking spaces, zero-width characters,
-// blank lines with spaces, excessive blank lines, and leading blank lines.
-func normalizeWhitespace(text string) string {
-	text = reNBSP.ReplaceAllString(text, " ")
-	text = reZeroWidth.ReplaceAllString(text, "")
-	text = reBlankLineSpaces.ReplaceAllString(text, "")
-	text = reExcessiveBlank.ReplaceAllString(text, "\n\n")
-	text = reLeadingBlank.ReplaceAllString(text, "")
-	return text
-}
-
-// highlightMarkdown applies ANSI colors to markdown syntax: headings, bold,
-// italic, and horizontal rules.
-func highlightMarkdown(text string, colors *markdownColors) string {
-	esc := func(params string) string {
-		if params == "" {
-			return ""
-		}
-		return "\033[" + params + "m"
-	}
-	h := esc(colors.Heading)
-	b := esc(colors.Bold)
-	it := esc(colors.Italic)
-	ru := esc(colors.Rule)
-	r := esc(colors.Reset)
-
-	// Headings
-	text = reHeading.ReplaceAllStringFunc(text, func(m string) string {
-		groups := reHeading.FindStringSubmatch(m)
-		if groups == nil {
-			return m
-		}
-		return groups[1] + " " + h + groups[2] + r
-	})
-
-	// Bold: replace with placeholder first to avoid matching italic inside bold
-	text = reBold.ReplaceAllStringFunc(text, func(m string) string {
-		groups := reBold.FindStringSubmatch(m)
-		if groups == nil {
-			return m
-		}
-		return boldPlaceholder + groups[1] + boldPlaceholder
-	})
-
-	// Italic: now safe to match single * because ** has been replaced
-	text = reItalic.ReplaceAllStringFunc(text, func(m string) string {
-		groups := reItalic.FindStringSubmatch(m)
-		return wrapLines(groups[1], it, r)
-	})
-
-	// Restore bold placeholders: pairs of placeholder tokens wrap content.
-	// Replace first placeholder with b, second with r, alternating.
-	text = replaceMarkerPairs(text, boldPlaceholder, b, r)
-
-	// Horizontal rules (dashes and underscores)
-	text = reRuleDashes.ReplaceAllString(text, ru+"$0"+r)
-	text = reRuleUnders.ReplaceAllString(text, ru+"$0"+r)
-
-	return text
-}
-
-// wrapLines makes ANSI styling work in aerc's per-line viewer by
-// re-emitting open/close codes around each line of content.
-func wrapLines(content, open, close string) string {
-	if !strings.Contains(content, "\n") {
-		return open + content + close
-	}
-	lines := strings.Split(content, "\n")
-	for i, line := range lines {
-		if line == "" {
-			continue
-		}
-		lines[i] = open + line + close
-	}
-	return strings.Join(lines, "\n")
-}
-
-// replaceMarkerPairs splits text on sentinel and alternates open/close ANSI
-// sequences at each boundary. Odd splits get open, even splits get close.
-func replaceMarkerPairs(text, sentinel, open, close string) string {
-	parts := strings.Split(text, sentinel)
-	var sb strings.Builder
-	for i, part := range parts {
-		if i == 0 {
-			sb.WriteString(part)
-			continue
-		}
-		if i%2 == 1 {
-			// Opening: wrap each line so aerc's per-line viewer sees codes.
-			sb.WriteString(wrapLines(part, open, close))
-		}
-		// Even parts (after close) are plain text, written directly.
-		if i%2 == 0 {
-			sb.WriteString(part)
-		}
-	}
-	return sb.String()
-}
-
 // stripANSI removes ANSI escape sequences from s.
 func stripANSI(s string) string {
 	return reANSI.ReplaceAllString(s, "")
 }
 
-// runPandoc pipes input through pandoc for HTML-to-markdown conversion.
-func runPandoc(input io.Reader, luaFilter string, cols int) (string, error) {
-	args := []string{
-		"-f", "html",
-		"-t", "markdown-raw_html-native_divs-native_spans-header_attributes-bracketed_spans-fenced_divs-inline_code_attributes-link_attributes",
-		"-L", luaFilter,
-		"--wrap=auto",
-		fmt.Sprintf("--columns=%d", cols),
-		"--reference-links",
-	}
-	cmd := exec.Command("pandoc", args...)
-	cmd.Stdin = input
-	var out, errBuf bytes.Buffer
-	cmd.Stdout = &out
-	cmd.Stderr = &errBuf
-	if err := cmd.Run(); err != nil {
-		return "", fmt.Errorf("running pandoc: %w", err)
-	}
-	return out.String(), nil
-}
-
-// runColorize pipes text through aerc's colorize filter.
-func runColorize(input string) (string, error) {
-	path, err := findColorize()
-	if err != nil {
-		return input, nil // colorize is optional; pass through if missing
-	}
-	cmd := exec.Command(path)
-	cmd.Stdin = strings.NewReader(input)
-	var out bytes.Buffer
-	cmd.Stdout = &out
-	if err := cmd.Run(); err != nil {
-		return input, nil // pass through on failure
-	}
-	return out.String(), nil
-}
-
-// findColorize locates the aerc colorize binary.
-func findColorize() (string, error) {
-	const fixed = "/usr/local/libexec/aerc/filters/colorize"
-	if _, err := os.Stat(fixed); err == nil {
-		return fixed, nil
-	}
-	path, err := exec.LookPath("colorize")
-	if err == nil {
-		return path, nil
-	}
-	return "", fmt.Errorf("colorize not found")
-}
-
-// unwrapTablesLua is the pandoc Lua filter that flattens layout tables
-// and divs into sequential content blocks with paragraph breaks between
-// cells. Embedded here so the binary is self-contained — no external
-// .lua file needed.
-const unwrapTablesLua = `
-function Table(el)
-  local blocks = {}
-  if el.head and el.head.rows then
-    for _, row in ipairs(el.head.rows) do
-      for _, cell in ipairs(row.cells) do
-        if #blocks > 0 then
-          table.insert(blocks, pandoc.Para{})
-        end
-        for _, block in ipairs(cell.contents) do
-          table.insert(blocks, block)
-        end
-      end
-    end
-  end
-  for _, body in ipairs(el.bodies) do
-    for _, row in ipairs(body.body) do
-      for _, cell in ipairs(row.cells) do
-        if #blocks > 0 then
-          table.insert(blocks, pandoc.Para{})
-        end
-        for _, block in ipairs(cell.contents) do
-          table.insert(blocks, block)
-        end
-      end
-    end
-  end
-  return blocks
-end
-
-function Div(el)
-  return el.content
-end
-`
-
-// writeLuaFilter writes the embedded Lua filter to a temp file and
-// returns the path. The caller must call the returned cleanup function.
-func writeLuaFilter() (string, func(), error) {
-	f, err := os.CreateTemp("", "unwrap-tables-*.lua")
-	if err != nil {
-		return "", nil, fmt.Errorf("creating temp lua filter: %w", err)
-	}
-	if _, err := f.WriteString(unwrapTablesLua); err != nil {
-		f.Close()
-		os.Remove(f.Name())
-		return "", nil, fmt.Errorf("writing temp lua filter: %w", err)
-	}
-	f.Close()
-	path := f.Name()
-	return path, func() { os.Remove(path) }, nil
-}
-
-// htmlToFootnotes runs the HTML-to-markdown pipeline through footnote
-// conversion, returning the pre-styled body and footnote refs.
-func htmlToFootnotes(r io.Reader, cols int) (string, []footnoteRef, error) {
-	if cols < 1 {
-		cols = 72
-	}
-
+// Markdown converts HTML email to clean markdown without ANSI styling.
+// Used by the markdown subcommand for reply templates.
+func Markdown(r io.Reader, w io.Writer, cols int) error {
 	raw, err := io.ReadAll(r)
 	if err != nil {
-		return "", nil, fmt.Errorf("reading input: %w", err)
+		return fmt.Errorf("reading input: %w", err)
 	}
 
 	cleaned := prepareHTML(string(raw))
-
-	luaFilter, cleanup, err := writeLuaFilter()
+	md, err := convertHTML(cleaned)
 	if err != nil {
-		return "", nil, fmt.Errorf("preparing lua filter: %w", err)
-	}
-	defer cleanup()
-
-	md, err := runPandoc(strings.NewReader(cleaned), luaFilter, cols)
-	if err != nil {
-		return "", nil, fmt.Errorf("pandoc conversion: %w", err)
+		return fmt.Errorf("converting html: %w", err)
 	}
 
-	md = html.UnescapeString(md)
-	md = cleanPandocArtifacts(md)
-	md = normalizeBoldMarkers(md)
-	md = normalizeLists(md)
-	md = normalizeWhitespace(md)
-
-	body, refs := convertToFootnotes(md)
-	return body, refs, nil
+	if _, err := fmt.Fprint(w, md+"\n"); err != nil {
+		return fmt.Errorf("writing output: %w", err)
+	}
+	return nil
 }
 
-// HTMLLinks extracts labeled footnote links from an HTML email.
-func HTMLLinks(r io.Reader, cols int) ([]FootnoteLink, error) {
-	body, refs, err := htmlToFootnotes(r, cols)
-	if err != nil {
-		return nil, err
-	}
-	return ExtractFootnoteLinks(body, refs), nil
-}
-
-// HTML reads raw HTML email from r, converts it to markdown with
-// footnotes, and highlights markdown syntax using theme t.
-// cols sets pandoc's column width.
+// HTML reads raw HTML email from r, converts it to markdown, and renders
+// it to styled ANSI output via Glamour using theme t. cols sets the
+// terminal width for wrapping.
 func HTML(r io.Reader, w io.Writer, t *theme.Theme, cols int) error {
-	body, refs, err := htmlToFootnotes(r, cols)
+	raw, err := io.ReadAll(r)
 	if err != nil {
-		return err
+		return fmt.Errorf("reading input: %w", err)
 	}
 
-	fc := &footnoteColors{
-		LinkText: t.Raw("link_text"),
-		Dim:      t.Raw("msg_dim"),
-		LinkURL:  t.Raw("link_url"),
-		Reset:    "0",
+	cleaned := prepareHTML(string(raw))
+	md, err := convertHTML(cleaned)
+	if err != nil {
+		return fmt.Errorf("converting html: %w", err)
 	}
-	styled := styleFootnotes(body, refs, cols, fc)
 
-	// Markdown syntax highlighting
-	mc := &markdownColors{
-		Heading: t.Raw("heading"),
-		Bold:    t.Raw("bold"),
-		Italic:  t.Raw("italic"),
-		Rule:    t.Raw("rule"),
-		Reset:   "0",
+	style := t.GlamourStyle()
+	renderer, err := glamour.NewTermRenderer(
+		glamour.WithStyles(style),
+		glamour.WithWordWrap(cols),
+	)
+	if err != nil {
+		return fmt.Errorf("creating renderer: %w", err)
 	}
-	styled = highlightMarkdown(styled, mc)
 
-	// Write leading newline + result
-	if _, err := fmt.Fprint(w, "\n"+styled); err != nil {
+	styled, err := renderer.Render(md)
+	if err != nil {
+		return fmt.Errorf("rendering markdown: %w", err)
+	}
+
+	if _, err := fmt.Fprint(w, styled); err != nil {
 		return fmt.Errorf("writing output: %w", err)
 	}
 	return nil

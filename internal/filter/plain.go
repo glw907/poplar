@@ -12,6 +12,19 @@ import (
 	"github.com/glw907/beautiful-aerc/internal/theme"
 )
 
+// findColorize locates the aerc colorize binary.
+func findColorize() (string, error) {
+	const fixed = "/usr/local/libexec/aerc/filters/colorize"
+	if _, err := os.Stat(fixed); err == nil {
+		return fixed, nil
+	}
+	path, err := exec.LookPath("colorize")
+	if err == nil {
+		return path, nil
+	}
+	return "", fmt.Errorf("colorize not found")
+}
+
 var (
 	htmlTagRe      = regexp.MustCompile(`(?i)<(div|html|body|table|span|br|p[ />])`)
 	reTabListItem  = regexp.MustCompile(`(?m)^\t+([-*+] )`)
