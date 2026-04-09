@@ -30,16 +30,17 @@ The README tells a story before it becomes a reference:
 1. **Why aerc?** — What makes aerc the right foundation for a
    terminal email client. Its strengths (fast, extensible filter
    protocol, good keyboard UX) and the gap it leaves (rendering).
-
-2. **The problem: email is a mess.** Not just marketing emails —
-   *all* email on the internet is inconsistent HTML, broken
+2. **The problem: email is a mess.** Email on the internet is inconsistent HTML, broken
    formatting, tracking pixels, layout tables, inline styles.
    GUI clients (Outlook, Gmail, Apple Mail) do enormous work to
    clean this up and present a coherent reading experience. CLI
    clients show the raw mess, or at best pipe through basic
    text conversion.
-
-3. **The markdown-forward design.** Markdown is the core
+3. **What beautiful-aerc gives you.** The same polished email
+   experience GUI users get, but in your terminal. Specific
+   deliverables: clean rendered HTML, numbered footnote links,
+   interactive link picker, consistent theming, a proper compose editor.
+4. **The markdown-forward design.** Markdown is the core
    abstraction throughout beautiful-aerc. Reading email: HTML is
    converted to clean markdown with ANSI styling. Writing email:
    you compose in markdown in neovim, and it converts to HTML
@@ -47,13 +48,6 @@ The README tells a story before it becomes a reference:
    in the terminal, gives you clean formatting options (headings,
    bold, lists, links) when composing, and converts losslessly
    to HTML for recipients who expect rich email.
-
-4. **What beautiful-aerc gives you.** The same polished email
-   experience GUI users get, but in your terminal. Specific
-   deliverables: clean rendered HTML, numbered footnote links,
-   interactive link picker, consistent theming, a proper compose
-   editor.
-
 5. **Screenshot placeholders** throughout, with descriptions of
    what to capture, recommended dimensions, and framing notes.
 
@@ -68,14 +62,19 @@ for readers who want to go deeper.
 1. **Why aerc** — 2-3 paragraphs on aerc's strengths and the gap
 2. **The problem: email is a mess** — frame the problem broadly
    (all email, not just marketing), contrast with GUI clients
-3. **The markdown-forward design** — why markdown is the core
-   abstraction for both reading and writing
-4. **What beautiful-aerc gives you** — concrete deliverables with
+3. **What beautiful-aerc gives you** — concrete deliverables with
    screenshot placeholders
-5. **Components overview** — what ships in the box (table of all
-   binaries: mailrender, pick-link, fastmail-cli, tidytext,
-   compose-prep; and config pieces: aerc config, nvim-mail,
-   kitty profile, launcher scripts)
+4. **The markdown-forward design** — why markdown is the core
+   abstraction for both reading and writing
+5. **Components overview** — what ships in the box, and why we replaced some aerc defaults
+   1. Go binaries
+      1. mailrender and compose prep are the core. pick-link works with mail-render to give you an easy experience for selecting links in your email
+      2. fastmail-cli, tidytext are options
+
+   2. Config scripts
+      1. aerc config and nvim-mail as core config
+      2. kitty profile, launcher scripts as examples of how to make your cli email experience feel more like a "regular app"
+
 6. **Prerequisites** — what to install first, with brief
    explanations of each dependency and why it's needed
 7. **Install** — step-by-step for newcomers. Rewrite the current
