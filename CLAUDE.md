@@ -43,7 +43,6 @@ e2e-tidytext/          End-to-end tests for tidytext
 .config/aerc/          aerc configuration files
 .config/aerc/themes/   TOML theme files (nord.toml, solarized-dark.toml, gruvbox-dark.toml)
 .config/aerc/stylesets/ Generated aerc stylesets
-.config/aerc/filters/  pandoc Lua filter (unwrap-tables.lua)
 .config/nvim-mail/     Neovim compose editor profile
 .config/kitty/         kitty terminal profile for mail
 .local/bin/            Launcher scripts (mail, nvim-mail, aerc-save-email)
@@ -228,7 +227,7 @@ make build     # build all five binaries
 make test      # run tests
 make vet       # go vet
 make check     # vet + test (gate before commits)
-make install   # install all four to ~/.local/bin/
+make install   # install all five to ~/.local/bin/
 ```
 
 ## Corpus

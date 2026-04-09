@@ -87,18 +87,6 @@ msg_dim = { color = "fg_dim" }
 `
 	os.WriteFile(filepath.Join(themesDir, "test.toml"), []byte(themeContent), 0644)
 
-	// Copy unwrap-tables.lua into the test config dir so the binary can find it
-	filterDir := filepath.Join(configDir, "filters")
-	os.MkdirAll(filterDir, 0755)
-	luaSrc := filepath.Join("..", ".config", "aerc", "filters", "unwrap-tables.lua")
-	luaData, err := os.ReadFile(luaSrc)
-	if err != nil {
-		panic("reading unwrap-tables.lua: " + err.Error())
-	}
-	if err := os.WriteFile(filepath.Join(filterDir, "unwrap-tables.lua"), luaData, 0644); err != nil {
-		panic("writing unwrap-tables.lua: " + err.Error())
-	}
-
 	code := m.Run()
 	os.RemoveAll(tmp)
 	os.RemoveAll(configDir)

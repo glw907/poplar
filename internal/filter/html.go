@@ -7,7 +7,6 @@ import (
 	"io"
 	"os"
 	"os/exec"
-	"path/filepath"
 	"regexp"
 	"strings"
 
@@ -199,7 +198,7 @@ func normalizeLists(text string) string {
 		lines[i] = reListSpacing.ReplaceAllString(lines[i], "$1 ")
 	}
 
-	// Phase 3: Compact loose lists (drop blank lines between items).
+	// Phase 2: Compact loose lists (drop blank lines between items).
 	var out []string
 	inList := false
 	pendingBlanks := 0
@@ -392,29 +391,60 @@ func findColorize() (string, error) {
 	return "", fmt.Errorf("colorize not found")
 }
 
-// findLuaFilter locates unwrap-tables.lua by checking standard locations.
-func findLuaFilter() (string, error) {
-	var candidates []string
+// unwrapTablesLua is the pandoc Lua filter that flattens layout tables
+// and divs into sequential content blocks with paragraph breaks between
+// cells. Embedded here so the binary is self-contained — no external
+// .lua file needed.
+const unwrapTablesLua = `
+function Table(el)
+  local blocks = {}
+  if el.head and el.head.rows then
+    for _, row in ipairs(el.head.rows) do
+      for _, cell in ipairs(row.cells) do
+        if #blocks > 0 then
+          table.insert(blocks, pandoc.Para{})
+        end
+        for _, block in ipairs(cell.contents) do
+          table.insert(blocks, block)
+        end
+      end
+    end
+  end
+  for _, body in ipairs(el.bodies) do
+    for _, row in ipairs(body.body) do
+      for _, cell in ipairs(row.cells) do
+        if #blocks > 0 then
+          table.insert(blocks, pandoc.Para{})
+        end
+        for _, block in ipairs(cell.contents) do
+          table.insert(blocks, block)
+        end
+      end
+    end
+  end
+  return blocks
+end
 
-	if aercConfig := os.Getenv("AERC_CONFIG"); aercConfig != "" {
-		candidates = append(candidates, filepath.Join(aercConfig, "filters", "unwrap-tables.lua"))
-	}
+function Div(el)
+  return el.content
+end
+`
 
-	// Relative to binary: ../../.config/aerc/filters/unwrap-tables.lua
-	if exe, err := os.Executable(); err == nil {
-		candidates = append(candidates, filepath.Join(filepath.Dir(exe), "..", "..", ".config", "aerc", "filters", "unwrap-tables.lua"))
+// writeLuaFilter writes the embedded Lua filter to a temp file and
+// returns the path. The caller must call the returned cleanup function.
+func writeLuaFilter() (string, func(), error) {
+	f, err := os.CreateTemp("", "unwrap-tables-*.lua")
+	if err != nil {
+		return "", nil, fmt.Errorf("creating temp lua filter: %w", err)
 	}
-
-	if home, err := os.UserHomeDir(); err == nil {
-		candidates = append(candidates, filepath.Join(home, ".config", "aerc", "filters", "unwrap-tables.lua"))
+	if _, err := f.WriteString(unwrapTablesLua); err != nil {
+		f.Close()
+		os.Remove(f.Name())
+		return "", nil, fmt.Errorf("writing temp lua filter: %w", err)
 	}
-
-	for _, c := range candidates {
-		if _, err := os.Stat(c); err == nil {
-			return c, nil
-		}
-	}
-	return "", fmt.Errorf("unwrap-tables.lua not found (checked: %s)", strings.Join(candidates, ", "))
+	f.Close()
+	path := f.Name()
+	return path, func() { os.Remove(path) }, nil
 }
 
 // htmlToFootnotes runs the HTML-to-markdown pipeline through footnote
@@ -431,10 +461,11 @@ func htmlToFootnotes(r io.Reader, cols int) (string, []footnoteRef, error) {
 
 	cleaned := prepareHTML(string(raw))
 
-	luaFilter, err := findLuaFilter()
+	luaFilter, cleanup, err := writeLuaFilter()
 	if err != nil {
-		return "", nil, fmt.Errorf("finding lua filter: %w", err)
+		return "", nil, fmt.Errorf("preparing lua filter: %w", err)
 	}
+	defer cleanup()
 
 	md, err := runPandoc(strings.NewReader(cleaned), luaFilter, cols)
 	if err != nil {

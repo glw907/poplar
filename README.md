@@ -20,7 +20,7 @@ aerc is a powerful terminal email client, but out of the box it relies on shell 
 
 - [aerc](https://aerc-mail.org/)
 - [pandoc](https://pandoc.org/) (called at runtime for HTML conversion)
-- Go 1.23+ (build only)
+- Go 1.25+ (build only)
 - GNU Stow (install only)
 
 Optional:
@@ -40,11 +40,11 @@ git clone https://github.com/glw907/beautiful-aerc.git
 cd beautiful-aerc
 ```
 
-**2. Build and install the four binaries**
+**2. Build and install the five binaries**
 
 ```sh
 make build
-make install   # installs mailrender, pick-link, fastmail-cli, tidytext to ~/.local/bin/
+make install   # installs mailrender, pick-link, fastmail-cli, tidytext, compose-prep to ~/.local/bin/
 ```
 
 **3. Generate a styleset**

@@ -15,7 +15,7 @@ func TestPrepare(t *testing.T) {
 		{
 			name: "new compose with empty To",
 			input: join(
-				"From: geoff@907.life",
+				"From: author@example.com",
 				"To:",
 				"Subject:",
 				"",
@@ -23,7 +23,7 @@ func TestPrepare(t *testing.T) {
 			),
 			opts: Options{InjectCcBcc: true},
 			want: join(
-				"From: geoff@907.life",
+				"From: author@example.com",
 				"To:",
 				"Cc:",
 				"Bcc:",
@@ -35,7 +35,7 @@ func TestPrepare(t *testing.T) {
 		{
 			name: "reply with quoted text",
 			input: join(
-				"From: geoff@907.life",
+				"From: author@example.com",
 				"To: Alice <alice@example.com>",
 				"Subject: Re: Hello",
 				"",
@@ -47,7 +47,7 @@ func TestPrepare(t *testing.T) {
 			opts: Options{InjectCcBcc: true},
 			// NOTE: net/mail quotes "Alice". Reflow wraps at 72 chars.
 			want: join(
-				"From: geoff@907.life",
+				"From: author@example.com",
 				`To: "Alice" <alice@example.com>`,
 				"Cc:",
 				"Bcc:",
@@ -61,7 +61,7 @@ func TestPrepare(t *testing.T) {
 		{
 			name: "forward with empty To and quoted text",
 			input: join(
-				"From: geoff@907.life",
+				"From: author@example.com",
 				"To:",
 				"Subject: Fwd: News",
 				"",
@@ -70,7 +70,7 @@ func TestPrepare(t *testing.T) {
 			),
 			opts: Options{InjectCcBcc: true},
 			want: join(
-				"From: geoff@907.life",
+				"From: author@example.com",
 				"To:",
 				"Cc:",
 				"Bcc:",
@@ -83,7 +83,7 @@ func TestPrepare(t *testing.T) {
 		{
 			name: "multi-recipient folding",
 			input: join(
-				"From: geoff@907.life",
+				"From: author@example.com",
 				"To: Alice <alice@example.com>, Bob <bob@example.com>, Charlie <charlie@example.com>",
 				"Subject: Group",
 				"",
@@ -93,7 +93,7 @@ func TestPrepare(t *testing.T) {
 			// NOTE: net/mail quotes these names. Also, the folding depends on
 			// actual string widths. Run the test, check actual output, adjust.
 			want: join(
-				"From: geoff@907.life",
+				"From: author@example.com",
 				`To: "Alice" <alice@example.com>, "Bob" <bob@example.com>,`,
 				`    "Charlie" <charlie@example.com>`,
 				"Cc:",
@@ -106,7 +106,7 @@ func TestPrepare(t *testing.T) {
 		{
 			name: "folded continuation header unfolded first",
 			input: join(
-				"From: geoff@907.life",
+				"From: author@example.com",
 				"To: alice@example.com,",
 				" bob@example.com",
 				"Subject: Hi",
@@ -115,7 +115,7 @@ func TestPrepare(t *testing.T) {
 			),
 			opts: Options{InjectCcBcc: true},
 			want: join(
-				"From: geoff@907.life",
+				"From: author@example.com",
 				"To: alice@example.com, bob@example.com",
 				"Cc:",
 				"Bcc:",
@@ -127,7 +127,7 @@ func TestPrepare(t *testing.T) {
 		{
 			name: "no-cc-bcc flag",
 			input: join(
-				"From: geoff@907.life",
+				"From: author@example.com",
 				"To: alice@dom",
 				"Subject: Hi",
 				"",
@@ -135,7 +135,7 @@ func TestPrepare(t *testing.T) {
 			),
 			opts: Options{InjectCcBcc: false},
 			want: join(
-				"From: geoff@907.life",
+				"From: author@example.com",
 				"To: alice@dom",
 				"Subject: Hi",
 				"",
