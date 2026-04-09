@@ -66,14 +66,46 @@ for readers who want to go deeper.
    screenshot placeholders
 4. **The markdown-forward design** — why markdown is the core
    abstraction for both reading and writing
-5. **Components overview** — what ships in the box, and why we replaced some aerc defaults
-   1. Go binaries
-      1. mailrender and compose prep are the core. pick-link works with mail-render to give you an easy experience for selecting links in your email
-      2. fastmail-cli, tidytext are options
+5. **Components overview** — what ships in the box, and why we
+   replaced some aerc defaults. Each component gets a brief
+   description of what it does and *why it's a Go binary* instead
+   of a shell script. The general answer: Go gives us a single
+   compiled binary with no runtime dependencies, proper error
+   handling, and the ability to share code between tools (theme
+   loading, header parsing, ANSI rendering). Shell scripts work
+   for simple filters but break down when you need multi-stage
+   pipelines, Unicode handling, or interactive TUIs.
 
-   2. Config scripts
-      1. aerc config and nvim-mail as core config
-      2. kitty profile, launcher scripts as examples of how to make your cli email experience feel more like a "regular app"
+   1. Go binaries (core)
+      - **mailrender** — the filter pipeline. Replaces aerc's
+        basic `colorize` and `plaintext` filters with a
+        multi-stage pipeline that produces clean markdown from
+        messy HTML. Why Go: the pipeline has 8+ stages (pre-clean,
+        pandoc, artifact cleanup, footnotes, ANSI styling) that
+        would be fragile as chained shell commands.
+      - **compose-prep** — normalizes the compose buffer before
+        nvim-mail opens it (unfold headers, strip brackets, reflow
+        quoted text). Why Go: RFC 2822 header parsing and
+        format-flowed text reflowing need proper string handling.
+      - **pick-link** — interactive URL picker for the message
+        viewer. Why Go: needs raw terminal mode, alternate screen
+        buffer, and `/dev/tty` input — a real TUI application.
+
+   2. Go binaries (optional)
+      - **fastmail-cli** — Fastmail JMAP operations (mail rules,
+        masked email, folder management). Why Go: JMAP is a
+        JSON-over-HTTP API that benefits from typed structs and
+        proper error handling.
+      - **tidytext** — Claude-powered prose proofreader. Why Go:
+        shares the theme system for styled output and needs
+        structured API interaction with Anthropic.
+
+   3. Config and scripts
+      - aerc config and nvim-mail as core config — the settings
+        that make everything work together
+      - kitty profile, launcher scripts, desktop file as examples
+        of how to make your CLI email experience feel more like
+        a "regular app"
 
 6. **Prerequisites** — what to install first, with brief
    explanations of each dependency and why it's needed
