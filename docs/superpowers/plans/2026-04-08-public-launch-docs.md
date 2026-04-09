@@ -8,6 +8,8 @@
 
 **Architecture:** The work splits into independent document authoring tasks plus config cleanup. Each task produces a self-contained file that can be committed independently. Config onboarding fixes go first since they affect what the docs reference.
 
+**Tone:** Friendly and educational. We want clear, well-organized documentation, but not dry or formal. The reader is a curious nerd exploring terminal email — write like you're showing a friend around a project you're proud of. Explain *why* before *how*. Be direct but warm.
+
 **Tech Stack:** Markdown, INI (aerc config), Lua (nvim-mail), TOML (kitty)
 
 **Spec:** `docs/superpowers/specs/2026-04-08-public-launch-docs-design.md`
