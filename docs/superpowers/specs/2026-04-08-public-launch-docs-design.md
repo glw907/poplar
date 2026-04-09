@@ -66,15 +66,37 @@ for readers who want to go deeper.
    screenshot placeholders
 4. **The markdown-forward design** — why markdown is the core
    abstraction for both reading and writing
-5. **Components overview** — what ships in the box, and why we
-   replaced some aerc defaults. Each component gets a brief
-   description of what it does and *why it's a Go binary* instead
-   of a shell script. The general answer: Go gives us a single
-   compiled binary with no runtime dependencies, proper error
-   handling, and the ability to share code between tools (theme
-   loading, header parsing, ANSI rendering). Shell scripts work
-   for simple filters but break down when you need multi-stage
-   pipelines, Unicode handling, or interactive TUIs.
+5. **Components overview** — what ships in the box, and why.
+
+   Start with framing: aerc's extensibility model. aerc ships
+   with a small set of built-in shell-script filters (`colorize`,
+   `plaintext`, `wrap`) and a powerful filter protocol — any
+   program that reads stdin and writes styled text to stdout can
+   be a filter. This is aerc's greatest strength: it doesn't try
+   to do everything itself, it gives you the hooks to build what
+   you need.
+
+   The built-in filters are fine for plain text email between
+   technical users. But most email on the internet is HTML, and
+   aerc's default approach is to shell out to `w3m` or `lynx`
+   for HTML-to-text conversion. The result is functional but
+   rough — you lose structure, links are hard to follow, and
+   there's no theming.
+
+   beautiful-aerc replaces these defaults with purpose-built Go
+   binaries. Why Go instead of more shell scripts? For simple
+   filters, shell works great — and aerc's design encourages
+   that. But the problems we're solving (multi-stage HTML
+   cleanup, RFC 2822 header parsing, interactive terminal UIs,
+   consistent theming across tools) need things shell scripts
+   struggle with: proper Unicode handling, structured error
+   handling, shared code between tools (theme loading, ANSI
+   rendering, header parsing), and the ability to build real
+   TUI applications. Go gives us single compiled binaries with
+   no runtime dependencies — easy to install, easy to maintain.
+
+   Each component gets a brief description of what it does and
+   why it exists.
 
    1. Go binaries (core)
       - **mailrender** — the filter pipeline. Replaces aerc's
