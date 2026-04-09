@@ -152,6 +152,59 @@ func TestStripHiddenElements(t *testing.T) {
 	}
 }
 
+func TestStripLinkURLs(t *testing.T) {
+	tests := []struct {
+		name  string
+		input string
+		want  string
+	}{
+		{
+			"standard link",
+			"Visit [Example](https://example.com) today.",
+			"Visit [Example](#) today.",
+		},
+		{
+			"tracking URL",
+			"[Click here](https://tracking.example.com/click?id=abc&redirect=https%3A%2F%2Fexample.com)",
+			"[Click here](#)",
+		},
+		{
+			"multiple links",
+			"See [A](https://a.com) and [B](https://b.com).",
+			"See [A](#) and [B](#).",
+		},
+		{
+			"no links",
+			"Plain text with no links.",
+			"Plain text with no links.",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := stripLinkURLs(tt.input)
+			if got != tt.want {
+				t.Errorf("got %q, want %q", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestHTMLLinkURLsNotVisible(t *testing.T) {
+	th := testTheme(t)
+	input := `<p>Check <a href="https://tracking.example.com/click?id=abc123">this product</a> out.</p>`
+	var buf bytes.Buffer
+	if err := HTML(strings.NewReader(input), &buf, th, 80); err != nil {
+		t.Fatal(err)
+	}
+	plain := stripANSI(buf.String())
+	if !strings.Contains(plain, "this product") {
+		t.Error("link text should be preserved")
+	}
+	if strings.Contains(plain, "tracking.example.com") {
+		t.Error("tracking URL should not appear in output")
+	}
+}
+
 func TestStripANSI(t *testing.T) {
 	tests := []struct {
 		name  string

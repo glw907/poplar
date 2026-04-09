@@ -27,6 +27,12 @@ var (
 	reBlankSpaces   = regexp.MustCompile(`(?m)^ +$`)
 	reExcessiveBlanks = regexp.MustCompile(`\n{3,}`)
 	reLeadingBlanks = regexp.MustCompile(`\A\n+`)
+
+	// Markdown link URL replacement: [text](url) → [text](#). Glamour
+	// renders link URLs as visible inline text, which produces noise
+	// from tracking URLs. Replacing with # preserves link styling
+	// while suppressing the URL display.
+	reMdLink = regexp.MustCompile(`\[([^\]]+)\]\([^)]+\)`)
 )
 
 // prepareHTML cleans the raw HTML before conversion: strips Mozilla-specific
@@ -95,6 +101,12 @@ func normalizeWhitespace(text string) string {
 	return text
 }
 
+// stripLinkURLs replaces markdown link URLs with # so Glamour styles
+// the link text without displaying the (often lengthy tracking) URL.
+func stripLinkURLs(text string) string {
+	return reMdLink.ReplaceAllString(text, "[$1](#)")
+}
+
 // stripANSI removes ANSI escape sequences from s.
 func stripANSI(s string) string {
 	return reANSI.ReplaceAllString(s, "")
@@ -136,6 +148,7 @@ func HTML(r io.Reader, w io.Writer, t *theme.Theme, cols int) error {
 		return fmt.Errorf("converting html: %w", err)
 	}
 	md = normalizeWhitespace(md)
+	md = stripLinkURLs(md)
 
 	style := t.GlamourStyle()
 	renderer, err := glamour.NewTermRenderer(
