@@ -21,9 +21,10 @@ var requiredColors = []string{
 
 // Theme holds parsed color slots and resolved ANSI tokens.
 type Theme struct {
-	Name   string
-	colors map[string]string // "accent_primary" → "#81a1c1"
-	tokens map[string]string // "hdr_key" → "38;2;129;161;193;1"
+	Name      string
+	colors    map[string]string          // "accent_primary" → "#81a1c1"
+	tokens    map[string]string          // "hdr_key" → "38;2;129;161;193;1"
+	tokenDefs map[string]tokenDefinition // original token definitions for Glamour
 }
 
 // themeFile is the TOML deserialization target.
@@ -79,9 +80,10 @@ func Load(path string) (*Theme, error) {
 	}
 
 	return &Theme{
-		Name:   f.Name,
-		colors: f.Colors,
-		tokens: resolved,
+		Name:      f.Name,
+		colors:    f.Colors,
+		tokens:    resolved,
+		tokenDefs: f.Tokens,
 	}, nil
 }
 
