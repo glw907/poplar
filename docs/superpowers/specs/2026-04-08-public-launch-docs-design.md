@@ -113,6 +113,36 @@ for readers who want to go deeper.
         artifact cleanup, footnote conversion, ANSI styling)
         would be fragile and unmaintainable as chained shell
         commands.
+
+        Include 2-3 annotated code snippets from the pipeline to
+        show readers what they're getting for free. Pick the ones
+        that are impressive/fun and tell a story about real email
+        on the internet. Good candidates:
+
+        - **The invisible Unicode nuclear option**
+          (`internal/filter/html.go` ~lines 39-43) — regex
+          cluster that strips soft hyphens, Mongolian vowel
+          separators, zero-width joiners, word joiners, BOM
+          characters, and a full range of typographic spaces
+          that senders embed invisibly in HTML email.
+
+        - **Nesting-aware hidden div removal**
+          (`internal/filter/html.go` ~lines 100-135) — a
+          hand-rolled depth-tracking HTML parser because
+          responsive emails (Apple receipts, etc.) embed a
+          hidden duplicate of the entire body in a
+          `display:none` div that nests arbitrarily deep.
+
+        - **The tracking pixel URL splicer**
+          (`internal/filter/html.go` ~lines 73-76) — Bank of
+          America embeds 1x1 tracking pixels *inside* hyperlink
+          text, causing pandoc to split a single URL across
+          multiple paragraphs.
+
+        Frame these as "here's what email actually looks like
+        under the hood" — entertaining and educational, not
+        scary. The tone should make the reader glad the pipeline
+        exists.
       - **compose-prep** — normalizes the compose buffer before
         nvim-mail opens it (unfold headers, strip brackets, reflow
         quoted text). Why Go: RFC 2822 header parsing and
