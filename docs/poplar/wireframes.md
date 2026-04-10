@@ -127,3 +127,77 @@ focused.
 - **Numeric switching:** `1-9` keys switch to tab by position.
 - **Overflow:** If tabs exceed terminal width, rightmost tabs
   are truncated with `…`. Active tab is always fully visible.
+
+---
+
+## 3. Sidebar (#1 — left panel)
+
+### Focused, Inbox selected
+
+```
+ ┃ 󰇰 Inbox              3
+   󰏫 Drafts
+   󰑚 Sent
+   󰀼 Archive
+
+   󰍷 Spam             12
+   󰩺 Trash
+
+   󰂚 Notifications
+   󰑴 Remind
+   󰡡 Lists/golang
+   󰡡 Lists/rust
+```
+
+### Focused, selection in Disposal group
+
+```
+   󰇰 Inbox              3
+   󰏫 Drafts
+   󰑚 Sent
+   󰀼 Archive
+
+   󰍷 Spam             12
+ ┃ 󰩺 Trash
+
+   󰂚 Notifications
+   󰑴 Remind
+   󰡡 Lists/golang
+```
+
+### Unfocused (message list has focus)
+
+```
+   󰇰 Inbox              3
+   󰏫 Drafts
+   󰑚 Sent
+   󰀼 Archive
+
+   󰍷 Spam             12
+   󰩺 Trash
+
+   󰂚 Notifications
+   󰑴 Remind
+```
+
+The selected folder (Inbox) still has `bg_selection` background
+but no `┃` border — the border only appears in the focused state.
+
+**Annotations:**
+
+- **Width:** 30 columns fixed.
+- **Selected row (focused):** `┃` thick left border in
+  `accent_primary` + full-width `bg_selection` background.
+  Folder name in `fg_bright`.
+- **Selected row (unfocused):** `bg_selection` background only,
+  no `┃` border. Folder name in `fg_base`.
+- **Unread counts:** Right-aligned in `accent_tertiary`. Only
+  shown when > 0.
+- **Folder icons:** Nerd Font in `fg_base`. When folder has
+  unread messages, icon switches to `accent_tertiary`.
+- **Group spacing:** One blank line between Primary, Disposal,
+  and Custom groups. No group headers rendered.
+- **Scrolling:** If folders exceed panel height, viewport clips
+  with j/k scrolling. No scrollbar.
+- **Footer (when focused):**
+  `Enter:open  c:compose  ::cmd`
