@@ -93,6 +93,15 @@ pass where it first appears.
 - **Snooze picker** — v2 candidate, needs date/time picker UI
 - **Label/tag system** — Gmail-specific, not in v1
 
+### Future: Neovim Companion Plugin
+
+A neovim plugin for poplar is a project goal beyond v1. Potential
+scope: email browsing within neovim (folder list, message list,
+viewer as neovim buffers), compose integration beyond nvim-mail,
+telescope pickers for folders/messages/contacts, and poplar
+command passthrough. Details to be designed when the core client
+is stable.
+
 ## 2. Wireframing Workflow
 
 Two-phase approach integrated into the development process.
