@@ -1,6 +1,7 @@
 package filter
 
 import (
+	gohtml "html"
 	"regexp"
 	"strings"
 )
@@ -495,5 +496,6 @@ func CleanHTML(html string) string {
 	md = collapseShortBlocks(md)
 	md = unflattenQuotes(md)
 	md = compactLineRuns(md)
+	md = gohtml.UnescapeString(md)
 	return md
 }

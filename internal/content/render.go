@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/lipgloss"
+	"github.com/charmbracelet/x/ansi"
 	"github.com/glw907/beautiful-aerc/internal/theme"
 )
 
@@ -29,12 +30,14 @@ func renderBlock(block Block, t *theme.CompiledTheme, width int) string {
 	switch b := block.(type) {
 	case Paragraph:
 		text := renderSpans(b.Spans, t)
+		text = ansi.Wordwrap(text, width, "")
 		return t.Paragraph.Render(text)
 
 	case Heading:
 		text := renderSpans(b.Spans, t)
 		prefix := strings.Repeat("#", b.Level) + " "
-		return t.Heading.Render(prefix + text)
+		text = ansi.Wordwrap(prefix+text, width, "")
+		return t.Heading.Render(text)
 
 	case Blockquote:
 		style := t.Quote
@@ -46,7 +49,7 @@ func renderBlock(block Block, t *theme.CompiledTheme, width int) string {
 		for _, child := range b.Blocks {
 			inner = append(inner, renderBlock(child, t, width-len(prefix)))
 		}
-		content := strings.Join(inner, "\n")
+		content := strings.Join(inner, "\n\n")
 		var lines []string
 		for _, line := range strings.Split(content, "\n") {
 			if line == "" {
@@ -59,12 +62,14 @@ func renderBlock(block Block, t *theme.CompiledTheme, width int) string {
 
 	case QuoteAttribution:
 		text := renderSpans(b.Spans, t)
+		text = ansi.Wordwrap(text, width, "")
 		return t.Attribution.Render(text)
 
 	case Signature:
 		var lines []string
 		for _, spans := range b.Lines {
 			text := renderSpans(spans, t)
+			text = ansi.Wordwrap(text, width, "")
 			lines = append(lines, t.Signature.Render(text))
 		}
 		return strings.Join(lines, "\n")
@@ -85,7 +90,8 @@ func renderBlock(block Block, t *theme.CompiledTheme, width int) string {
 		if b.Ordered {
 			prefix = string(rune('0'+b.Index%10)) + ". "
 		}
-		return t.Paragraph.Render(prefix + text)
+		text = ansi.Wordwrap(prefix+text, width, "")
+		return t.Paragraph.Render(text)
 
 	default:
 		return ""
