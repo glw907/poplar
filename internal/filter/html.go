@@ -1,13 +1,8 @@
 package filter
 
 import (
-	"fmt"
-	"io"
 	"regexp"
 	"strings"
-
-	"github.com/charmbracelet/glamour"
-	"github.com/glw907/beautiful-aerc/internal/theme"
 )
 
 // Package-level compiled regexes.
@@ -17,9 +12,6 @@ var (
 	reMozAttr       = regexp.MustCompile(` moz-do-not-send="[^"]*"`)
 	reHiddenDivOpen = regexp.MustCompile(`(?i)<div[^>]+style="[^"]*display:\s*none[^"]*"[^>]*>`)
 	reZeroImg       = regexp.MustCompile(`(?i)<img[^>]*(?:width:\s*0|height:\s*0|width="0"|height="0")[^>]*/?>`)
-	reANSI          = regexp.MustCompile(`\x1b\[[0-9;]*m`)
-	reOSC8          = regexp.MustCompile(`\x1b\]8;[^\x1b]*\x1b\\`)
-
 	// Post-conversion whitespace normalization: strip invisible filler
 	// characters that email senders embed for preheader text, collapse
 	// excessive blank lines, and strip leading blanks.
@@ -489,53 +481,13 @@ func stripEmptyLinks(text string) string {
 	return reEmptyMdLink.ReplaceAllString(text, "")
 }
 
-// stripANSI removes ANSI escape sequences (CSI and OSC 8) from s.
-func stripANSI(s string) string {
-	s = reOSC8.ReplaceAllString(s, "")
-	return reANSI.ReplaceAllString(s, "")
-}
-
-// Markdown converts HTML email to clean markdown without ANSI styling.
-// Used by the markdown subcommand for reply templates.
-func Markdown(r io.Reader, w io.Writer, cols int) error {
-	raw, err := io.ReadAll(r)
+// CleanHTML converts raw HTML email content to normalized markdown.
+// This is the content pipeline only — no rendering or styling.
+func CleanHTML(html string) string {
+	html = prepareHTML(html)
+	md, err := convertHTML(html)
 	if err != nil {
-		return fmt.Errorf("reading input: %w", err)
-	}
-
-	cleaned := prepareHTML(string(raw))
-	md, err := convertHTML(cleaned)
-	if err != nil {
-		return fmt.Errorf("converting html: %w", err)
-	}
-	md = normalizeWhitespace(md)
-	md = unflattenQuotes(md)
-	md = reflowMarkdown(md, cols)
-
-	if _, err := fmt.Fprint(w, md+"\n"); err != nil {
-		return fmt.Errorf("writing output: %w", err)
-	}
-	return nil
-}
-
-// wrapWidth is the fixed line width for rendered email, matching the
-// standard email prose width. Using a fixed width rather than the
-// terminal width avoids awkward reflows when the pane is very wide
-// or very narrow.
-const wrapWidth = 78
-
-// HTML reads raw HTML email from r, converts it to markdown, and renders
-// it to styled ANSI output via Glamour using theme t.
-func HTML(r io.Reader, w io.Writer, t *theme.Theme, _ int) error {
-	raw, err := io.ReadAll(r)
-	if err != nil {
-		return fmt.Errorf("reading input: %w", err)
-	}
-
-	cleaned := prepareHTML(string(raw))
-	md, err := convertHTML(cleaned)
-	if err != nil {
-		return fmt.Errorf("converting html: %w", err)
+		return html
 	}
 	md = normalizeWhitespace(md)
 	md = deduplicateBlocks(md)
@@ -543,25 +495,5 @@ func HTML(r io.Reader, w io.Writer, t *theme.Theme, _ int) error {
 	md = collapseShortBlocks(md)
 	md = unflattenQuotes(md)
 	md = compactLineRuns(md)
-	md = reflowMarkdown(md, wrapWidth)
-
-	style := t.GlamourStyle()
-	renderer, err := glamour.NewTermRenderer(
-		glamour.WithStyles(style),
-		glamour.WithWordWrap(0),
-	)
-	if err != nil {
-		return fmt.Errorf("creating renderer: %w", err)
-	}
-
-	styled, err := renderer.Render(md)
-	if err != nil {
-		return fmt.Errorf("rendering markdown: %w", err)
-	}
-
-	// Leading newline separates body from the header filter's separator line.
-	if _, err := fmt.Fprint(w, "\n"+styled); err != nil {
-		return fmt.Errorf("writing output: %w", err)
-	}
-	return nil
+	return md
 }
