@@ -526,3 +526,124 @@ Persistent indicator at the right edge of the status bar.
 - **Connection (#12):** Right-aligned in status bar. Always visible.
   `●` connected = `color_success`. `◌` reconnecting = `color_warning`
   (with inline spinner). `○` offline = `fg_dim`.
+
+---
+
+## 8. Screen States (#13, #14, #15, #16, #17)
+
+### Empty folder (#13)
+
+Centered placeholder when a folder has no messages.
+
+```
+│                           │                                                                                   │
+│                           │                                                                                   │
+│                           │                                                                                   │
+│                           │                                                                                   │
+│                           │                                                                                   │
+│                           │                          No messages                                               │
+│                           │                                                                                   │
+│                           │                                                                                   │
+│                           │                                                                                   │
+│                           │                                                                                   │
+│                           │                                                                                   │
+```
+
+### Threaded view — expanded (#14)
+
+Default state. All thread children visible with box-drawing
+prefixes.
+
+```
+     Eve Martinez              Re: Server migration plan                   Apr 05
+     ├─ Grace Kim              └─ Re: Server migration plan                Apr 05
+     │  └─ Frank Lee              Re: Server migration plan                Apr 05
+```
+
+### Threaded view — collapsed (#14)
+
+Thread folded with `zc`. Shows message count badge.
+
+```
+     Eve Martinez           [3] Re: Server migration plan                  Apr 05
+```
+
+### Threaded view — partially collapsed (#14)
+
+A mid-thread node folded, root still expanded.
+
+```
+     Eve Martinez              Re: Server migration plan                   Apr 05
+     ├─ Grace Kim           [2] └─ Re: Server migration plan               Apr 05
+```
+
+### Search results (#15)
+
+Search query and result count shown in status bar. Message list
+filters to matching messages only.
+
+```
+├───────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ 󰍉 search: "project update" · 3 results                                                            ● connected│
+├───────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+```
+
+`n/N` jump between results. `:clear` restores the full list.
+
+### Multi-select (#16)
+
+`v` enters visual select mode. `Space` toggles individual rows.
+Selected messages show a check icon in the flags column.
+
+```
+ 󰇮   Alice Johnson            Re: Project update for Q2 launch         10:32 AM
+ 󰇮  󰄬 Bob Smith                Weekly standup notes                      9:15 AM
+ 󰑚  󰄬 Carol White              Re: Budget review                       Yesterday
+      Dave Chen                 Meeting minutes from Monday                Apr 07
+ 󰈻  󰄬 Eve Martinez             Quarterly report draft                    Apr 06
+```
+
+Status bar and footer swap to bulk mode:
+
+```
+├───────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ 3 selected                                                                                                    │
+├───────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ Space:toggle  d:del all  a:archive all  v:cancel  Esc:cancel                                                  │
+╰───────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+```
+
+### Focused panel cycling (#17)
+
+`Tab` toggles focus between sidebar and message list. The focused
+panel receives j/k navigation. Visual difference is the `┃`
+selection border.
+
+```
+Sidebar focused:                    Message list focused:
+┌──────────┬──────────────────┐     ┌──────────┬──────────────────┐
+│ ┃ Inbox  │  Alice Johnson   │     │   Inbox  │▐ Alice Johnson   │
+│   Sent   │  Bob Smith       │     │   Sent   │  Bob Smith       │
+│   Trash  │  Carol White     │     │   Trash  │  Carol White     │
+└──────────┴──────────────────┘     └──────────┴──────────────────┘
+  ↑ j/k navigate here                           ↑ j/k navigate here
+```
+
+**Annotations:**
+
+- **Empty folder (#13):** "No messages" text in `fg_dim`. Centered
+  horizontally and vertically in the message list panel.
+- **Thread collapse (#14):** `zo` unfold, `zc` fold, `za` toggle.
+  Collapsed thread shows `[N]` count in `fg_dim` before subject.
+  Thread root always visible. Count includes root.
+- **Search (#15):** `󰍉` search icon in `color_info`. Query text
+  in `fg_bright`. Result count in `fg_dim`. Status bar retains
+  connection indicator. `:clear` restores normal view.
+- **Multi-select (#16):** `󰄬` check icon in `color_success` on
+  selected rows. Selected rows get `bg_selection` background.
+  Status bar shows count. Footer swaps to bulk actions. `Esc`
+  or `v` exits multi-select mode, deselecting all.
+- **Focus cycling (#17):** `Tab` key. Focused panel shows `┃`
+  (sidebar) or `▐` (message list) on the selected row. Unfocused
+  panel shows `bg_selection` background only, no border indicator.
+  j/k only operates in the focused panel.
