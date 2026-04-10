@@ -2,7 +2,12 @@
 
 Themeable aerc email filters and configuration, distributed as a
 single GNU Stow package. Builds four binaries from one Go module:
-mailrender, pick-link, fastmail-cli, tidytext.
+mailrender, fastmail-cli, tidytext, poplar.
+
+## Poplar
+
+@docs/poplar/STATUS.md
+@docs/poplar/architecture.md
 
 ## MANDATORY: Go Conventions
 
@@ -24,13 +29,11 @@ ANY Go code.** Key rules:
 
 ```
 cmd/mailrender/        CLI: filters, themes, compose (cobra)
-cmd/pick-link/         CLI: interactive URL picker (cobra)
 cmd/fastmail-cli/      CLI: rules, masked, folders (cobra)
 cmd/tidytext/          CLI: fix, config (cobra)
 internal/filter/       Filter implementations (headers, html, plain)
 internal/compose/      Compose buffer normalization (mailrender compose)
 internal/theme/        TOML theme files -> ANSI tokens
-internal/picker/       Link picker UI
 internal/tidy/         Prose tidying: config, prompt, API
 internal/jmap/         JMAP session, mail ops, masked email
 internal/header/       RFC 2822 header parsing
@@ -63,10 +66,10 @@ for the token reference.
 ## Build
 
 ```
-make build     # build all four binaries
+make build     # build all three binaries
 make test      # run tests
 make check     # vet + test (gate before commits)
-make install   # install all four to ~/.local/bin/
+make install   # install all three to ~/.local/bin/
 ```
 
 ## Testing
