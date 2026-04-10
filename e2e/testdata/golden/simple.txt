@@ -1,5 +1,6 @@
 
-Hi there,                                                                     
-Just wanted to follow up on our conversation from yesterday. Let me know if   
-you have any questions.                                                       
-Best regards,   Alice                                                         
+[38;2;216;222;233mHi there,[0m
+
+[38;2;216;222;233mJust wanted to follow up on our conversation from yesterday. Let me know if you have any questions.[0m
+
+[38;2;216;222;233mBest regards,   Alice[0m

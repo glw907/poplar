@@ -53,34 +53,6 @@ func TestRenderBodySignature(t *testing.T) {
 	}
 }
 
-func TestRenderBodyWidthCap(t *testing.T) {
-	long := strings.Repeat("word ", 30)
-	blocks := []Block{
-		Paragraph{Spans: []Span{Text{Content: long}}},
-	}
-	result := RenderBody(blocks, theme.Nord, 120)
-	for _, line := range strings.Split(result, "\n") {
-		visible := stripANSITest(line)
-		if len(visible) > 80 {
-			t.Errorf("line exceeds 78 visible chars: %d chars: %q", len(visible), visible)
-		}
-	}
-}
-
-func TestRenderBodyNarrowTerminal(t *testing.T) {
-	long := strings.Repeat("word ", 20)
-	blocks := []Block{
-		Paragraph{Spans: []Span{Text{Content: long}}},
-	}
-	result := RenderBody(blocks, theme.Nord, 40)
-	for _, line := range strings.Split(result, "\n") {
-		visible := stripANSITest(line)
-		if len(visible) > 42 {
-			t.Errorf("line exceeds terminal width: %d chars", len(visible))
-		}
-	}
-}
-
 func TestRenderBodyBoldSpan(t *testing.T) {
 	blocks := []Block{
 		Paragraph{Spans: []Span{

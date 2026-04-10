@@ -22,14 +22,14 @@ func RenderBody(blocks []Block, t *theme.CompiledTheme, width int) string {
 	for _, block := range blocks {
 		sections = append(sections, renderBlock(block, t, w))
 	}
-	return strings.Join(sections, "\n")
+	return strings.Join(sections, "\n\n")
 }
 
 func renderBlock(block Block, t *theme.CompiledTheme, width int) string {
 	switch b := block.(type) {
 	case Paragraph:
 		text := renderSpans(b.Spans, t)
-		return t.Paragraph.Width(width).Render(text)
+		return t.Paragraph.Render(text)
 
 	case Heading:
 		text := renderSpans(b.Spans, t)
@@ -49,7 +49,11 @@ func renderBlock(block Block, t *theme.CompiledTheme, width int) string {
 		content := strings.Join(inner, "\n")
 		var lines []string
 		for _, line := range strings.Split(content, "\n") {
-			lines = append(lines, style.Render(prefix)+line)
+			if line == "" {
+				lines = append(lines, style.Render(">"))
+			} else {
+				lines = append(lines, style.Render(prefix)+line)
+			}
 		}
 		return strings.Join(lines, "\n")
 
@@ -70,7 +74,7 @@ func renderBlock(block Block, t *theme.CompiledTheme, width int) string {
 		return t.HorizontalRule.Render(line)
 
 	case CodeBlock:
-		return t.CodeBlock.Width(width).Render(b.Text)
+		return t.CodeBlock.Render(b.Text)
 
 	case Table:
 		return renderTable(b, t)
