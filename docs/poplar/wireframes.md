@@ -87,3 +87,43 @@ focused.
   hint text in `fg_dim`. Context = message list.
 - **Focus**: Message list focused (sidebar selection shown but
   without the `┃` active border). `Tab` cycles focus between panels.
+
+---
+
+## 2. Tab Bar (#18)
+
+### Single account tab (default on launch)
+
+```
+╭─ 󰇰 Inbox ─────────────────────────────────────────────────────────────────────────────────────────────────────╮
+```
+
+### Multiple tabs (viewer open)
+
+```
+╭─ 󰇰 Inbox ─┬─ Re: Project update for Q2 launch ─┬─────────────────────────────────────────────────────────────╮
+```
+
+### Three tabs (two viewers open)
+
+```
+╭─ 󰇰 Inbox ─┬─ Re: Project update ─┬─ Budget review ─┬──────────────────────────────────────────────────────────╮
+```
+
+**Annotations:**
+
+- **Active tab:** `accent_secondary` text on `bg_base`. Bottom
+  border merges with content area (no visible line between tab
+  and content).
+- **Inactive tabs:** `fg_dim` text on `bg_elevated`. Visible
+  bottom border separating tab from content.
+- **Tab separator:** `┬` where tab borders meet the top edge.
+  `─` fills remaining space to the right edge.
+- **Account folder tabs:** Show folder icon + folder name.
+  Not closeable — always present. Title updates when folder
+  changes (e.g., switch from Inbox to Sent).
+- **Viewer tabs:** Show message subject, truncated to fit.
+  Closeable with `q`.
+- **Numeric switching:** `1-9` keys switch to tab by position.
+- **Overflow:** If tabs exceed terminal width, rightmost tabs
+  are truncated with `…`. Active tab is always fully visible.
