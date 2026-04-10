@@ -12,14 +12,13 @@ import (
 
 var (
 	binary       string
-	configDir    string
 	updateGolden = flag.Bool("update-golden", false, "regenerate golden files")
 )
 
 func TestMain(m *testing.M) {
 	flag.Parse()
 
-	// Build the binary once
+	// Build the binary once.
 	tmp, err := os.MkdirTemp("", "mailrender-test")
 	if err != nil {
 		panic(err)
@@ -32,64 +31,8 @@ func TestMain(m *testing.M) {
 		panic("build failed: " + err.Error())
 	}
 
-	// Create test config directory with theme + aerc.conf
-	configDir, err = os.MkdirTemp("", "mailrender-config")
-	if err != nil {
-		panic(err)
-	}
-
-	// Write aerc.conf
-	os.WriteFile(filepath.Join(configDir, "aerc.conf"), []byte("[ui]\nstyleset-name=test\n"), 0644)
-
-	// Write TOML theme matching the old test palette values
-	themesDir := filepath.Join(configDir, "themes")
-	os.MkdirAll(themesDir, 0755)
-	themeContent := `name = "test"
-
-[colors]
-bg_base = "#2e3440"
-bg_elevated = "#3b4252"
-bg_selection = "#394353"
-bg_border = "#49576b"
-fg_base = "#d8dee9"
-fg_bright = "#e5e9f0"
-fg_brightest = "#eceff4"
-fg_dim = "#616e88"
-accent_primary = "#81a1c1"
-accent_secondary = "#88c0d0"
-accent_tertiary = "#8fbcbb"
-color_error = "#bf616a"
-color_warning = "#d08770"
-color_success = "#a3be8c"
-color_info = "#ebcb8b"
-color_special = "#b48ead"
-
-[tokens]
-heading = { color = "color_success", bold = true }
-bold = { bold = true }
-italic = { italic = true }
-link_text = { color = "accent_secondary" }
-link_url = { color = "fg_dim" }
-rule = { color = "fg_dim" }
-hdr_key = { color = "accent_primary", bold = true }
-hdr_value = { color = "fg_base" }
-hdr_dim = { color = "fg_dim" }
-picker_num = { color = "accent_primary" }
-picker_label = { color = "fg_base" }
-picker_url = { color = "fg_dim" }
-picker_sel_bg = { color = "bg_selection" }
-picker_sel_fg = { color = "fg_bright" }
-msg_marker = { color = "fg_dim", bold = true }
-msg_title_success = { color = "color_success", bold = true }
-msg_title_accent = { color = "accent_primary", bold = true }
-msg_detail = { color = "fg_base" }
-msg_dim = { color = "fg_dim" }
-`
-	os.WriteFile(filepath.Join(themesDir, "test.toml"), []byte(themeContent), 0644)
-
 	code := m.Run()
 	os.RemoveAll(tmp)
-	os.RemoveAll(configDir)
 	os.Exit(code)
 }
 
@@ -112,10 +55,7 @@ func TestHTMLFixtures(t *testing.T) {
 
 			cmd := exec.Command(binary, "html")
 			cmd.Stdin = bytes.NewReader(input)
-			cmd.Env = append(os.Environ(),
-				"AERC_COLUMNS=80",
-				"AERC_CONFIG="+configDir,
-			)
+			cmd.Env = append(os.Environ(), "AERC_COLUMNS=80")
 			out, err := cmd.CombinedOutput()
 			if err != nil {
 				t.Fatalf("running html filter: %v\noutput: %s", err, out)
@@ -146,10 +86,7 @@ func TestHeadersFixture(t *testing.T) {
 
 	cmd := exec.Command(binary, "headers")
 	cmd.Stdin = strings.NewReader(input)
-	cmd.Env = append(os.Environ(),
-		"AERC_COLUMNS=80",
-		"AERC_CONFIG="+configDir,
-	)
+	cmd.Env = append(os.Environ(), "AERC_COLUMNS=80")
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		t.Fatalf("running headers filter: %v\noutput: %s", err, out)
