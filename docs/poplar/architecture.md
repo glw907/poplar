@@ -121,3 +121,35 @@ maildir, mbox, or notmuch backends.
 extraction surface from aerc. Backend interface is pluggable — other
 backends can be added later if there's demand.
 **Date:** 2026-04-09
+
+### Synchronous adapter over async
+**Decision:** The `mail.Backend` interface uses synchronous blocking
+methods. The JMAP adapter bridges the forked worker's async
+message-passing (channels + callbacks) to blocking calls via a pump
+goroutine.
+**Rationale:** Bubbletea's `tea.Cmd` model handles async naturally —
+blocking calls run in commands that return messages on completion.
+Synchronous methods are simpler to reason about and test than
+channel-based APIs. The pump goroutine reads from the worker's
+response channel and dispatches registered callbacks; `doAction`
+blocks on a per-call channel until Done/Error arrives.
+**Date:** 2026-04-09 (Pass 2)
+
+### Config in ~/.config/poplar/
+**Decision:** Poplar config lives in `~/.config/poplar/accounts.toml`,
+separate from aerc's config.
+**Rationale:** Allows both clients to coexist during development.
+The TOML format matches the theme files for consistency. Credential
+resolution uses a `credential-cmd` field that executes a shell
+command and injects the output into the source URL's userinfo.
+**Date:** 2026-04-09 (Pass 2)
+
+### Inherited global WorkerMessages channel
+**Decision:** Keep aerc's package-level `types.WorkerMessages` channel
+for now. Known limitation: multiple adapters would race on this
+channel.
+**Rationale:** Refactoring to per-worker channels requires changes
+across the entire forked worker codebase. Single-account use (Passes
+2-10) is unaffected. Will need to be addressed for multi-account
+support in Pass 11.
+**Date:** 2026-04-09 (Pass 2)
