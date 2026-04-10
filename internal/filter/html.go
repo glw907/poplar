@@ -32,7 +32,6 @@ var (
 	// Paren-style list items: "1)" or "1\)" → "1."
 	// Handles both top-level and blockquote-prefixed lines.
 	reParenList = regexp.MustCompile(`(?m)^((?:>\s?)*)(\d+)\\?\)\s`)
-
 )
 
 // prepareHTML cleans the raw HTML before conversion: strips Mozilla-specific
