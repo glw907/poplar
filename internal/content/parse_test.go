@@ -1,6 +1,8 @@
 package content
 
 import (
+	"os"
+	"path/filepath"
 	"testing"
 )
 
@@ -224,5 +226,29 @@ func TestParseBlocksBlockquoteLevel(t *testing.T) {
 	}
 	if inner.Level != 2 {
 		t.Errorf("inner level: got %d, want 2", inner.Level)
+	}
+}
+
+func TestParseBlocksCorpus(t *testing.T) {
+	fixtures, err := filepath.Glob("../../e2e/testdata/*.html")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(fixtures) == 0 {
+		t.Skip("no e2e fixtures found")
+	}
+	for _, fix := range fixtures {
+		t.Run(filepath.Base(fix), func(t *testing.T) {
+			raw, err := os.ReadFile(fix)
+			if err != nil {
+				t.Fatal(err)
+			}
+			// Verify ParseBlocks doesn't panic on HTML input.
+			// Real integration tested in e2e after CleanHTML is wired up.
+			blocks := ParseBlocks(string(raw))
+			if len(blocks) == 0 {
+				t.Error("expected at least one block from HTML input")
+			}
+		})
 	}
 }
