@@ -325,3 +325,90 @@ the entire content area.
 - **Footer:** Viewer-specific bindings. `Tab:links` replaces
   `/:search`. `q:close` added. No `?:help` — `?` still works
   but isn't shown (footer space is precious).
+
+---
+
+## 6. Keybinding Help Popover (#7)
+
+Modal overlay triggered by `?` in any context. Centered on screen
+with dimmed content behind. Content changes per context.
+
+### Message list context
+
+```
+                  ╭─ Message List ──────────────────────────────────────────╮
+                  │                                                         │
+                  │  Navigate           Triage          Reply               │
+                  │  j/k  up/down       d  delete       r  reply            │
+                  │  gg   top           D  delete…      R  all              │
+                  │  G    bottom        a  archive      f  forward          │
+                  │  C-d  half pg dn    A  archive…     c  compose          │
+                  │  C-u  half pg up    s  star                             │
+                  │  C-f  page dn       .  read/unrd                        │
+                  │  C-b  page up                                           │
+                  │                                                         │
+                  │  Search             Select          Threads             │
+                  │  /    search        v  select       zo  unfold          │
+                  │  n    next          ␣  toggle       zc  fold            │
+                  │  N    prev                          za  toggle          │
+                  │                                                         │
+                  │  Go To                                                  │
+                  │  gi  inbox    gd  drafts    gs  sent                    │
+                  │  ga  archive  gx  spam      gt  trash                   │
+                  │                                                         │
+                  │  Enter  open        :  command       ?  close           │
+                  │                                                         │
+                  ╰─────────────────────────────────────────────────────────╯
+```
+
+### Viewer context
+
+```
+                  ╭─ Message Viewer ────────────────────────────────────────╮
+                  │                                                         │
+                  │  Navigate           Triage          Reply               │
+                  │  j/k  scroll        d  delete       r  reply            │
+                  │  gg   top           a  archive      R  all              │
+                  │  G    bottom        s  star         f  forward          │
+                  │  C-d  half pg dn                    c  compose          │
+                  │  C-u  half pg up                                        │
+                  │  C-f  page dn                                           │
+                  │  C-b  page up                                           │
+                  │                                                         │
+                  │  Tab  link picker   q  close        ?  close            │
+                  │                                                         │
+                  ╰─────────────────────────────────────────────────────────╯
+```
+
+### Sidebar context
+
+```
+                  ╭─ Sidebar ───────────────────────────────────────────────╮
+                  │                                                         │
+                  │  Navigate           Go To                               │
+                  │  j/k  up/down       gi  inbox      gd  drafts          │
+                  │  gg   top           gs  sent       ga  archive         │
+                  │  G    bottom        gx  spam       gt  trash           │
+                  │                                                         │
+                  │  Enter  open        c  compose      ?  close           │
+                  │                                                         │
+                  ╰─────────────────────────────────────────────────────────╯
+```
+
+**Annotations:**
+
+- **Modal overlay:** Centered horizontally and vertically. Content
+  behind is dimmed (lipgloss reduced-opacity background).
+- **Border:** Rounded corners in `bg_border`.
+- **Title:** Context name in `accent_primary` bold, embedded in
+  top border.
+- **Group headings:** `fg_bright` bold (Navigate, Triage, etc.).
+- **Key column:** `fg_bright` bold. Fixed width within each column.
+- **Description column:** `fg_dim`. Left-aligned within group.
+- **Layout:** Three groups per row where content fits. Groups
+  separated by whitespace, no divider lines.
+- **Close:** `?` or `Escape`. Both close the popover.
+- **Input routing:** All keypresses route to popover when open.
+  Only `?` and `Escape` are handled; everything else is ignored.
+- **Size constraint:** Must fit on screen without scrolling. If
+  too many bindings, prune — this constraint forces curation.
