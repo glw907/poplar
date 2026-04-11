@@ -67,11 +67,30 @@ Each `Palette` must define exactly these 16 slots. All values are 7-character he
 
 ## Built-in themes
 
-| Theme | Style |
-|-------|-------|
-| `theme.Nord` | Cool dark (Arctic Ice Studio) |
-| `theme.SolarizedDark` | Classic dark (Ethan Schoonover) |
-| `theme.GruvboxDark` | Warm dark (morhetz) |
+### Dark themes
+
+| Theme | CLI name | Style |
+|-------|----------|-------|
+| `theme.OneDark` | `one-dark` | Neutral, muted (default) |
+| `theme.Nord` | `nord` | Cool, arctic blue |
+| `theme.SolarizedDark` | `solarized-dark` | Warm-neutral, classic |
+| `theme.GruvboxDark` | `gruvbox-dark` | Warm, retro |
+| `theme.CatppuccinMocha` | `catppuccin-mocha` | Pastel, warm |
+| `theme.Dracula` | `dracula` | Purple, vibrant |
+| `theme.TokyoNight` | `tokyo-night` | Cool, modern |
+| `theme.RosePine` | `rose-pine` | Muted, warm |
+| `theme.Kanagawa` | `kanagawa` | Cool, muted Japanese aesthetic |
+| `theme.EverforestDark` | `everforest-dark` | Green, earthy |
+
+### Light themes
+
+| Theme | CLI name | Style |
+|-------|----------|-------|
+| `theme.CatppuccinLatte` | `catppuccin-latte` | Pastel, warm |
+| `theme.SolarizedLight` | `solarized-light` | Warm-neutral, classic |
+| `theme.GruvboxLight` | `gruvbox-light` | Warm, creamy |
+| `theme.RosePineDawn` | `rose-pine-dawn` | Soft, warm |
+| `theme.EverforestLight` | `everforest-light` | Green, soft |
 
 ## Generating a styleset
 
@@ -93,7 +112,7 @@ After generating, set `styleset-name` in `aerc.conf` to match the theme name.
 
 1. Add a new `Palette` var in `internal/theme/themes.go` with 16 hex colors
 2. Add a compiled theme: `var MyTheme = NewCompiledTheme("My Theme", myPalette)`
-3. Register it in `cmd/mailrender/themes.go` and `cmd/mailrender/preview.go`
+3. Add it to the `Themes` map and `ThemeNames()` in `internal/theme/themes.go`
 4. Generate the aerc styleset: `mailrender themes generate my-theme`
 5. Preview with: `mailrender preview --theme my-theme corpus/some-email.html`
 
