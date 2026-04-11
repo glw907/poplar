@@ -40,14 +40,26 @@ for sidebar implementation (Pass 2.5b-2).
 - [Pass 2.5b-1 chrome shell plan](../superpowers/plans/2026-04-10-poplar-chrome-shell.md)
 - [Chrome shell design spec](../superpowers/specs/2026-04-10-poplar-chrome-shell-design.md)
 - [Wireframes](../poplar/wireframes.md)
+- [bubbletea-design skill spec](../superpowers/specs/2026-04-10-bubbletea-design-skill-design.md)
+- [bubbletea-design skill plan](../superpowers/plans/2026-04-10-bubbletea-design-skill.md)
 
 ## Continuing Development
 
 ### Next steps
 
-1. **Execute Pass 2.5b-2** — sidebar prototype
+1. **Implement bubbletea-design skill** — ready to execute
+2. **Execute Pass 2.5b-2** — sidebar prototype (after skill is done)
 
 ### Next starter prompt
+
+> Implement the bubbletea-design skill. Read the plan at
+> `docs/superpowers/plans/2026-04-10-bubbletea-design-skill.md`
+> and the spec at
+> `docs/superpowers/specs/2026-04-10-bubbletea-design-skill-design.md`.
+> Execute all three tasks: write the SKILL.md, verify discovery,
+> and smoke test against poplar's tab bar.
+
+### After bubbletea-design skill
 
 > Start Pass 2.5b-2: sidebar prototype. Read the wireframes at
 > `docs/poplar/wireframes.md`, the chrome shell design spec at
