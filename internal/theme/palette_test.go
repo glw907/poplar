@@ -37,9 +37,21 @@ func TestNewCompiledThemeStyles(t *testing.T) {
 
 func TestAllThemesBuild(t *testing.T) {
 	themes := map[string]*CompiledTheme{
-		"Nord":          Nord,
-		"SolarizedDark": SolarizedDark,
-		"GruvboxDark":   GruvboxDark,
+		"OneDark":        OneDark,
+		"Nord":           Nord,
+		"SolarizedDark":  SolarizedDark,
+		"GruvboxDark":    GruvboxDark,
+		"CatppuccinMocha": CatppuccinMocha,
+		"CatppuccinLatte": CatppuccinLatte,
+		"Dracula":        Dracula,
+		"TokyoNight":     TokyoNight,
+		"RosePine":       RosePine,
+		"RosePineDawn":   RosePineDawn,
+		"Kanagawa":       Kanagawa,
+		"EverforestDark": EverforestDark,
+		"EverforestLight": EverforestLight,
+		"SolarizedLight": SolarizedLight,
+		"GruvboxLight":   GruvboxLight,
 	}
 	for name, th := range themes {
 		t.Run(name, func(t *testing.T) {
