@@ -12,7 +12,7 @@ protocol handling (IMAP + JMAP).
 
 | Layer | Package | Purpose |
 |-------|---------|---------|
-| UI | `internal/ui/` | Bubbletea components (tabs, sidebar, msglist, viewer, statusbar) |
+| UI | `internal/ui/` | Bubbletea components (topline, sidebar, msglist, viewer, statusbar, footer) |
 | Mail adapter | `internal/mail/` | `Backend` interface, poplar-native types, account lifecycle |
 | Poplar config | `internal/poplar/` | AccountConfig struct, poplar-specific types |
 | Forked workers | `internal/aercfork/worker/` | Forked aerc IMAP + JMAP workers |
@@ -267,3 +267,53 @@ while satisfying bubbletea's `tea.Model` contract at the boundary.
 This is the standard pattern in the bubbletea ecosystem for apps
 with typed model hierarchies.
 **Date:** 2026-04-10 (Pass 2.5b-1)
+
+### Drop tabs in favor of sidebar
+**Decision:** Remove the tab bar entirely. The sidebar (always
+visible) shows folder context. Opening a message renders in the
+right panel, not a new tab. `q` returns to the message list.
+**Rationale:** With the sidebar always visible, the tab bar
+provided no new information while consuming 3 rows. Simplifies
+navigation — no tab lifecycle, no `1-9` switching. Aligns with
+"Better Pine" philosophy (one thing at a time).
+**Date:** 2026-04-11
+
+### Three-sided frame with open left edge
+**Decision:** Top `──┬──╮`, right `│`, bottom status bar
+`──┴──╯`. No left border.
+**Rationale:** Distinctive asymmetric frame that avoids the
+junction problem at bottom-left where the status bar meets a
+left border. The open left edge matches the bottom where the
+grey status bar starts at column 0.
+**Date:** 2026-04-11
+
+### Account name in sidebar, switchable
+**Decision:** Account name at top of sidebar, one account at a
+time, key to cycle between accounts.
+**Rationale:** Pine-style simplicity over stacked account trees.
+When the sidebar collapses, the top frame line shows
+`account · folder` for context.
+**Date:** 2026-04-11
+
+### Colorblind-accessible connection states
+**Decision:** Connection states use shape + color + text: `●`
+green filled (connected), `○` red hollow (offline), `◐` orange
+half (reconnecting).
+**Rationale:** Triple redundancy ensures accessibility across
+colorblind conditions, monochrome terminals, and screen readers.
+**Date:** 2026-04-11
+
+### Footer group separators
+**Decision:** `┊` (U+250A, light quadruple dash vertical) in
+`fg_dim` between key groups. Custom rendering, not bubbles/help.
+**Rationale:** Subtle enough to recede behind key hints, clear
+enough to read groups. Spacing alone was insufficient.
+**Date:** 2026-04-11
+
+### Single-key folder jumps
+**Decision:** Uppercase single keys (I/D/S/A/X/T) jump to
+canonical folders from any context. Not multi-key sequences.
+**Rationale:** Bubbletea sends one KeyMsg per keypress. Multi-key
+sequences require a state machine. Uppercase avoids conflict with
+lowercase triage keys (d/a/s).
+**Date:** 2026-04-11

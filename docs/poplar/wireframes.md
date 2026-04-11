@@ -16,130 +16,66 @@ See the UI design spec for the complete interface inventory:
 - Default terminal: 120 columns x 40 rows
 - `←N→` for column widths
 - `[key]` for interactive elements
-- Tab bar uses bubbletea bubble style (not aerc `┬` separators)
+- Three-sided frame: top `──┬──╮`, right `│`, bottom `──┴──╯`. No left border.
 
 ---
 
 ## 1. Composite Layout
 
 Full application with all persistent chrome and both panels visible.
-Shows the multi-tab state with a viewer tab open — this makes the
-tab bar visible as a distinct UI element. Inbox selected, message
+No tab bar — sidebar provides folder context. Inbox selected, message
 list focused.
 
 ```
- ╭───────────╮
- │ 󰇰  Inbox  │  Re: Project update for Q2 launch
-─╯           ╰──────────────────────────────────────────────────────────────────────────────────────────────╮
-│←───────── 30 ─────────→│←──────────────────────────── remaining ──────────────────────────────────────→│
-│                         │                                                                               │
-│ ┃ 󰇰  Inbox           3 │  󰇮  Alice Johnson          Re: Project update for Q2 launch       10:32 AM   │
-│   󰏫  Drafts             │  󰇮  Bob Smith               Weekly standup notes                    9:15 AM   │
-│   󰑚  Sent               │  󰑚  Carol White             Re: Budget review                     Yesterday   │
-│   󰀼  Archive            │      Dave Chen               Meeting minutes from Monday              Apr 07   │
-│                         │  󰈻  Eve Martinez            Quarterly report draft                   Apr 06   │
-│   󰍷  Spam           12  │      Frank Lee               Re: Server migration plan                Apr 05   │
-│   󰩺  Trash              │      ├─ Grace Kim            └─ Re: Server migration plan             Apr 05   │
-│                         │      │  └─ Frank Lee            Re: Server migration plan              Apr 05   │
-│   󰂚  Notifications      │      Hannah Park             New office supplies order                Apr 04   │
-│   󰑴  Remind             │      Ivan Petrov             Conference travel request                Apr 03   │
-│   󰡡  Lists/golang       │                                                                               │
-│                         │                                                                               │
-│                         │                                                                               │
-│                         │                                                                               │
-│                         │                                                                               │
-│                         │                                                                               │
-│                         │                                                                               │
-│                         │                                                                               │
-│                         │                                                                               │
-│                         │                                                                               │
-│                         │                                                                               │
-│                         │                                                                               │
-├─────────────────────────┴───────────────────────────────────────────────────────────────────────────────┤
-│ 󰇰  Inbox · 10 messages · 2 unread                                                          ● connected │
-├─────────────────────────────────────────────────────────────────────────────────────────────────────────┤
-│ d:del  a:archive  s:star  r:reply  R:all  f:fwd  c:compose  /:search  ?:help  ::cmd                    │
-╰─────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+───────────────────────────┬──────────────────────────────────────────────────────────────────────────────╮
+│ geoff@907.life           │                                                                              │
+│                          │                                                                              │
+│ ┃ 󰇰  Inbox           3  │  󰇮  Alice Johnson          Re: Project update for Q2 launch       10:32 AM  │
+│   󰏫  Drafts              │  󰇮  Bob Smith               Weekly standup notes                    9:15 AM  │
+│   󰑚  Sent                │  󰑚  Carol White             Re: Budget review                     Yesterday  │
+│   󰀼  Archive             │      Dave Chen               Meeting minutes from Monday              Apr 07  │
+│                          │  󰈻  Eve Martinez            Quarterly report draft                   Apr 06  │
+│   󰍷  Spam           12   │      Frank Lee               Re: Server migration plan                Apr 05  │
+│   󰩺  Trash               │      ├─ Grace Kim            └─ Re: Server migration plan             Apr 05  │
+│                          │      │  └─ Frank Lee            Re: Server migration plan              Apr 05  │
+│   󰂚  Notifications       │      Hannah Park             New office supplies order                Apr 04  │
+│   󰑴  Remind              │      Ivan Petrov             Conference travel request                Apr 03  │
+│   󰡡  Lists/golang        │                                                                              │
+│                          │                                                                              │
+ ──────────────────────────┴──────────────────────────────────────── 10 messages · 3 unread · ● connected ─╯
+  d:del  a:archive  s:star  ┊  r:reply  R:all  f:fwd  c:compose  ┊  /:search  ?:help  ::cmd
 ```
 
 **Annotations:**
 
-- **Tab bar** (top 3 rows): Bubbletea-style tab bubbles — not
-  aerc's embedded-in-border `┬` style. Active tab is a rounded
-  bubble (`╭│╰╯`) in `accent_secondary` on `bg_base`. The active
-  tab's bottom edge opens into the content area (no border between
-  active tab and content). Inactive tabs are plain text in `fg_dim`
-  sitting on the connecting line. The connecting line merges into
-  the content frame's top-right corner (`╮`).
-- **Sidebar** (left, 30 cols): Three folder groups separated by
-  blank lines. Selected row has `┃` thick left border in
-  `accent_primary` + `bg_selection` full-width fill. Unread counts
-  right-aligned in `accent_tertiary`, shown only when > 0.
+- **No tab bar**: Removed entirely. The sidebar (always visible)
+  shows folder context. Folder name and message counts are in the
+  status bar. No `1-9` switching or tab lifecycle.
+- **Three-sided frame**: Top edge `───┬───╮` (left of divider is
+  open, right closes with `╮`). Right border `│`. Bottom status
+  bar `──┴──╯`. No left border — left edge is open.
+- **Sidebar** (left, 30 cols): Account name (`geoff@907.life`) at
+  top in `fg_dim`. Three folder groups separated by blank lines.
+  Selected row has `┃` thick left border in `accent_primary` +
+  `bg_selection` full-width fill. Unread counts right-aligned in
+  `accent_tertiary`, shown only when > 0.
 - **Message list** (right, remaining width): Columns — flags (2),
   sender (22), subject (fill), date (12). Double-space separator.
   Unread rows in `accent_tertiary` with bold sender. Read rows in
   `fg_dim`. Thread prefixes use box-drawing `├─ └─ │`.
 - **Vertical divider**: `│` between panels in `bg_border`.
-- **Status bar**: `fg_bright` on `bg_border`. Folder icon + name,
-  message count, unread count. Connection indicator right-aligned.
-- **Command footer**: Key in `fg_bright` bold, `:` separator and
-  hint text in `fg_dim`. Context = message list.
+- **Status bar**: Bottom frame edge. `fg_bright` on `bg_border`.
+  Message count, unread count, connection indicator right-aligned.
+  Closes frame with `╯`.
+- **Command footer**: Below the status bar frame edge. Key in
+  `fg_bright` bold, `:` separator and hint text in `fg_dim`.
+  Groups separated by `┊` in `fg_dim`. Context = message list.
 - **Focus**: Message list focused (sidebar selection shown but
   without the `┃` active border). `Tab` cycles focus between panels.
 
 ---
 
-## 2. Tab Bar (#18)
-
-Bubbletea-style tab bubbles. Active tab has rounded borders that
-open into the content area below. Inactive tabs are plain text on
-the connecting line.
-
-### Single account tab (default on launch)
-
-```
- ╭───────────╮
- │ 󰇰  Inbox  │
-─╯           ╰───────────────────────────────────────────────────────────────────────────────────────╮
-```
-
-### Multiple tabs (viewer open)
-
-```
- ╭───────────╮
- │ 󰇰  Inbox  │  Re: Project update for Q2 launch
-─╯           ╰──────────────────────────────────────────────────────────────────────────────────────╮
-```
-
-### Three tabs (two viewers open)
-
-```
- ╭───────────╮
- │ 󰇰  Inbox  │  Re: Project update  ·  Budget review
-─╯           ╰──────────────────────────────────────────────────────────────────────────────────────╮
-```
-
-**Annotations:**
-
-- **Active tab:** Rounded bubble (`╭╮` top, `╯╰` bottom opening
-  into content). `accent_secondary` text on `bg_base`. Bottom edge
-  opens into content area — no visible line between active tab and
-  content.
-- **Inactive tabs:** Plain text in `fg_dim` on the connecting line.
-  No border — distinguished from active tab by color alone. `·` dot
-  separator between inactive tabs.
-- **Account folder tabs:** Show folder icon + folder name. Not
-  closeable — always present. Title updates when folder changes
-  (e.g., switch from Inbox to Sent).
-- **Viewer tabs:** Show message subject, truncated to fit.
-  Closeable with `q`.
-- **Numeric switching:** `1-9` keys switch to tab by position.
-- **Overflow:** If tabs exceed terminal width, rightmost tabs are
-  truncated with `…`. Active tab is always fully visible.
-
----
-
-## 3. Sidebar (#1 — left panel)
+## 2. Sidebar (#1 — left panel)
 
 ### Focused, Inbox selected
 
@@ -213,7 +149,7 @@ but no `┃` border — the border only appears in the focused state.
 
 ---
 
-## 4. Message List (#1 — right panel)
+## 3. Message List (#1 — right panel)
 
 ### Default with cursor and threading
 
@@ -265,82 +201,62 @@ above is for wireframe reference only.
 
 ---
 
-## 5. Message Viewer (#2)
+## 4. Message Viewer (#2)
 
-Full-width viewer in its own tab. No sidebar — the viewer uses
-the entire content area.
+Viewer opens in the right panel with sidebar still visible. `q`
+returns to the message list — no tab switching needed.
 
 ```
- ╭───────────╮ ╭──────────────────────────────────────╮
- │ 󰇰  Inbox  │ │ Re: Project update for Q2 launch     │
-─╯           ╰─╯                                      ╰────────────────────────────────────────────────────╮
-│                                                                                                          │
-│  From:     Alice Johnson <alice@example.com>                                                             │
-│  To:       Geoff Wright <geoff@907.life>                                                                 │
-│  Date:     Thu, 10 Apr 2026 10:32:07 -0600                                                               │
-│  Subject:  Re: Project update for Q2 launch                                                              │
-│  ──────────────────────────────────────────────────────────────────────────────────────────               │
-│                                                                                                          │
-│  Hey Geoff,                                                                                              │
-│                                                                                                          │
-│  Just wanted to follow up on the Q2 launch timeline. I've attached the                                   │
-│  updated project plan with the revised milestones.                                                       │
-│                                                                                                          │
-│  ## Key changes                                                                                          │
-│                                                                                                          │
-│  - Beta release moved to April 15                                                                        │
-│  - QA window extended by one week                                                                        │
-│  - Launch date is now May 1                                                                              │
-│                                                                                                          │
-│  Let me know if you have any concerns about the new timeline.                                            │
-│                                                                                                          │
-│  > On Apr 9, 2026, Geoff Wright wrote:                                                                   │
-│  > Can you send me the updated project plan? I want to review the                                        │
-│  > milestones before our meeting on Friday.                                                              │
-│                                                                                                          │
-│  Best,                                                                                                   │
-│  Alice                                                                                                   │
-│                                                                                                          │
-│                                                                                                          │
-│                                                                                                          │
-│                                                                                                          │
-├──────────────────────────────────────────────────────────────────────────────────────────────────────────┤
-│ Re: Project update for Q2 launch · 100%                                                      ● connected │
-├──────────────────────────────────────────────────────────────────────────────────────────────────────────┤
-│ d:del  a:archive  s:star  r:reply  R:all  f:fwd  Tab:links  q:close                                     │
-╰──────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+───────────────────────────┬──────────────────────────────────────────────────────────────────────────────╮
+│ geoff@907.life           │                                                                              │
+│                          │  From:     Alice Johnson <alice@example.com>                                 │
+│   󰇰  Inbox           3  │  To:       Geoff Wright <geoff@907.life>                                     │
+│   󰏫  Drafts              │  Date:     Thu, 10 Apr 2026 10:32:07 -0600                                  │
+│   󰑚  Sent                │  Subject:  Re: Project update for Q2 launch                                 │
+│   󰀼  Archive             │  ────────────────────────────────────────────────────────────                │
+│                          │                                                                              │
+│   󰍷  Spam           12   │  Hey Geoff,                                                                  │
+│   󰩺  Trash               │                                                                              │
+│                          │  Just wanted to follow up on the Q2 launch timeline.                         │
+│   󰂚  Notifications       │                                                                              │
+│   󰑴  Remind              │  ## Key changes                                                              │
+│   󰡡  Lists/golang        │                                                                              │
+│                          │  - Beta release moved to April 15                                            │
+│                          │  - Launch date is now May 1                                                  │
+│                          │                                                                              │
+│                          │  > On Apr 9, 2026, Geoff Wright wrote:                                      │
+│                          │  > Can you send me the updated project plan?                                 │
+ ──────────────────────────┴──────────────────────────────────────────── 100% · ● connected ─╯
+  d:del  a:archive  s:star  ┊  r:reply  R:all  f:fwd  ┊  Tab:links  q:close  ?:help
 ```
 
 **Annotations:**
 
-- **Tab bar:** Bubbletea bubble style. Both tabs have rounded
-  bubbles here — the viewer tab is active (`accent_secondary`),
-  the account tab is inactive (`fg_dim`). Active tab's bottom
-  opens into the content area.
-- **Full width:** Viewer uses entire content area (no sidebar
-  split). Opens in a new tab — the account folder tab remains
-  available via `1` or tab switching.
-- **Header block:** Rendered by the existing header filter
-  (shared with mailrender). Keys in `accent_primary` bold,
-  values in `fg_base`, `<email>` in angle brackets in `fg_dim`.
-  Separator `─` line in `fg_dim` below headers.
-- **Body:** Rendered by the content pipeline (`ParseBlocks` →
-  `RenderBody`). Lipgloss styles from compiled theme. Headings
-  in `color_success` bold. Blockquotes prefixed with `>` in
-  `accent_tertiary` (level 1) or `fg_dim` (level 2+). Links
-  in `accent_primary` underline.
+- **No tab bar:** Viewer opens in the right panel — no new tab
+  created. Sidebar remains visible. `q` returns to message list.
+  No `1-9` switching or tab lifecycle.
+- **Sidebar:** Still visible and showing current folder selection.
+  Folder icon on selected row shifts to `bg_selection` (unfocused
+  style — viewer has focus).
+- **Message body:** 72-char fixed width (same as mailrender render
+  width). Content pipeline (`ParseBlocks` → `RenderBody`). Headings
+  in `color_success` bold. Blockquotes in `accent_tertiary` (level
+  1) or `fg_dim` (level 2+). Links in `accent_primary` underline.
+- **Header block:** Keys in `accent_primary` bold, values in
+  `fg_base`, `<email>` in angle brackets in `fg_dim`. Separator
+  `─` line in `fg_dim` below headers.
 - **Viewport:** `bubbles/viewport`. Scroll percentage in status
   bar. `j/k` lines, `C-d/C-u` half page, `C-f/C-b` full page,
-  `gg/G` top/bottom.
-- **Left margin:** 2-char indent for body content readability.
-- **Status bar:** Message subject + scroll percentage.
-- **Footer:** Viewer-specific bindings. `Tab:links` replaces
-  `/:search`. `q:close` added. No `?:help` — `?` still works
-  but isn't shown (footer space is precious).
+  `G` bottom.
+- **Status bar:** Bottom frame edge. Scroll percentage + connection
+  indicator. Closes frame with `╯`.
+- **Footer:** Viewer-specific bindings. `Tab:links` opens link
+  picker. `q:close` returns to message list. Groups separated by
+  `┊`.
 
 ---
 
-## 6. Keybinding Help Popover (#7)
+## 5. Keybinding Help Popover (#7)
 
 Modal overlay triggered by `?` in any context. Centered on screen
 with dimmed content behind. Content changes per context.
@@ -427,7 +343,7 @@ with dimmed content behind. Content changes per context.
 
 ---
 
-## 7. Transient UI (#8, #9, #10, #11, #12)
+## 6. Transient UI (#8, #9, #10, #11, #12)
 
 All transient elements render in the status bar area (between
 content and command footer). Only one transient element at a time.
@@ -435,13 +351,11 @@ Priority: error banner > undo bar > toast > normal status.
 
 ### Status toast (#8)
 
-Auto-dismissing feedback after an action. Replaces normal status
-bar content for 3 seconds.
+Auto-dismissing feedback after an action. Toast appears inline in the
+top frame line at the right side for 3 seconds.
 
 ```
-├─────────────────────────────────────────────────────────────────────────────────────────────────────────┤
-│ ✓ Archived 1 message                                                                       ● connected │
-├─────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+───────────────────────────┬──────────────────────────────────────── ✓ 3 archived ─╮
 ```
 
 Toast variants by action type:
@@ -456,19 +370,15 @@ Toast variants by action type:
 
 ### Undo bar (#9)
 
-Replaces status bar for reversible destructive actions. Action is
-deferred — not executed until the 5-second window expires.
+Replaces status bar content for reversible destructive actions. Action
+is deferred — not executed until the 5-second window expires.
 
 ```
-├─────────────────────────────────────────────────────────────────────────────────────────────────────────┤
-│ Deleted 1 message · press u to undo                                                                [5s] │
-├─────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+ ──────────────────────────┴────────────── Deleted 1 message · press u to undo · [5s] ─╯
 ```
 
 ```
-├─────────────────────────────────────────────────────────────────────────────────────────────────────────┤
-│ Deleted 3 messages · press u to undo                                                               [3s] │
-├─────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+ ──────────────────────────┴─────────────── Deleted 3 messages · press u to undo · [3s] ─╯
 ```
 
 ### Error banner (#10)
@@ -477,15 +387,11 @@ Persistent — does not auto-dismiss. Cleared by keypress or
 condition resolving (e.g., reconnection succeeds).
 
 ```
-├─────────────────────────────────────────────────────────────────────────────────────────────────────────┤
-│ ✗ Connection lost — reconnecting…                                                                       │
-├─────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+ ──────────────────────────┴──────────────────── ✗ Connection lost — reconnecting… ─╯
 ```
 
 ```
-├─────────────────────────────────────────────────────────────────────────────────────────────────────────┤
-│ ✗ Send failed: SMTP authentication error                                                                │
-├─────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+ ──────────────────────────┴─────────────────── ✗ Send failed: SMTP authentication error ─╯
 ```
 
 ### Loading spinner (#11)
@@ -515,12 +421,13 @@ with braille dot pattern.
 
 ### Connection status (#12)
 
-Persistent indicator at the right edge of the status bar.
+Persistent indicator at the right edge of the status bar frame edge.
+Uses shape + color + text for colorblind accessibility.
 
 ```
-│ 󰇰  Inbox · 10 messages · 2 unread                                                          ● connected │
-│ 󰇰  Inbox · 10 messages · 2 unread                                                     ◌ reconnecting…  │
-│ 󰇰  Inbox · 10 messages · 2 unread                                                          ○ offline   │
+ ──────────────────────────┴──────────────────── 10 messages · 2 unread · ● connected ─╯
+ ──────────────────────────┴──────────────── 10 messages · 2 unread · ◐ reconnecting… ─╯
+ ──────────────────────────┴──────────────────── 10 messages · 2 unread · ○ offline   ─╯
 ```
 
 **Annotations:**
@@ -535,13 +442,14 @@ Persistent indicator at the right edge of the status bar.
 - **Spinner (#11):** `bubbles/spinner` with braille dot style
   (`⣾⣽⣻⢿⡿⣟⣯⣷`). Centered in content area. Spinner char + label
   in `fg_dim`.
-- **Connection (#12):** Right-aligned in status bar. Always visible.
-  `●` connected = `color_success`. `◌` reconnecting = `color_warning`
-  (with inline spinner). `○` offline = `fg_dim`.
+- **Connection (#12):** Right-aligned in status bar frame edge. Always
+  visible. Triple redundancy (shape + color + text) for colorblind
+  accessibility. `●` filled = connected (`color_success`). `◐` half =
+  reconnecting (`color_warning`). `○` hollow = offline (`fg_dim`).
 
 ---
 
-## 8. Screen States (#13, #14, #15, #16, #17)
+## 7. Screen States (#13, #14, #15, #16, #17)
 
 ### Empty folder (#13)
 
@@ -595,9 +503,7 @@ Search query and result count shown in status bar. Message list
 filters to matching messages only.
 
 ```
-├─────────────────────────────────────────────────────────────────────────────────────────────────────────┤
-│ 󰍉  search: "project update" · 3 results                                                   ● connected │
-├─────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+ ──────────────────────────┴───────────────── 󰍉  search: "project update" · 3 results · ● connected ─╯
 ```
 
 `n/N` jump between results. `:clear` restores the full list.
@@ -618,11 +524,8 @@ Selected messages show a check icon in the flags column.
 Status bar and footer swap to bulk mode:
 
 ```
-├─────────────────────────────────────────────────────────────────────────────────────────────────────────┤
-│ 3 selected                                                                                              │
-├─────────────────────────────────────────────────────────────────────────────────────────────────────────┤
-│ Space:toggle  d:del all  a:archive all  v:cancel  Esc:cancel                                            │
-╰─────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+ ──────────────────────────┴──────────────────────────────────────────────── 3 selected ─╯
+  Space:toggle  d:del all  a:archive all  v:cancel  Esc:cancel
 ```
 
 ### Focused panel cycling (#17)
@@ -662,7 +565,7 @@ Sidebar focused:                    Message list focused:
 
 ---
 
-## 9. Overlays (#4, #5, #6)
+## 8. Overlays (#4, #5, #6)
 
 ### Compose review (#4)
 
@@ -670,9 +573,7 @@ Inline prompt in the status bar after the editor exits with code 0.
 Blocks all other input until answered.
 
 ```
-├─────────────────────────────────────────────────────────────────────────────────────────────────────────┤
-│ Send message?  y:send  n:abort  e:edit  p:postpone                                                      │
-├─────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+ ──────────────────────────┴─────────────────── Send message?  y:send  n:abort  e:edit  p:postpone ─╯
 ```
 
 ### Folder picker (#5)
@@ -719,9 +620,7 @@ Inline prompt in status bar for bulk delete (3+ messages).
 Single-message delete skips this and uses the undo bar instead.
 
 ```
-├─────────────────────────────────────────────────────────────────────────────────────────────────────────┤
-│ Delete 5 messages?  y:confirm  n:cancel                                                                 │
-├─────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+ ──────────────────────────┴────────────────────────────── Delete 5 messages?  y:confirm  n:cancel ─╯
 ```
 
 **Annotations:**
@@ -742,7 +641,7 @@ Single-message delete skips this and uses the undo bar instead.
 
 ---
 
-## 10. Compose — External Editor (#3)
+## 9. Compose — External Editor (#3)
 
 Not a poplar screen. Bubbletea suspends via `tea.ExecProcess`,
 handing the terminal to the editor. Poplar disappears entirely
@@ -803,27 +702,26 @@ and reappears when the editor exits.
 
 ## Coverage
 
-All 20 UI elements from the interface inventory:
+All 19 UI elements from the interface inventory (Tab Bar removed):
 
 | # | Element | Wireframe |
 |---|---------|-----------|
-| 1 | Folder + Message List | §1 Composite, §3 Sidebar, §4 Message List |
-| 2 | Message Viewer | §5 Viewer |
-| 3 | Compose (external) | §10 Compose |
-| 4 | Compose Review | §9 Overlays |
-| 5 | Folder Picker | §9 Overlays |
-| 6 | Confirm Delete | §9 Overlays |
-| 7 | Keybinding Help | §6 Help Popover |
-| 8 | Status Toast | §7 Transient UI |
-| 9 | Undo Bar | §7 Transient UI |
-| 10 | Error Banner | §7 Transient UI |
-| 11 | Loading Spinner | §7 Transient UI |
-| 12 | Connection Status | §7 Transient UI |
-| 13 | Empty Folder | §8 Screen States |
-| 14 | Threaded View | §8 Screen States |
-| 15 | Search Results | §8 Screen States |
-| 16 | Multi-Select | §8 Screen States |
-| 17 | Focused Panel | §8 Screen States |
-| 18 | Tab Bar | §1 Composite, §2 Tab Bar |
-| 19 | Command Footer | §1 Composite (all wireframes) |
-| 20 | Status Bar | §1 Composite (all wireframes) |
+| 1 | Folder + Message List | §1 Composite, §2 Sidebar, §3 Message List |
+| 2 | Message Viewer | §4 Viewer |
+| 3 | Compose (external) | §9 Compose |
+| 4 | Compose Review | §8 Overlays |
+| 5 | Folder Picker | §8 Overlays |
+| 6 | Confirm Delete | §8 Overlays |
+| 7 | Keybinding Help | §5 Help Popover |
+| 8 | Status Toast | §6 Transient UI |
+| 9 | Undo Bar | §6 Transient UI |
+| 10 | Error Banner | §6 Transient UI |
+| 11 | Loading Spinner | §6 Transient UI |
+| 12 | Connection Status | §6 Transient UI |
+| 13 | Empty Folder | §7 Screen States |
+| 14 | Threaded View | §7 Screen States |
+| 15 | Search Results | §7 Screen States |
+| 16 | Multi-Select | §7 Screen States |
+| 17 | Focused Panel | §7 Screen States |
+| 19 | Command Footer | §1 Composite (all wireframes). Grouped by function with `┊` separators. |
+| 20 | Status Bar | §1 Composite (all wireframes). Bottom frame edge `──┴──╯`. |

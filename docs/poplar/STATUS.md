@@ -1,8 +1,8 @@
 # Poplar Status
 
-**Current state:** bubbletea-design skill done. Chrome shell prototype
-complete with tab bar, status bar, command footer, and focus cycling.
-Ready for keybinding design (Pass 2.5b-keys).
+**Current state:** Chrome redesign complete. Tab bar dropped, three-sided
+frame added, account name in sidebar, grouped footer with `┊` separators,
+single-key folder jumps defined. Ready for sidebar prototype (Pass 2.5b-2).
 
 ## Passes
 
@@ -14,7 +14,8 @@ Ready for keybinding design (Pass 2.5b-keys).
 | 2.5-fix | Fix first-level blockquote wrapping (BACKLOG #7) | done |
 | 2.5a | Text wireframes for all screens | done |
 | 2.5b-1 | Prototype: chrome shell | done |
-| 2.5b-keys | Keybinding design: single-key scheme for all screens | pending |
+| 2.5b-keys | Keybinding design: single-key scheme for all screens | done |
+| 2.5b-chrome | Chrome redesign: drop tabs, frame, status, footer | done |
 | 2.5b-2 | Prototype: sidebar | pending |
 | 2.5b-3 | Prototype: message list | pending |
 | 2.5b-4 | Prototype: message viewer | pending |
@@ -44,34 +45,26 @@ Ready for keybinding design (Pass 2.5b-keys).
 - [bubbletea-design skill spec](../superpowers/specs/2026-04-10-bubbletea-design-skill-design.md)
 - [bubbletea-design skill plan](../superpowers/plans/2026-04-10-bubbletea-design-skill.md)
 - [Sidebar plan](../superpowers/plans/2026-04-10-poplar-sidebar.md)
+- [Chrome redesign spec](../superpowers/specs/2026-04-11-poplar-chrome-redesign-design.md)
+- [Chrome redesign plan](../superpowers/plans/2026-04-11-poplar-chrome-redesign.md)
+- [Keybinding map](../poplar/keybindings.md)
 
 ## Continuing Development
 
 ### Next steps
 
-1. **Execute Pass 2.5b-keys** — keybinding design for all screens
-2. **Execute Pass 2.5b-2** — sidebar prototype (uses keybinding decisions)
+1. **Execute Pass 2.5b-2** — sidebar prototype
 
 ### Next starter prompt
 
-> Start Pass 2.5b-keys: keybinding design. Bubbletea sends one
-> KeyMsg per keypress — no multi-key chords. Design a complete
-> single-key binding scheme covering sidebar navigation (folder
-> jumps), message list, viewer, and global actions. Read the
-> architecture doc at `docs/poplar/architecture.md` (especially
-> "No multi-key sequences" and "Vim-first keybindings"), the
-> wireframes at `docs/poplar/wireframes.md`, and BACKLOG #8.
-> Brainstorm approaches, write a design spec, then update
-> `keys.go` and the command footer.
-
-### After keybinding design
-
 > Start Pass 2.5b-2: sidebar prototype. Read the plan at
 > `docs/superpowers/plans/2026-04-10-poplar-sidebar.md`, the
-> wireframes at `docs/poplar/wireframes.md`, and the architecture
-> doc at `docs/poplar/architecture.md`. Execute the plan — the
-> keybinding scheme from Pass 2.5b-keys informs which keys the
-> sidebar handles.
+> wireframes at `docs/poplar/wireframes.md`, the architecture
+> doc at `docs/poplar/architecture.md`, and the keybinding map
+> at `docs/poplar/keybindings.md`. The chrome redesign dropped
+> the tab bar — sidebar is always visible, account name at top,
+> three-sided frame. Execute the plan using the keybinding scheme
+> already defined in `internal/ui/keys.go`.
 
 ### Pass-end checklist
 
