@@ -22,11 +22,51 @@ func TestPaletteHex(t *testing.T) {
 	}
 }
 
-func TestAllThemesHaveDistinctColors(t *testing.T) {
-	if Nord.PaletteHex("bg_base") == SolarizedDark.PaletteHex("bg_base") {
-		t.Error("Nord and SolarizedDark have same bg_base")
+func TestThemeRegistryComplete(t *testing.T) {
+	expected := []string{
+		"catppuccin-latte", "catppuccin-mocha", "dracula",
+		"everforest-dark", "everforest-light", "gruvbox-dark",
+		"gruvbox-light", "kanagawa", "nord", "one-dark",
+		"rose-pine", "rose-pine-dawn", "solarized-dark",
+		"solarized-light", "tokyo-night",
 	}
-	if Nord.PaletteHex("bg_base") == GruvboxDark.PaletteHex("bg_base") {
-		t.Error("Nord and GruvboxDark have same bg_base")
+
+	if len(Themes) != 15 {
+		t.Fatalf("Themes map has %d entries, want 15", len(Themes))
+	}
+
+	for _, name := range expected {
+		if _, ok := Themes[name]; !ok {
+			t.Errorf("Themes map missing %q", name)
+		}
+	}
+
+	names := ThemeNames()
+	if len(names) != 15 {
+		t.Fatalf("ThemeNames() returned %d names, want 15", len(names))
+	}
+
+	// Verify alphabetical order.
+	for i := 1; i < len(names); i++ {
+		if names[i] < names[i-1] {
+			t.Errorf("ThemeNames() not sorted: %q before %q", names[i-1], names[i])
+		}
+	}
+
+	// Verify all themes have distinct bg_base (no copy-paste errors).
+	seen := map[string]string{}
+	for name, th := range Themes {
+		bg := th.PaletteHex("bg_base")
+		if bg == "" {
+			t.Errorf("theme %q has empty bg_base", name)
+		}
+		if other, ok := seen[bg]; ok {
+			// Solarized Light and Everforest Light share #fdf6e3 — skip that known pair.
+			if !((name == "solarized-light" && other == "everforest-light") ||
+				(name == "everforest-light" && other == "solarized-light")) {
+				t.Errorf("themes %q and %q share bg_base %s", name, other, bg)
+			}
+		}
+		seen[bg] = name
 	}
 }

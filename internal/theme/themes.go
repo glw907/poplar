@@ -330,14 +330,32 @@ var SolarizedLight = NewCompiledTheme("Solarized Light", solarizedLightPalette)
 // GruvboxLight is the compiled Gruvbox Light theme.
 var GruvboxLight = NewCompiledTheme("Gruvbox Light", gruvboxLightPalette)
 
-// Themes maps lowercase theme names to compiled themes.
+// Themes maps lowercase CLI names to compiled themes.
 var Themes = map[string]*CompiledTheme{
-	"nord":           Nord,
-	"solarized-dark": SolarizedDark,
-	"gruvbox-dark":   GruvboxDark,
+	"catppuccin-latte": CatppuccinLatte,
+	"catppuccin-mocha": CatppuccinMocha,
+	"dracula":          Dracula,
+	"everforest-dark":  EverforestDark,
+	"everforest-light": EverforestLight,
+	"gruvbox-dark":     GruvboxDark,
+	"gruvbox-light":    GruvboxLight,
+	"kanagawa":         Kanagawa,
+	"nord":             Nord,
+	"one-dark":         OneDark,
+	"rose-pine":        RosePine,
+	"rose-pine-dawn":   RosePineDawn,
+	"solarized-dark":   SolarizedDark,
+	"solarized-light":  SolarizedLight,
+	"tokyo-night":      TokyoNight,
 }
 
-// ThemeNames returns the available theme names in display order.
+// ThemeNames returns the available theme names in alphabetical order.
 func ThemeNames() []string {
-	return []string{"nord", "solarized-dark", "gruvbox-dark"}
+	return []string{
+		"catppuccin-latte", "catppuccin-mocha", "dracula",
+		"everforest-dark", "everforest-light", "gruvbox-dark",
+		"gruvbox-light", "kanagawa", "nord", "one-dark",
+		"rose-pine", "rose-pine-dawn", "solarized-dark",
+		"solarized-light", "tokyo-night",
+	}
 }
