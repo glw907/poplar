@@ -1,7 +1,8 @@
 package ui
 
 import (
-	"github.com/charmbracelet/bubbles/help"
+	"strings"
+
 	"github.com/charmbracelet/lipgloss"
 )
 
@@ -11,31 +12,26 @@ type FooterContext int
 const (
 	MsgListContext FooterContext = iota
 	SidebarContext
+	ViewerContext
 )
 
-// Footer renders context-appropriate keybinding hints.
+// Footer renders context-appropriate keybinding hints with group separators.
 type Footer struct {
 	styles      Styles
-	help        help.Model
 	context     FooterContext
 	msgKeys     MsgListKeys
 	sidebarKeys SidebarKeys
+	viewerKeys  ViewerKeys
 }
 
 // NewFooter creates a Footer with the given styles.
 func NewFooter(styles Styles) Footer {
-	h := help.New()
-	h.ShortSeparator = "  "
-	h.Styles.ShortKey = styles.FooterKey
-	h.Styles.ShortDesc = styles.FooterHint
-	h.Styles.ShortSeparator = styles.FooterHint
-
 	return Footer{
 		styles:      styles,
-		help:        h,
 		context:     MsgListContext,
 		msgKeys:     NewMsgListKeys(),
 		sidebarKeys: NewSidebarKeys(),
+		viewerKeys:  NewViewerKeys(),
 	}
 }
 
@@ -46,15 +42,29 @@ func (f *Footer) SetContext(ctx FooterContext) {
 
 // View renders the footer at the given width.
 func (f Footer) View(width int) string {
-	f.help.Width = width
-
-	var line string
+	var groups []keyGroup
 	switch f.context {
 	case SidebarContext:
-		line = f.help.ShortHelpView(f.sidebarKeys.ShortHelp())
+		groups = f.sidebarKeys.Groups()
+	case ViewerContext:
+		groups = f.viewerKeys.Groups()
 	default:
-		line = f.help.ShortHelpView(f.msgKeys.ShortHelp())
+		groups = f.msgKeys.Groups()
 	}
 
+	sep := " " + f.styles.FooterSep.Render("┊") + "  "
+
+	var parts []string
+	for _, g := range groups {
+		var bindings []string
+		for _, b := range g {
+			k := f.styles.FooterKey.Render(b.Help().Key)
+			d := f.styles.FooterHint.Render(":" + b.Help().Desc)
+			bindings = append(bindings, k+d)
+		}
+		parts = append(parts, strings.Join(bindings, "  "))
+	}
+
+	line := " " + strings.Join(parts, sep)
 	return lipgloss.NewStyle().Width(width).Render(line)
 }

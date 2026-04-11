@@ -28,6 +28,7 @@ type Styles struct {
 	// Footer
 	FooterKey  lipgloss.Style
 	FooterHint lipgloss.Style
+	FooterSep  lipgloss.Style
 
 	// Selection (used by focus cycling)
 	Selection lipgloss.Style
@@ -71,6 +72,8 @@ func NewStyles(t *theme.CompiledTheme) Styles {
 		FooterKey: lipgloss.NewStyle().
 			Foreground(t.FgBright).Bold(true),
 		FooterHint: lipgloss.NewStyle().
+			Foreground(t.FgDim),
+		FooterSep: lipgloss.NewStyle().
 			Foreground(t.FgDim),
 
 		Selection: lipgloss.NewStyle().
