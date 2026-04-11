@@ -318,6 +318,50 @@ sequences require a state machine. Uppercase avoids conflict with
 lowercase triage keys (d/a/s).
 **Date:** 2026-04-11
 
+### Catkin: reusable built-in editor
+**Decision:** Poplar's built-in compose editor is named Catkin. It lives
+in `catkin/` as a standalone, importable bubbletea component with no
+poplar dependencies. Email-specific features (reflow, quote handling,
+tidytext, spellcheck) are layered on top by poplar's compose panel.
+**Rationale:** A premier bubbletea text editor component that others
+can import. Keeps the editor focused on editing, the compose panel
+focused on email workflow. Extractable to its own repo if it gains
+traction.
+**Date:** 2026-04-11
+
+### Catkin: Ctrl+key commands, no multi-key sequences
+**Decision:** Catkin is non-modal. All commands use modifier keys
+(Ctrl+key) or special keys (arrows, Home/End, PgUp/PgDn). No bare
+letter commands, no multi-key sequences. One `tea.KeyMsg` = one action.
+**Rationale:** Idiomatic bubbletea. Catkin is always in insert mode —
+bare keys are text input. The spirit is vim-flavored (efficient,
+keyboard-driven, no mouse required) but the grammar is Ctrl+key like
+pico/micro. Consistent with poplar's global "no multi-key sequences"
+rule.
+**Date:** 2026-04-11
+
+### Two-editor architecture with Editor interface
+**Decision:** Compose supports two editor backends behind an `Editor`
+interface: Catkin (v1 default) and neovim via `--embed` RPC (v1.1).
+Config selects the editor. The compose panel, header region, lifecycle,
+and send pipeline are shared.
+**Rationale:** Catkin provides an out-of-the-box experience for
+everyone. Neovim embedding is the 1.1 killer feature — inline nvim in
+the right panel while sidebar and chrome stay visible. No terminal
+email client does this today. The `Editor` interface is designed in v1
+so the neovim implementation slots in without refactoring.
+**Date:** 2026-04-11
+
+### Inline compose over terminal takeover
+**Decision:** Compose renders in the right panel. Sidebar, top line,
+status bar, and footer remain visible and active with compose-appropriate
+content. No `tea.ExecProcess` terminal takeover.
+**Rationale:** Every terminal email client today shells out and loses
+context. Keeping the chrome visible during compose is the differentiating
+UX feature. The header region is native bubbletea (not part of the
+editor), the editor fills the remaining space.
+**Date:** 2026-04-11
+
 ### 15 compiled themes with One Dark default
 **Decision:** Ship 15 compiled themes (10 dark, 5 light). Default is
 One Dark. Selection criteria: terminal ecosystem presence (kitty/alacritty

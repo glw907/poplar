@@ -133,29 +133,31 @@ baked into the core editor.
 **Package structure:**
 
 - `catkin/` — core editor component (standalone, no poplar
-  dependencies). Manages its own key sequences internally.
+  dependencies)
 - Poplar's compose panel wraps Catkin and adds email-specific
   behavior (quote-aware reflow, tidytext, spellcheck, signature)
 
-Catkin is not modal, but its command vocabulary is vim-flavored.
-Users who know vim motions feel at home; users who don't can
-discover commands through the footer hints and `?` help. The goal
-is a non-modal editor where vim-literate users never reach for a
-manual.
+**Keybinding philosophy:** Catkin is non-modal — you're always
+inserting text. All commands use modifier keys (Ctrl+key) or
+special keys (arrows, Home/End, PgUp/PgDn). No multi-key
+sequences. No bare letter commands. This is idiomatic bubbletea:
+one `tea.KeyMsg` = one action. The spirit is vim-flavored
+(efficient, keyboard-driven, no mouse required) but the grammar
+is Ctrl+key like pico/micro.
 
 ### Core Editing
 
-- Insert, delete, backspace, word-delete (`dw`-style)
-- Word-level navigation (`w`/`b` or Ctrl+Left/Right)
-- Line start/end (`0`/`$` or Home/End)
-- Paragraph-level cut/paste (`dd`-paragraph / `p`) — a
-  "paragraph" is consecutive non-blank lines at the same quote
-  depth
-- Line-level cut (secondary binding)
-- Selection support for cut operations
-- Undo/redo (`u` / Ctrl+R)
-- Search (`/`) with `n`/`N` for next/previous match
-- Jump to top/bottom (`gg`/`G`)
+- Insert, delete, backspace
+- Word-delete forward/back (Ctrl+D / Ctrl+Backspace)
+- Word-level navigation (Ctrl+Left / Ctrl+Right)
+- Line start/end (Home / End)
+- Document start/end (Ctrl+Home / Ctrl+End)
+- Page up/down (PgUp / PgDn)
+- Paragraph-level cut/paste (Ctrl+K / Ctrl+U) — a "paragraph"
+  is consecutive non-blank lines at the same quote depth
+- Selection (Shift+arrows, Shift+Home/End)
+- Undo/redo (Ctrl+Z / Ctrl+Y)
+- Search (Ctrl+F) with next/prev (Ctrl+N / Ctrl+P)
 
 ### Mail-Specific Features
 
