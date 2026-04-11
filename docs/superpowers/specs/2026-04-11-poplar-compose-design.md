@@ -459,3 +459,8 @@ features available.
 The `Editor` interface is the seam. Pass 9 builds Catkin and the
 full compose infrastructure. The v1.1 pass adds the neovim
 implementation behind the same interface.
+
+**Implementation plan deferred.** This spec captures design
+decisions. The implementation plan will be written when Pass 9 is
+next — several passes (sidebar, message list, viewer, triage,
+command mode, live backend) will refine the architecture first.
