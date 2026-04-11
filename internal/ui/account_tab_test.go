@@ -33,12 +33,12 @@ func TestAccountTab(t *testing.T) {
 			t.Errorf("initial focus = %d, want SidebarPanel", tab.focused)
 		}
 
-		tab, _ = tab.Update(tea.KeyMsg{Type: tea.KeyTab})
+		tab, _ = tab.updateTab(tea.KeyMsg{Type: tea.KeyTab})
 		if tab.focused != MsgListPanel {
 			t.Errorf("after Tab, focus = %d, want MsgListPanel", tab.focused)
 		}
 
-		tab, _ = tab.Update(tea.KeyMsg{Type: tea.KeyTab})
+		tab, _ = tab.updateTab(tea.KeyMsg{Type: tea.KeyTab})
 		if tab.focused != SidebarPanel {
 			t.Errorf("after second Tab, focus = %d, want SidebarPanel", tab.focused)
 		}
@@ -56,7 +56,7 @@ func TestAccountTab(t *testing.T) {
 
 	t.Run("resize propagates", func(t *testing.T) {
 		tab := NewAccountTab(styles, backend)
-		tab, _ = tab.Update(tea.WindowSizeMsg{Width: 120, Height: 40})
+		tab, _ = tab.updateTab(tea.WindowSizeMsg{Width: 120, Height: 40})
 		if tab.width != 120 {
 			t.Errorf("width = %d, want 120", tab.width)
 		}

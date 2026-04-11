@@ -53,8 +53,13 @@ func (m AccountTab) Closeable() bool { return false }
 // Init returns no initial command.
 func (m AccountTab) Init() tea.Cmd { return nil }
 
-// Update handles key events and window size changes.
-func (m AccountTab) Update(msg tea.Msg) (AccountTab, tea.Cmd) {
+// Update satisfies tea.Model. Delegates to updateTab for typed access.
+func (m AccountTab) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	return m.updateTab(msg)
+}
+
+// updateTab handles key events and window size changes, returning the typed model.
+func (m AccountTab) updateTab(msg tea.Msg) (AccountTab, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		m.width = msg.Width
