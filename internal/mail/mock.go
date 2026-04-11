@@ -10,6 +10,7 @@ import (
 // MockBackend implements Backend with hardcoded data.
 // Used for prototype development, testing, and demos.
 type MockBackend struct {
+	name    string
 	folders []Folder
 	msgs    []MessageInfo
 	updates chan Update
@@ -18,6 +19,7 @@ type MockBackend struct {
 // NewMockBackend creates a MockBackend with realistic sample data.
 func NewMockBackend() *MockBackend {
 	return &MockBackend{
+		name: "geoff@907.life",
 		folders: []Folder{
 			{Name: "Inbox", Exists: 10, Unseen: 3, Role: "inbox"},
 			{Name: "Drafts", Exists: 2, Unseen: 0, Role: "drafts"},
@@ -46,6 +48,7 @@ func NewMockBackend() *MockBackend {
 	}
 }
 
+func (m *MockBackend) AccountName() string              { return m.name }
 func (m *MockBackend) Connect(_ context.Context) error { return nil }
 func (m *MockBackend) Disconnect() error               { return nil }
 

@@ -17,6 +17,8 @@ type SearchCriteria struct {
 // tea.Cmd model handles async naturally by running blocking calls
 // in commands that return messages on completion.
 type Backend interface {
+	AccountName() string
+
 	Connect(ctx context.Context) error
 	Disconnect() error
 
