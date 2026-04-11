@@ -62,6 +62,11 @@ right panel (same position as the message list). `q` returns to
 the message list. No tab lifecycle, no tab switching keys.
 One view at a time — "Better Pine" simplicity.
 
+**Folder jumps:** Single uppercase keys jump to canonical folders
+from any context: `I` Inbox, `D` Drafts, `S` Sent, `A` Archive,
+`X` Spam, `T` Trash. Works whether the sidebar is visible or
+collapsed. See `docs/poplar/keybindings.md` for the full map.
+
 ### 2. Account Label in Sidebar
 
 The sidebar shows the account name at the top, followed by a
@@ -93,7 +98,7 @@ connecting horizontally rather than terminating vertically.
 │ content                                                                  │
 │                                                                          │
  ──────────────────────────┴──────────────── 10 messages · 3 unread · ● connected ─╯
-  d:del  a:archive  s:star  r:reply  R:all  f:fwd  c:compose  /:search  ?:help  ::cmd
+  d:del  a:archive  s:star  ┊  r:reply  R:all  f:fwd  c:compose  ┊  /:search  ?:help  ::cmd
 ```
 
 - The `╯` is the bottom-right rounded corner of the content
@@ -106,7 +111,10 @@ connecting horizontally rather than terminating vertically.
   starts at column 0.
 - The command footer sits below, outside the frame, with no
   borders or background. One space of left padding before the
-  first hint.
+  first hint. Bindings are grouped logically with `┊` (light
+  quadruple dash vertical) separators in `fg_dim` between
+  groups. See `docs/poplar/keybindings.md` for the full map,
+  groupings, and curated footer display per context.
 
 ### 4. Combined Status Indicator (Bottom Right)
 
@@ -280,7 +288,7 @@ or viewer).
 │                          │                                                                              │
 │                          │                                                                              │
  ──────────────────────────┴──────────────────────────────────── 10 messages · 3 unread · ● connected ─╯
-  d:del  a:archive  s:star  r:reply  R:all  f:fwd  c:compose  /:search  ?:help  ::cmd
+  d:del  a:archive  s:star  ┊  r:reply  R:all  f:fwd  c:compose  ┊  /:search  ?:help  ::cmd
 ```
 
 #### Message Viewer with Sidebar
@@ -310,7 +318,7 @@ or viewer).
 │                          │  > On Apr 9, 2026, Geoff Wright wrote:                                      │
 │                          │  > Can you send me the updated project plan?                                 │
  ──────────────────────────┴──────────────────────────────────────────── 100% · ● connected ─╯
-  d:del  a:archive  s:star  r:reply  R:all  f:fwd  Tab:links  q:close
+  d:del  a:archive  s:star  ┊  r:reply  R:all  f:fwd  ┊  Tab:links  q:close  ?:help
 ```
 
 #### Toast Notification (transient, overlays top-right)
