@@ -1,8 +1,8 @@
 # Poplar Status
 
-**Current state:** Pass 2.5b-1 done. Chrome shell prototype complete
-with tab bar, status bar, command footer, and focus cycling. Ready
-for sidebar implementation (Pass 2.5b-2).
+**Current state:** bubbletea-design skill done. Chrome shell prototype
+complete with tab bar, status bar, command footer, and focus cycling.
+Ready for sidebar implementation (Pass 2.5b-2).
 
 ## Passes
 
@@ -47,19 +47,9 @@ for sidebar implementation (Pass 2.5b-2).
 
 ### Next steps
 
-1. **Implement bubbletea-design skill** — ready to execute
-2. **Execute Pass 2.5b-2** — sidebar prototype (after skill is done)
+1. **Execute Pass 2.5b-2** — sidebar prototype
 
 ### Next starter prompt
-
-> Implement the bubbletea-design skill. Read the plan at
-> `docs/superpowers/plans/2026-04-10-bubbletea-design-skill.md`
-> and the spec at
-> `docs/superpowers/specs/2026-04-10-bubbletea-design-skill-design.md`.
-> Execute all three tasks: write the SKILL.md, verify discovery,
-> and smoke test against poplar's tab bar.
-
-### After bubbletea-design skill
 
 > Start Pass 2.5b-2: sidebar prototype. Read the wireframes at
 > `docs/poplar/wireframes.md`, the chrome shell design spec at
