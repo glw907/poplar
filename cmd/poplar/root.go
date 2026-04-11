@@ -1,17 +1,13 @@
 package main
 
 import (
-	"context"
 	"fmt"
-	"os"
-	"path/filepath"
 
+	tea "github.com/charmbracelet/bubbletea"
 	"github.com/glw907/beautiful-aerc/internal/mail"
-	"github.com/glw907/beautiful-aerc/internal/poplar"
+	"github.com/glw907/beautiful-aerc/internal/theme"
+	"github.com/glw907/beautiful-aerc/internal/ui"
 	"github.com/spf13/cobra"
-
-	// Import forked workers for init() side effects (handler registration).
-	_ "github.com/glw907/beautiful-aerc/internal/aercfork/worker"
 )
 
 func newRootCmd() *cobra.Command {
@@ -24,42 +20,28 @@ func newRootCmd() *cobra.Command {
 	return cmd
 }
 
-func runRoot(cmd *cobra.Command, args []string) error {
-	home, err := os.UserHomeDir()
-	if err != nil {
-		return fmt.Errorf("finding home directory: %w", err)
-	}
+// appModel wraps ui.App to satisfy tea.Model (returns tea.Model, not App).
+type appModel struct {
+	app ui.App
+}
 
-	configPath := filepath.Join(home, ".config", "poplar", "accounts.toml")
-	accounts, err := poplar.ParseAccounts(configPath)
-	if err != nil {
-		return fmt.Errorf("loading accounts: %w", err)
-	}
+func (m appModel) Init() tea.Cmd { return m.app.Init() }
 
-	acct := &accounts[0]
-	adapter, err := mail.NewJMAPAdapter(acct)
-	if err != nil {
-		return fmt.Errorf("creating adapter: %w", err)
-	}
+func (m appModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	app, cmd := m.app.Update(msg)
+	m.app = app
+	return m, cmd
+}
 
-	ctx := context.Background()
-	if err := adapter.Connect(ctx); err != nil {
-		return fmt.Errorf("connecting: %w", err)
-	}
+func (m appModel) View() string { return m.app.View() }
 
-	folders, err := adapter.ListFolders()
-	if err != nil {
-		return fmt.Errorf("listing folders: %w", err)
-	}
+func runRoot(_ *cobra.Command, _ []string) error {
+	backend := mail.NewMockBackend()
+	app := ui.NewApp(theme.Nord, backend)
 
-	for _, f := range folders {
-		role := ""
-		if f.Role != "" {
-			role = " [" + f.Role + "]"
-		}
-		fmt.Fprintf(os.Stdout, "%-30s %d messages, %d unread%s\n",
-			f.Name, f.Exists, f.Unseen, role)
+	p := tea.NewProgram(appModel{app: app}, tea.WithAltScreen())
+	if _, err := p.Run(); err != nil {
+		return fmt.Errorf("running poplar: %w", err)
 	}
-
 	return nil
 }
