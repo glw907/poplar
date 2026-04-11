@@ -48,6 +48,8 @@ single-key folder jumps defined. Ready for sidebar prototype (Pass 2.5b-2).
 - [Chrome redesign spec](../superpowers/specs/2026-04-11-poplar-chrome-redesign-design.md)
 - [Chrome redesign plan](../superpowers/plans/2026-04-11-poplar-chrome-redesign.md)
 - [Keybinding map](../poplar/keybindings.md)
+- [Theme selection spec](../superpowers/specs/2026-04-11-poplar-themes-design.md)
+- [Theme selection plan](../superpowers/plans/2026-04-11-poplar-themes.md)
 
 ## Continuing Development
 

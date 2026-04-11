@@ -20,7 +20,7 @@ protocol handling (IMAP + JMAP).
 | Forked support | `internal/aercfork/{log,parse,xdg,auth,keepalive}/` | Forked aerc support libraries |
 | Content pipeline | `internal/filter/` | CleanHTML/CleanPlain: raw email → normalized markdown |
 | Block model | `internal/content/` | ParseBlocks, RenderBody, ParseHeaders, RenderHeaders |
-| Themes | `internal/theme/` | Compiled lipgloss themes (Nord, SolarizedDark, GruvboxDark) |
+| Themes | `internal/theme/` | Compiled lipgloss themes (15 themes, One Dark default) |
 | Compose | `internal/compose/` | Existing compose buffer normalization (shared with mailrender) |
 | Config | `internal/config/` | Poplar config parsing (accounts, UI, keybindings) |
 
@@ -316,4 +316,14 @@ canonical folders from any context. Not multi-key sequences.
 **Rationale:** Bubbletea sends one KeyMsg per keypress. Multi-key
 sequences require a state machine. Uppercase avoids conflict with
 lowercase triage keys (d/a/s).
+**Date:** 2026-04-11
+
+### 15 compiled themes with One Dark default
+**Decision:** Ship 15 compiled themes (10 dark, 5 light). Default is
+One Dark. Selection criteria: terminal ecosystem presence (kitty/alacritty
+ports minimum) with popularity as tiebreaker.
+**Rationale:** One Dark is neutral and familiar to millions of VS Code
+users. The 15-theme lineup covers every major terminal color scheme
+family. All themes are compiled Go values — no runtime config files.
+`poplar themes` subcommand lists available themes.
 **Date:** 2026-04-11
