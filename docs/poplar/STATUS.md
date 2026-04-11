@@ -1,7 +1,8 @@
 # Poplar Status
 
-**Current state:** Pass 2.5a done. Text wireframes for all 20 UI
-elements complete. Ready for prototype implementation (Pass 2.5b).
+**Current state:** Pass 2.5b-1 done. Chrome shell prototype complete
+with tab bar, status bar, command footer, and focus cycling. Ready
+for sidebar implementation (Pass 2.5b-2).
 
 ## Passes
 
@@ -12,7 +13,7 @@ elements complete. Ready for prototype implementation (Pass 2.5b).
 | 2.5-render | Lipgloss migration: block model + compiled themes | done |
 | 2.5-fix | Fix first-level blockquote wrapping (BACKLOG #7) | done |
 | 2.5a | Text wireframes for all screens | done |
-| 2.5b-1 | Prototype: chrome shell | pending |
+| 2.5b-1 | Prototype: chrome shell | done |
 | 2.5b-2 | Prototype: sidebar | pending |
 | 2.5b-3 | Prototype: message list | pending |
 | 2.5b-4 | Prototype: message viewer | pending |
@@ -36,20 +37,24 @@ elements complete. Ready for prototype implementation (Pass 2.5b).
 - [Pass 1 plan](../superpowers/plans/2026-04-09-poplar-pass1-scaffold.md)
 - [Pass 2 plan](../superpowers/plans/2026-04-09-poplar-pass2-backend-adapter.md)
 - [Pass 2.5a wireframe plan](../superpowers/plans/2026-04-10-poplar-wireframes.md)
+- [Pass 2.5b-1 chrome shell plan](../superpowers/plans/2026-04-10-poplar-chrome-shell.md)
+- [Chrome shell design spec](../superpowers/specs/2026-04-10-poplar-chrome-shell-design.md)
 - [Wireframes](../poplar/wireframes.md)
 
 ## Continuing Development
 
 ### Next steps
 
-1. **Execute Pass 2.5b-1** — implementation plan is ready
+1. **Execute Pass 2.5b-2** — sidebar prototype
 
 ### Next starter prompt
 
-> Execute Pass 2.5b-1: chrome shell prototype. The implementation
-> plan is at `docs/superpowers/plans/2026-04-10-poplar-chrome-shell.md`.
-> The design spec is at `docs/superpowers/specs/2026-04-10-poplar-chrome-shell-design.md`.
-> Use subagent-driven-development to execute the plan task by task.
+> Start Pass 2.5b-2: sidebar prototype. Read the wireframes at
+> `docs/poplar/wireframes.md`, the chrome shell design spec at
+> `docs/superpowers/specs/2026-04-10-poplar-chrome-shell-design.md`,
+> and the architecture doc at `docs/poplar/architecture.md`. Write a
+> plan first, then build the sidebar: folder groups, selection,
+> unread badges, and g-prefix jumps.
 
 ### Pass-end checklist
 
