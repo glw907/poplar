@@ -179,9 +179,9 @@ community.
 **Date:** 2026-04-10
 
 ### Vim-first keybindings
-**Decision:** Full vim motion set (j/k, gg/G, C-d/C-u, C-f/C-b,
-zo/zc/za), vim visual mode for multi-select (v), `g`-prefix for
-folder jumps (gi/gd/gs/ga/gx/gt). Not configurable in v1.
+**Decision:** Single-key vim motions (j/k, G, C-d/C-u, C-f/C-b),
+vim visual mode for multi-select (v). Folder jumps via command
+mode. Not configurable in v1.
 **Rationale:** Vim motions are the universal TUI convention (mutt,
 aerc, lazygit, k9s all agree). Assuming vim literacy lets the
 command footer focus on email-specific actions instead of wasting
@@ -202,7 +202,8 @@ real estate is precious — use it for email workflow discovery. The
 separated by blank lines in the sidebar. No rendered group headers.
 **Rationale:** The grouping is self-evident from folder names and
 icons. Headers would label the obvious and add visual noise. Groups
-exist in the data model for sort order and `g`-prefix jumps.
+exist in the data model for sort order and folder jump targeting
+(via command mode).
 **Date:** 2026-04-10
 
 ### Provider folder name normalization
@@ -211,8 +212,8 @@ Trash) regardless of provider naming ([Gmail]/Sent Mail, Sent Items,
 etc.). Recognition via case-insensitive matching against known
 aliases.
 **Rationale:** Users shouldn't see provider implementation details.
-Canonical names work across providers and match the `g`-prefix
-jump mnemonics.
+Canonical names work across providers and match command mode
+jump targets.
 **Date:** 2026-04-10
 
 ### Hand-rolled sidebar over bubbles/list
@@ -241,6 +242,18 @@ status/toast, command mode.
 idioms. Lessons from building the sidebar inform the message list.
 Incremental validation — each sub-pass produces a testable result.
 **Date:** 2026-04-10
+
+### No multi-key sequences
+**Decision:** Avoid multi-key chords (e.g., `g i`, `g g`) in
+bubbletea. Use single-key bindings for all actions.
+**Rationale:** Bubbletea sends one `tea.KeyMsg` per keypress.
+Multi-key sequences require a custom state machine (pending key
+buffer, timeout logic, disambiguation). This is unnecessary
+complexity — folder jumps and other multi-key actions belong in
+command mode (`:go inbox`) which naturally handles multi-word
+input. `G` (shift-g) for jump-to-bottom is fine since it's a
+single keypress.
+**Date:** 2026-04-10 (Pass 2.5b-2)
 
 ### appModel wrapper for tea.Model compliance
 **Decision:** `ui.App.Update` returns `(App, tea.Cmd)` (typed, per
