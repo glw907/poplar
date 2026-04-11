@@ -16,6 +16,9 @@
 
 ## Medium
 
+- [ ] **#8** Design folder jump keybindings without multi-key sequences `#feature` `#poplar` *(2026-04-10)*
+  Need single-key alternatives to g-prefix chords (gi/gd/gs/ga/gx/gt) for jumping to Inbox, Drafts, Sent, Archive, Spam, Trash. Bubbletea sends one KeyMsg per keypress — multi-key chords require a custom state machine. Options: single-key mnemonics, command mode `:go inbox`, numeric folder indices, or other approaches. Important for daily triage workflow. Deserves its own pass.
+
 - [x] **#1** Clean up pick-link references from live docs `#improvement` `#docs` *(2026-04-09)*
   Binary was archived but `~/.claude/docs/aerc-setup.md` and `CLAUDE.md` still reference it extensively.
 - [x] **#2** Clean up stale pandoc references from docs `#improvement` `#docs` *(2026-04-09)*

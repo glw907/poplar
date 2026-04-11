@@ -1,6 +1,6 @@
 {
   "backlog_path": "BACKLOG.md",
   "roadmap_path": "ROADMAP.md",
-  "domains": ["mailrender", "fastmail-cli", "tidytext", "config", "docs"],
+  "domains": ["mailrender", "fastmail-cli", "tidytext", "poplar", "config", "docs"],
   "default_priority": "medium"
 }
