@@ -8,22 +8,15 @@ import (
 	"github.com/glw907/beautiful-aerc/internal/mail"
 )
 
-// Panel identifies which panel of the AccountTab is focused.
-type Panel int
-
-const (
-	SidebarPanel Panel = iota
-	MsgListPanel
-)
-
 // sidebarWidth is the fixed width of the sidebar panel.
 const sidebarWidth = 30
 
-// AccountTab is the main account view with sidebar and message list panels.
+// AccountTab is the main account view. The screen is one pane from a
+// keyboard nav standpoint (like pine) — no focus cycling. Every key is
+// always live: J/K/G navigate folders, j/k navigate messages.
 type AccountTab struct {
 	styles  Styles
 	backend mail.Backend
-	focused Panel
 	sidebar Sidebar
 	width   int
 	height  int
@@ -37,7 +30,6 @@ func NewAccountTab(styles Styles, backend mail.Backend) AccountTab {
 	return AccountTab{
 		styles:  styles,
 		backend: backend,
-		focused: SidebarPanel,
 		sidebar: sb,
 	}
 }
@@ -69,27 +61,16 @@ func (m AccountTab) updateTab(msg tea.Msg) (AccountTab, tea.Cmd) {
 		m.sidebar.SetSize(sw, m.height-2) // -2 for account name + blank line
 
 	case tea.KeyMsg:
-		switch {
-		case msg.Type == tea.KeyTab:
-			if m.focused == SidebarPanel {
-				m.focused = MsgListPanel
-			} else {
-				m.focused = SidebarPanel
-			}
-			m.sidebar.SetFocused(m.focused == SidebarPanel)
-
-		default:
-			if m.focused == SidebarPanel {
-				m.handleSidebarKey(msg)
-			}
-		}
+		m.handleKey(msg)
 	}
 	return m, nil
 }
 
-// handleSidebarKey routes key events to sidebar actions.
-// J/K (uppercase) navigate folders. j/k are reserved for messages.
-func (m *AccountTab) handleSidebarKey(msg tea.KeyMsg) {
+// handleKey routes key events to sidebar or message list actions.
+// J/K/G navigate folders (sidebar). j/k will navigate messages once
+// the message list exists. No focus switching — keys are dispatched
+// by identity, not by "which panel is active".
+func (m *AccountTab) handleKey(msg tea.KeyMsg) {
 	switch msg.String() {
 	case "J", "down":
 		m.sidebar.MoveDown()
@@ -112,7 +93,6 @@ func (m AccountTab) View() string {
 	acctLine := m.styles.SidebarAccount.Width(sw).Render(" " + m.backend.AccountName())
 	blank := m.styles.SidebarBg.Width(sw).Render("")
 
-	// Sidebar content: account name + blank + folder list
 	sidebarFolders := m.sidebar.View()
 
 	var sidebarLines []string
@@ -130,24 +110,19 @@ func (m AccountTab) View() string {
 
 	sidebarView := strings.Join(sidebarLines, "\n")
 	divider := renderDivider(m.height, m.styles)
-	msglistView := renderPlaceholder("Message List", mw, m.height, m.focused == MsgListPanel, m.styles)
+	msglistView := renderPlaceholder("Message List", mw, m.height, m.styles)
 
 	return lipgloss.JoinHorizontal(lipgloss.Top, sidebarView, divider, msglistView)
 }
 
 // renderPlaceholder renders a centered label in a panel of the given size.
-func renderPlaceholder(label string, width, height int, focused bool, s Styles) string {
+func renderPlaceholder(label string, width, height int, s Styles) string {
 	topPad := max(0, (height-1)/2)
 	botPad := max(0, height-1-topPad)
 	leftPad := max(0, (width-len(label))/2)
 
 	padStyle := lipgloss.NewStyle().Width(width)
 	labelStyle := lipgloss.NewStyle().Width(width).Foreground(s.Dim.GetForeground())
-	if focused {
-		bg := s.Selection.GetBackground()
-		padStyle = padStyle.Background(bg)
-		labelStyle = labelStyle.Background(bg)
-	}
 
 	blankLine := padStyle.Render("")
 	var lines []string

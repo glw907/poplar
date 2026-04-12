@@ -52,16 +52,6 @@ func TestApp(t *testing.T) {
 		}
 	})
 
-	t.Run("tab key delegates to account tab", func(t *testing.T) {
-		app := NewApp(theme.Nord, backend)
-		app.width = 80
-		app.height = 24
-		app, _ = app.Update(tea.KeyMsg{Type: tea.KeyTab})
-		if app.acct.focused != MsgListPanel {
-			t.Errorf("after Tab, focused = %d, want MsgListPanel", app.acct.focused)
-		}
-	})
-
 	t.Run("view has top line with ╮", func(t *testing.T) {
 		app := NewApp(theme.Nord, backend)
 		app, _ = app.Update(tea.WindowSizeMsg{Width: 80, Height: 24})
@@ -138,10 +128,10 @@ func TestApp(t *testing.T) {
 		}
 	})
 
-	t.Run("footer starts in sidebar context", func(t *testing.T) {
+	t.Run("footer starts in account context", func(t *testing.T) {
 		app := NewApp(theme.Nord, backend)
-		if app.footer.context != SidebarContext {
-			t.Errorf("footer context = %d, want SidebarContext (sidebar is focused on startup)", app.footer.context)
+		if app.footer.context != AccountContext {
+			t.Errorf("footer context = %d, want AccountContext", app.footer.context)
 		}
 	})
 

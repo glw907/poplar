@@ -28,7 +28,6 @@ type folderEntry struct {
 type Sidebar struct {
 	entries  []folderEntry
 	selected int
-	focused  bool
 	styles   Styles
 	width    int
 	height   int
@@ -47,7 +46,6 @@ func NewSidebar(styles Styles, folders []mail.Folder, width, height int) Sidebar
 	return Sidebar{
 		entries:  entries,
 		selected: 0,
-		focused:  true,
 		styles:   styles,
 		width:    width,
 		height:   height,
@@ -80,9 +78,6 @@ func (s Sidebar) SelectedIcon() string {
 	}
 	return ""
 }
-
-// SetFocused sets whether the sidebar has focus.
-func (s *Sidebar) SetFocused(focused bool) { s.focused = focused }
 
 // SetSize updates the sidebar dimensions.
 func (s *Sidebar) SetSize(width, height int) {
@@ -164,9 +159,9 @@ func (s Sidebar) renderRow(idx int, entry folderEntry, bgStyle lipgloss.Style) s
 		return base
 	}
 
-	// Indicator: ┃ when focused+selected, space otherwise
+	// Indicator: ┃ when selected, space otherwise
 	var indicator string
-	if isSelected && s.focused {
+	if isSelected {
 		indicator = withBg(s.styles.SidebarIndicator).Render("┃")
 	} else {
 		indicator = bgStyle.Render(" ")

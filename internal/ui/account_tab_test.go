@@ -13,23 +13,6 @@ func TestAccountTab(t *testing.T) {
 	styles := NewStyles(theme.Nord)
 	backend := mail.NewMockBackend()
 
-	t.Run("focus cycling", func(t *testing.T) {
-		tab := NewAccountTab(styles, backend)
-		if tab.focused != SidebarPanel {
-			t.Errorf("initial focus = %d, want SidebarPanel", tab.focused)
-		}
-
-		tab, _ = tab.updateTab(tea.KeyMsg{Type: tea.KeyTab})
-		if tab.focused != MsgListPanel {
-			t.Errorf("after Tab, focus = %d, want MsgListPanel", tab.focused)
-		}
-
-		tab, _ = tab.updateTab(tea.KeyMsg{Type: tea.KeyTab})
-		if tab.focused != SidebarPanel {
-			t.Errorf("after second Tab, focus = %d, want SidebarPanel", tab.focused)
-		}
-	})
-
 	t.Run("title returns folder name", func(t *testing.T) {
 		tab := NewAccountTab(styles, backend)
 		if tab.Title() != "Inbox" {
@@ -67,7 +50,7 @@ func TestAccountTab(t *testing.T) {
 		}
 	})
 
-	t.Run("J/K navigates sidebar when focused", func(t *testing.T) {
+	t.Run("J/K navigates sidebar", func(t *testing.T) {
 		tab := NewAccountTab(styles, backend)
 		tab.width = 80
 		tab.height = 20
@@ -88,16 +71,6 @@ func TestAccountTab(t *testing.T) {
 		tab, _ = tab.updateTab(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'J'}})
 		if tab.Title() != "Drafts" {
 			t.Errorf("Title() = %q, want Drafts", tab.Title())
-		}
-	})
-
-	t.Run("sidebar unfocused when msglist focused", func(t *testing.T) {
-		tab := NewAccountTab(styles, backend)
-		tab.width = 80
-		tab.height = 20
-		tab, _ = tab.updateTab(tea.KeyMsg{Type: tea.KeyTab})
-		if tab.sidebar.focused {
-			t.Error("sidebar should be unfocused after Tab")
 		}
 	})
 

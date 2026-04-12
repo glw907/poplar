@@ -77,7 +77,7 @@ until unread, then escalate to `FgBright` + bold.
 | `SidebarSelected` | — | `BgSelection` | Selected row override |
 | `SidebarFolder` | `FgBase` | inherit | Folder icon + name (no unread) |
 | `SidebarUnread` | `FgBright` bold | inherit | Folder icon + name + count (has unread) |
-| `SidebarIndicator` | `AccentSecondary` | inherit | `┃` focus indicator (selected + focused only) |
+| `SidebarIndicator` | `AccentSecondary` | inherit | `┃` selection indicator (selected row) |
 
 Background composition: sidebar rows carry their bg via the `bgStyle`
 parameter into `renderRow`. Each text segment runs through `withBg()`

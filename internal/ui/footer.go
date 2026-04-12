@@ -10,28 +10,26 @@ import (
 type FooterContext int
 
 const (
-	MsgListContext FooterContext = iota
-	SidebarContext
+	// AccountContext is the unified one-pane account view (folders + messages).
+	AccountContext FooterContext = iota
 	ViewerContext
 )
 
 // Footer renders context-appropriate keybinding hints with group separators.
 type Footer struct {
-	styles      Styles
-	context     FooterContext
-	msgKeys     MsgListKeys
-	sidebarKeys SidebarKeys
-	viewerKeys  ViewerKeys
+	styles     Styles
+	context    FooterContext
+	acctKeys   AccountKeys
+	viewerKeys ViewerKeys
 }
 
 // NewFooter creates a Footer with the given styles.
 func NewFooter(styles Styles) Footer {
 	return Footer{
-		styles:      styles,
-		context:     MsgListContext,
-		msgKeys:     NewMsgListKeys(),
-		sidebarKeys: NewSidebarKeys(),
-		viewerKeys:  NewViewerKeys(),
+		styles:     styles,
+		context:    AccountContext,
+		acctKeys:   NewAccountKeys(),
+		viewerKeys: NewViewerKeys(),
 	}
 }
 
@@ -44,12 +42,10 @@ func (f *Footer) SetContext(ctx FooterContext) {
 func (f Footer) View(width int) string {
 	var groups []keyGroup
 	switch f.context {
-	case SidebarContext:
-		groups = f.sidebarKeys.Groups()
 	case ViewerContext:
 		groups = f.viewerKeys.Groups()
 	default:
-		groups = f.msgKeys.Groups()
+		groups = f.acctKeys.Groups()
 	}
 
 	sep := " " + f.styles.FooterSep.Render("┊") + "  "

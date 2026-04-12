@@ -76,9 +76,8 @@ func TestSidebar(t *testing.T) {
 		}
 	})
 
-	t.Run("selected row has focus indicator when focused", func(t *testing.T) {
+	t.Run("selected row has focus indicator", func(t *testing.T) {
 		sb := NewSidebar(styles, folders, 30, 20)
-		sb.focused = true
 		view := sb.View()
 		plain := stripANSI(view)
 		lines := strings.Split(plain, "\n")
@@ -88,20 +87,10 @@ func TestSidebar(t *testing.T) {
 		for _, line := range lines {
 			if strings.TrimSpace(line) != "" {
 				if !strings.Contains(line, "┃") {
-					t.Errorf("focused selected row missing ┃: %q", line)
+					t.Errorf("selected row missing ┃: %q", line)
 				}
 				break
 			}
-		}
-	})
-
-	t.Run("no focus indicator when unfocused", func(t *testing.T) {
-		sb := NewSidebar(styles, folders, 30, 20)
-		sb.focused = false
-		view := sb.View()
-		plain := stripANSI(view)
-		if strings.Contains(plain, "┃") {
-			t.Error("unfocused sidebar should not have ┃ indicator")
 		}
 	})
 

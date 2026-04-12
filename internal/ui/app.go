@@ -42,7 +42,7 @@ func NewApp(t *theme.CompiledTheme, backend mail.Backend) App {
 		footer:    NewFooter(styles),
 		keys:      NewGlobalKeys(),
 	}
-	app.updateFooterContext()
+	app.syncStatusBar()
 	return app
 }
 
@@ -61,7 +61,7 @@ func (m App) Update(msg tea.Msg) (App, tea.Cmd) {
 		var cmd tea.Cmd
 		m.acct, cmd = m.acct.Update(contentMsg)
 		cmds = append(cmds, cmd)
-		m.updateFooterContext()
+		m.syncStatusBar()
 		return m, tea.Batch(cmds...)
 
 	case tea.KeyMsg:
@@ -81,7 +81,7 @@ func (m App) Update(msg tea.Msg) (App, tea.Cmd) {
 	var cmd tea.Cmd
 	m.acct, cmd = m.acct.Update(msg)
 	cmds = append(cmds, cmd)
-	m.updateFooterContext()
+	m.syncStatusBar()
 
 	return m, tea.Batch(cmds...)
 }
@@ -126,14 +126,9 @@ func (m App) contentHeight() int {
 	return h
 }
 
-// updateFooterContext switches the footer KeyMap based on the active panel
-// and syncs the status bar with the sidebar's selected folder.
-func (m *App) updateFooterContext() {
-	if m.acct.focused == SidebarPanel {
-		m.footer.SetContext(SidebarContext)
-	} else {
-		m.footer.SetContext(MsgListContext)
-	}
+// syncStatusBar updates the status bar counts from the sidebar's
+// selected folder. One-pane: footer context doesn't change here.
+func (m *App) syncStatusBar() {
 	if f, ok := m.acct.sidebar.SelectedFolderInfo(); ok {
 		m.statusBar.SetCounts(f.Exists, f.Unseen)
 	}

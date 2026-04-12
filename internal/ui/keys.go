@@ -43,17 +43,18 @@ func NewFolderJumpKeys() FolderJumpKeys {
 	}
 }
 
-// MsgListKeys groups for the message list footer.
-type MsgListKeys struct {
+// AccountKeys groups for the unified one-pane account footer.
+// With no focus cycling, folder nav and message nav are both always live.
+type AccountKeys struct {
 	nav    keyGroup
 	triage keyGroup
 	reply  keyGroup
 	app    keyGroup
 }
 
-// NewMsgListKeys returns the default message list key bindings.
-func NewMsgListKeys() MsgListKeys {
-	return MsgListKeys{
+// NewAccountKeys returns the default account view key bindings.
+func NewAccountKeys() AccountKeys {
+	return AccountKeys{
 		nav: keyGroup{
 			key.NewBinding(key.WithKeys("j"), key.WithHelp("j/k", "messages")),
 			key.NewBinding(key.WithKeys("J"), key.WithHelp("J/K", "folders")),
@@ -78,41 +79,8 @@ func NewMsgListKeys() MsgListKeys {
 }
 
 // Groups returns the keybinding groups for footer rendering.
-func (k MsgListKeys) Groups() []keyGroup {
+func (k AccountKeys) Groups() []keyGroup {
 	return []keyGroup{k.nav, k.triage, k.reply, k.app}
-}
-
-// SidebarKeys groups for the sidebar footer.
-type SidebarKeys struct {
-	nav    keyGroup
-	action keyGroup
-	folder keyGroup
-	app    keyGroup
-}
-
-// NewSidebarKeys returns the default sidebar key bindings.
-func NewSidebarKeys() SidebarKeys {
-	fj := NewFolderJumpKeys()
-	return SidebarKeys{
-		nav: keyGroup{
-			key.NewBinding(key.WithKeys("j"), key.WithHelp("j/J/k/K", "nav")),
-		},
-		action: keyGroup{
-			key.NewBinding(key.WithKeys("enter"), key.WithHelp("Enter", "open")),
-			key.NewBinding(key.WithKeys("c"), key.WithHelp("c", "compose")),
-		},
-		folder: keyGroup{fj.Inbox, fj.Drafts, fj.Sent, fj.Archive},
-		app: keyGroup{
-			key.NewBinding(key.WithKeys("?"), key.WithHelp("?", "help")),
-			key.NewBinding(key.WithKeys(":"), key.WithHelp(":", "cmd")),
-			key.NewBinding(key.WithKeys("q"), key.WithHelp("q", "quit")),
-		},
-	}
-}
-
-// Groups returns the keybinding groups for footer rendering.
-func (k SidebarKeys) Groups() []keyGroup {
-	return []keyGroup{k.nav, k.action, k.folder, k.app}
 }
 
 // ViewerKeys groups for the viewer footer.
