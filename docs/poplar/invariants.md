@@ -135,7 +135,7 @@ invariant. ADR numbering is chronological.
 
 | Invariant theme | ADRs |
 |---|---|
-| Monorepo, single binary, fork policy | 0001, 0002 |
+| Monorepo, single binary, fork policy | 0001, 0002, 0058 |
 | Lipgloss + compiled themes, styling discipline | 0004, 0043, 0046 |
 | JMAP + IMAP only, minimal account config | 0008, 0012, 0009 |
 | Mail backend adapter synchronous | 0011 |

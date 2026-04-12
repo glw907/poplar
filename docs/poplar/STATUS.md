@@ -1,8 +1,7 @@
 # Poplar Status
 
-**Current pass:** Pass 2.5b-3.6 (threading + fold). Pivot plan
-(`2026-04-12-poplar-pivot.md`) executing ahead of it — feature work
-resumes once the pivot lands.
+**Current pass:** Pass 2.5b-3.6 (threading + fold). Pivot to the
+single-binary `poplar` repo landed 2026-04-12 (ADR 0058).
 
 ## Passes
 

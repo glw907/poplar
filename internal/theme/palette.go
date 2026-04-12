@@ -111,7 +111,6 @@ func NewCompiledTheme(name string, p Palette) *CompiledTheme {
 }
 
 // PaletteHex returns the raw hex value for a color slot by name.
-// Used by the styleset generator.
 func (t *CompiledTheme) PaletteHex(name string) string {
 	switch name {
 	case "bg_base":

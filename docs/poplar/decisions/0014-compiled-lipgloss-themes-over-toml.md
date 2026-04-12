@@ -10,7 +10,9 @@ Follows Charm conventions (lipgloss styles as Go values).
 Eliminates runtime file discovery, TOML parsing errors, and the
 glamour→lipgloss impedance mismatch. Three-layer pipeline: filter
 (CleanHTML/CleanPlain) → content (ParseBlocks) → renderer (RenderBody
-with lipgloss). Poplar and mailrender share the same compiled themes.
+with lipgloss). (Pre-pivot the themes were also consumed by the
+retired mailrender CLI; after ADR 0058 internal/theme/ is poplar-
+only and the aerc styleset generator is gone.)
 
 ## Decision
 
