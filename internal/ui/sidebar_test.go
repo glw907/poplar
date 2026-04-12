@@ -16,7 +16,7 @@ func TestSidebar(t *testing.T) {
 	folders := mockFolders()
 
 	t.Run("renders all folders", func(t *testing.T) {
-		sb := newSidebarFromFolders(styles, folders, 30, 20)
+		sb := NewSidebar(styles, mail.Classify(folders), config.DefaultUIConfig(), 30, 20)
 		view := sb.View()
 		plain := stripANSI(view)
 		for _, f := range folders {
@@ -27,7 +27,7 @@ func TestSidebar(t *testing.T) {
 	})
 
 	t.Run("groups separated by blank lines", func(t *testing.T) {
-		sb := newSidebarFromFolders(styles, folders, 30, 20)
+		sb := NewSidebar(styles, mail.Classify(folders), config.DefaultUIConfig(), 30, 20)
 		view := sb.View()
 		plain := stripANSI(view)
 		lines := strings.Split(plain, "\n")
@@ -44,7 +44,7 @@ func TestSidebar(t *testing.T) {
 	})
 
 	t.Run("initial selection is first folder", func(t *testing.T) {
-		sb := newSidebarFromFolders(styles, folders, 30, 20)
+		sb := NewSidebar(styles, mail.Classify(folders), config.DefaultUIConfig(), 30, 20)
 		if sb.Selected() != 0 {
 			t.Errorf("initial selection = %d, want 0", sb.Selected())
 		}
@@ -54,7 +54,7 @@ func TestSidebar(t *testing.T) {
 	})
 
 	t.Run("unread count shown only when positive", func(t *testing.T) {
-		sb := newSidebarFromFolders(styles, folders, 30, 20)
+		sb := NewSidebar(styles, mail.Classify(folders), config.DefaultUIConfig(), 30, 20)
 		view := sb.View()
 		plain := stripANSI(view)
 		lines := strings.Split(plain, "\n")
@@ -78,7 +78,7 @@ func TestSidebar(t *testing.T) {
 	})
 
 	t.Run("selected row has selection indicator", func(t *testing.T) {
-		sb := newSidebarFromFolders(styles, folders, 30, 20)
+		sb := NewSidebar(styles, mail.Classify(folders), config.DefaultUIConfig(), 30, 20)
 		view := sb.View()
 		plain := stripANSI(view)
 		lines := strings.Split(plain, "\n")
@@ -96,7 +96,7 @@ func TestSidebar(t *testing.T) {
 	})
 
 	t.Run("all lines same display width", func(t *testing.T) {
-		sb := newSidebarFromFolders(styles, folders, 30, 20)
+		sb := NewSidebar(styles, mail.Classify(folders), config.DefaultUIConfig(), 30, 20)
 		view := sb.View()
 		lines := strings.Split(view, "\n")
 		for i, line := range lines {
@@ -109,7 +109,7 @@ func TestSidebar(t *testing.T) {
 	})
 
 	t.Run("j moves down", func(t *testing.T) {
-		sb := newSidebarFromFolders(styles, folders, 30, 20)
+		sb := NewSidebar(styles, mail.Classify(folders), config.DefaultUIConfig(), 30, 20)
 		sb.MoveDown()
 		if sb.Selected() != 1 {
 			t.Errorf("after MoveDown, selected = %d, want 1", sb.Selected())
@@ -120,7 +120,7 @@ func TestSidebar(t *testing.T) {
 	})
 
 	t.Run("k moves up", func(t *testing.T) {
-		sb := newSidebarFromFolders(styles, folders, 30, 20)
+		sb := NewSidebar(styles, mail.Classify(folders), config.DefaultUIConfig(), 30, 20)
 		sb.MoveDown()
 		sb.MoveDown()
 		sb.MoveUp()
@@ -130,7 +130,7 @@ func TestSidebar(t *testing.T) {
 	})
 
 	t.Run("k at top stays at 0", func(t *testing.T) {
-		sb := newSidebarFromFolders(styles, folders, 30, 20)
+		sb := NewSidebar(styles, mail.Classify(folders), config.DefaultUIConfig(), 30, 20)
 		sb.MoveUp()
 		if sb.Selected() != 0 {
 			t.Errorf("MoveUp at top: selected = %d, want 0", sb.Selected())
@@ -138,7 +138,7 @@ func TestSidebar(t *testing.T) {
 	})
 
 	t.Run("j at bottom stays at last", func(t *testing.T) {
-		sb := newSidebarFromFolders(styles, folders, 30, 20)
+		sb := NewSidebar(styles, mail.Classify(folders), config.DefaultUIConfig(), 30, 20)
 		for i := 0; i < 20; i++ {
 			sb.MoveDown()
 		}
@@ -149,7 +149,7 @@ func TestSidebar(t *testing.T) {
 	})
 
 	t.Run("G moves to bottom", func(t *testing.T) {
-		sb := newSidebarFromFolders(styles, folders, 30, 20)
+		sb := NewSidebar(styles, mail.Classify(folders), config.DefaultUIConfig(), 30, 20)
 		sb.MoveToBottom()
 		last := len(folders) - 1
 		if sb.Selected() != last {
@@ -158,7 +158,7 @@ func TestSidebar(t *testing.T) {
 	})
 
 	t.Run("gg moves to top", func(t *testing.T) {
-		sb := newSidebarFromFolders(styles, folders, 30, 20)
+		sb := NewSidebar(styles, mail.Classify(folders), config.DefaultUIConfig(), 30, 20)
 		sb.MoveDown()
 		sb.MoveDown()
 		sb.MoveDown()
@@ -169,7 +169,7 @@ func TestSidebar(t *testing.T) {
 	})
 
 	t.Run("height exactly matches", func(t *testing.T) {
-		sb := newSidebarFromFolders(styles, folders, 30, 15)
+		sb := NewSidebar(styles, mail.Classify(folders), config.DefaultUIConfig(), 30, 15)
 		view := sb.View()
 		lines := strings.Split(view, "\n")
 		if len(lines) != 15 {
@@ -178,7 +178,7 @@ func TestSidebar(t *testing.T) {
 	})
 
 	t.Run("spam shows unread count 12", func(t *testing.T) {
-		sb := newSidebarFromFolders(styles, folders, 30, 20)
+		sb := NewSidebar(styles, mail.Classify(folders), config.DefaultUIConfig(), 30, 20)
 		view := sb.View()
 		plain := stripANSI(view)
 		lines := strings.Split(plain, "\n")
@@ -192,7 +192,7 @@ func TestSidebar(t *testing.T) {
 	})
 
 	t.Run("selected icon tracks selection", func(t *testing.T) {
-		sb := newSidebarFromFolders(styles, folders, 30, 20)
+		sb := NewSidebar(styles, mail.Classify(folders), config.DefaultUIConfig(), 30, 20)
 		if sb.SelectedIcon() != "󰇰" {
 			t.Errorf("SelectedIcon() = %q, want inbox icon", sb.SelectedIcon())
 		}

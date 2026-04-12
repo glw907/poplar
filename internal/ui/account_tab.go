@@ -5,6 +5,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/glw907/beautiful-aerc/internal/config"
 	"github.com/glw907/beautiful-aerc/internal/mail"
 )
 
@@ -16,48 +17,23 @@ const sidebarWidth = 30
 type AccountTab struct {
 	styles  Styles
 	backend mail.Backend
+	uiCfg   config.UIConfig
 	sidebar Sidebar
 	msglist MessageList
 	width   int
 	height  int
 }
 
-// NewAccountTab creates an AccountTab using the given styles and backend.
-func NewAccountTab(styles Styles, backend mail.Backend) AccountTab {
-	folders, _ := backend.ListFolders()
-	sb := newSidebarFromFolders(styles, folders, sidebarWidth, 1)
-
-	tab := AccountTab{
+// NewAccountTab builds an empty AccountTab. The initial folder list is
+// fetched via Init's returned Cmd, not synchronously.
+func NewAccountTab(styles Styles, backend mail.Backend, uiCfg config.UIConfig) AccountTab {
+	return AccountTab{
 		styles:  styles,
 		backend: backend,
-		sidebar: sb,
+		uiCfg:   uiCfg,
+		sidebar: NewSidebar(styles, nil, uiCfg, sidebarWidth, 1),
 		msglist: NewMessageList(styles, nil, 1, 1),
 	}
-	tab.loadSelectedFolder()
-	return tab
-}
-
-// loadSelectedFolder fetches messages for the currently selected
-// sidebar folder and seeds the message list. Mock-backed for now;
-// Pass 3 will plumb this through real JMAP/IMAP fetches.
-func (m *AccountTab) loadSelectedFolder() {
-	name := m.sidebar.SelectedFolder()
-	if name == "" {
-		m.msglist.SetMessages(nil)
-		return
-	}
-	if err := m.backend.OpenFolder(name); err != nil {
-		// TODO(pass3): surface OpenFolder error via toast/status.
-		m.msglist.SetMessages(nil)
-		return
-	}
-	msgs, err := m.backend.FetchHeaders(nil)
-	if err != nil {
-		// TODO(pass3): surface FetchHeaders error via toast/status.
-		m.msglist.SetMessages(nil)
-		return
-	}
-	m.msglist.SetMessages(msgs)
 }
 
 // Title returns the current folder name.
@@ -69,15 +45,17 @@ func (m AccountTab) Icon() string { return m.sidebar.SelectedIcon() }
 // Closeable returns false — the account tab cannot be closed.
 func (m AccountTab) Closeable() bool { return false }
 
-// Init returns no initial command.
-func (m AccountTab) Init() tea.Cmd { return nil }
+// Init fires the initial folder-list fetch.
+func (m AccountTab) Init() tea.Cmd {
+	return loadFoldersCmd(m.backend)
+}
 
 // Update satisfies tea.Model. Delegates to updateTab for typed access.
 func (m AccountTab) Update(msg tea.Msg) (AccountTab, tea.Cmd) {
 	return m.updateTab(msg)
 }
 
-// updateTab handles key events and window size changes, returning the typed model.
+// updateTab handles the message cases and returns a typed AccountTab.
 func (m AccountTab) updateTab(msg tea.Msg) (AccountTab, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
@@ -87,24 +65,37 @@ func (m AccountTab) updateTab(msg tea.Msg) (AccountTab, tea.Cmd) {
 		m.sidebar.SetSize(sw, m.height-2) // -2 for account name + blank line
 		mw := max(1, m.width-sw-1)        // -1 for divider
 		m.msglist.SetSize(mw, m.height)
+		return m, nil
+
+	case foldersLoadedMsg:
+		m.sidebar.SetFolders(mail.Classify(msg.folders), m.uiCfg)
+		return m, m.selectionChangedCmds()
+
+	case folderLoadedMsg:
+		m.msglist.SetMessages(msg.msgs)
+		return m, nil
+
+	case backendErrMsg:
+		// TODO(pass-2.5b-6): surface via status/toast.
+		return m, nil
 
 	case tea.KeyMsg:
-		m.handleKey(msg)
+		return m.handleKey(msg)
 	}
 	return m, nil
 }
 
 // handleKey dispatches navigation keys by identity. J/K/G move the
-// sidebar (and refresh the message list); j/k/Ctrl-d/Ctrl-u move the
+// sidebar (and dispatch a folder-load Cmd); j/k/Ctrl-d/Ctrl-u move the
 // message list cursor.
-func (m *AccountTab) handleKey(msg tea.KeyMsg) {
+func (m AccountTab) handleKey(msg tea.KeyMsg) (AccountTab, tea.Cmd) {
 	switch msg.String() {
 	case "J":
 		m.sidebar.MoveDown()
-		m.loadSelectedFolder()
+		return m, m.selectionChangedCmds()
 	case "K":
 		m.sidebar.MoveUp()
-		m.loadSelectedFolder()
+		return m, m.selectionChangedCmds()
 	case "G":
 		m.msglist.MoveToBottom()
 	case "g":
@@ -122,6 +113,22 @@ func (m *AccountTab) handleKey(msg tea.KeyMsg) {
 	case "ctrl+b", "pgup":
 		m.msglist.PageUp()
 	}
+	return m, nil
+}
+
+// selectionChangedCmds returns the batch of Cmds that run every time
+// the selected folder changes: a FolderChangedMsg emission so App's
+// status bar updates, plus a load Cmd that will populate the message
+// list when it resolves.
+func (m AccountTab) selectionChangedCmds() tea.Cmd {
+	folder, ok := m.sidebar.SelectedFolderInfo()
+	if !ok {
+		return nil
+	}
+	return tea.Batch(
+		folderChangedCmd(folder),
+		loadFolderCmd(m.backend, folder.Name),
+	)
 }
 
 // View renders the sidebar + divider + message list.
@@ -142,7 +149,6 @@ func (m AccountTab) View() string {
 	if sidebarFolders != "" {
 		sidebarLines = append(sidebarLines, strings.Split(sidebarFolders, "\n")...)
 	}
-
 	for len(sidebarLines) < m.height {
 		sidebarLines = append(sidebarLines, blank)
 	}

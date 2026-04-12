@@ -115,7 +115,7 @@ func TestFooterView(t *testing.T) {
 		f := NewFooter(styles)
 		f.SetContext(AccountContext)
 		result := stripANSI(f.View(40))
-		for _, want := range []string{"? help", ": cmd", "q quit"} {
+		for _, want := range []string{"? help", "q quit"} {
 			if !strings.Contains(result, want) {
 				t.Errorf("rank-0 hint %q should always be present", want)
 			}
@@ -125,21 +125,21 @@ func TestFooterView(t *testing.T) {
 	t.Run("responsive: triage drops last before app", func(t *testing.T) {
 		f := NewFooter(styles)
 		f.SetContext(AccountContext)
-		// At width 60 the minimum email loop survives: primary triage
+		// At width 58 the minimum email loop survives: primary triage
 		// (d/a), compose, and the always-kept app group. Reply (r/R)
 		// has dropped but compose has not.
-		result := stripANSI(f.View(60))
+		result := stripANSI(f.View(58))
 		if !strings.Contains(result, "d del") {
-			t.Error("d del should still be present at width 60")
+			t.Error("d del should still be present at width 58")
 		}
 		if !strings.Contains(result, "c compose") {
-			t.Error("c compose should still be present at width 60")
+			t.Error("c compose should still be present at width 58")
 		}
 		if strings.Contains(result, "r/R reply") {
-			t.Error("r/R reply should be dropped at width 60")
+			t.Error("r/R reply should be dropped at width 58")
 		}
 		if !strings.Contains(result, "? help") {
-			t.Error("? help should still be present at width 60")
+			t.Error("? help should still be present at width 58")
 		}
 	})
 

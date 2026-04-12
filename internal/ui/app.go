@@ -5,6 +5,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/glw907/beautiful-aerc/internal/config"
 	"github.com/glw907/beautiful-aerc/internal/mail"
 	"github.com/glw907/beautiful-aerc/internal/theme"
 )
@@ -21,38 +22,32 @@ type App struct {
 	height    int
 }
 
-// NewApp creates the root model with a single AccountTab.
-func NewApp(t *theme.CompiledTheme, backend mail.Backend) App {
+// NewApp creates the root model with a single AccountTab. Folder loading
+// happens in Init's Cmd chain, not in the constructor.
+func NewApp(t *theme.CompiledTheme, backend mail.Backend, uiCfg config.UIConfig) App {
 	styles := NewStyles(t)
-	acct := NewAccountTab(styles, backend)
-
 	sb := NewStatusBar(styles)
-	folders, _ := backend.ListFolders()
-	if len(folders) > 0 {
-		inbox := folders[0]
-		sb.SetCounts(inbox.Exists, inbox.Unseen)
-	}
 	sb.SetConnectionState(Connected)
 
-	app := App{
-		acct:      acct,
+	return App{
+		acct:      NewAccountTab(styles, backend, uiCfg),
 		styles:    styles,
 		topLine:   NewTopLine(styles),
 		statusBar: sb,
 		footer:    NewFooter(styles),
 		keys:      NewGlobalKeys(),
 	}
-	app.syncStatusBar()
-	return app
 }
 
-// Init returns no initial command.
-func (m App) Init() tea.Cmd { return nil }
+// Init delegates to the account tab so the initial folder fetch fires.
+func (m App) Init() tea.Cmd {
+	return m.acct.Init()
+}
 
-// Update handles global keys and delegates to the account tab.
+// Update handles global keys and delegates everything else to the
+// account tab. FolderChangedMsg bubbles up from the child and updates
+// the status bar without reaching into child state.
 func (m App) Update(msg tea.Msg) (App, tea.Cmd) {
-	var cmds []tea.Cmd
-
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		m.width = msg.Width
@@ -60,9 +55,11 @@ func (m App) Update(msg tea.Msg) (App, tea.Cmd) {
 		contentMsg := tea.WindowSizeMsg{Width: m.width - 1, Height: m.contentHeight()}
 		var cmd tea.Cmd
 		m.acct, cmd = m.acct.Update(contentMsg)
-		cmds = append(cmds, cmd)
-		m.syncStatusBar()
-		return m, tea.Batch(cmds...)
+		return m, cmd
+
+	case FolderChangedMsg:
+		m.statusBar.SetCounts(msg.Exists, msg.Unseen)
+		return m, nil
 
 	case tea.KeyMsg:
 		switch msg.String() {
@@ -71,19 +68,13 @@ func (m App) Update(msg tea.Msg) (App, tea.Cmd) {
 		case "?":
 			// Stubbed for 2.5b-5 (help popover)
 			return m, nil
-		case ":":
-			// Stubbed for 2.5b-7 (command mode)
-			return m, nil
 		}
 	}
 
-	// Delegate to account tab
+	// Delegate everything else to the account tab.
 	var cmd tea.Cmd
 	m.acct, cmd = m.acct.Update(msg)
-	cmds = append(cmds, cmd)
-	m.syncStatusBar()
-
-	return m, tea.Batch(cmds...)
+	return m, cmd
 }
 
 // View composes the full-screen layout.
@@ -92,7 +83,6 @@ func (m App) View() string {
 		return ""
 	}
 
-	// Add right border │ to each content line
 	rawContent := m.acct.View()
 	rightBorder := m.styles.FrameBorder.Render("│")
 	contentLines := strings.Split(rawContent, "\n")
@@ -117,19 +107,10 @@ func (m App) View() string {
 
 // contentHeight returns the height available for the content area.
 func (m App) contentHeight() int {
-	// top line (1) + status bar (1) + footer (1)
-	chrome := 3
+	chrome := 3 // top line + status bar + footer
 	h := m.height - chrome
 	if h < 1 {
 		return 1
 	}
 	return h
-}
-
-// syncStatusBar updates the status bar counts from the sidebar's
-// selected folder. One-pane: footer context doesn't change here.
-func (m *App) syncStatusBar() {
-	if f, ok := m.acct.sidebar.SelectedFolderInfo(); ok {
-		m.statusBar.SetCounts(f.Exists, f.Unseen)
-	}
 }

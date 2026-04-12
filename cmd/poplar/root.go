@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/glw907/beautiful-aerc/internal/config"
 	"github.com/glw907/beautiful-aerc/internal/mail"
 	"github.com/glw907/beautiful-aerc/internal/theme"
 	"github.com/glw907/beautiful-aerc/internal/ui"
@@ -53,7 +54,9 @@ func runRoot(f rootFlags) error {
 	}
 
 	backend := mail.NewMockBackend()
-	app := ui.NewApp(t, backend)
+	uiCfg := config.DefaultUIConfig()
+	// Pass 3 swaps this for config.LoadUI(configPath).
+	app := ui.NewApp(t, backend, uiCfg)
 
 	p := tea.NewProgram(appModel{app: app}, tea.WithAltScreen())
 	if _, err := p.Run(); err != nil {

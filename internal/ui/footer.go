@@ -55,7 +55,7 @@ var (
 //   - . read (5), s star (4), f fwd (3), / find (3) — secondary actions
 //   - r/R reply (2), c compose (2) — primary compose actions
 //   - d del (1), a archive (1) — primary triage
-//   - ? help (0), : cmd (0), q quit (0) — always kept
+//   - ? help (0), q quit (0) — always kept
 func accountFooterGroups() [][]footerHint {
 	return [][]footerHint{
 		{
@@ -71,7 +71,6 @@ func accountFooterGroups() [][]footerHint {
 		},
 		{
 			hint("?", "help", 0),
-			hint(":", "cmd", 0),
 			hint("q", "quit", 0),
 		},
 	}
@@ -88,7 +87,6 @@ func viewerFooterGroups() [][]footerHint {
 			hint("Tab", "links", 0),
 			hint("q", "close", 0),
 			hint("?", "help", 0),
-			hint(":", "cmd", 0),
 		},
 	}
 }

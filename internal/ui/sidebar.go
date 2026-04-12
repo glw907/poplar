@@ -40,11 +40,24 @@ func NewSidebar(styles Styles, classified []mail.ClassifiedFolder, uiCfg config.
 	}
 }
 
-// newSidebarFromFolders adapts the legacy NewSidebar(folders) signature
-// for call sites not yet migrated to the ClassifiedFolder + UIConfig
-// model. Phase E removes this shim.
-func newSidebarFromFolders(styles Styles, folders []mail.Folder, width, height int) Sidebar {
-	return NewSidebar(styles, mail.Classify(folders), config.DefaultUIConfig(), width, height)
+// SetFolders replaces the sidebar's folder set with a newly classified
+// list under a given UIConfig. Selection is preserved by provider name
+// where possible; otherwise it resets to 0.
+func (s *Sidebar) SetFolders(classified []mail.ClassifiedFolder, uiCfg config.UIConfig) {
+	var prevName string
+	if s.selected < len(s.entries) {
+		prevName = s.entries[s.selected].cf.Folder.Name
+	}
+	s.entries = buildEntries(classified, uiCfg)
+	s.selected = 0
+	if prevName != "" {
+		for i, e := range s.entries {
+			if e.cf.Folder.Name == prevName {
+				s.selected = i
+				break
+			}
+		}
+	}
 }
 
 // Selected returns the index of the currently selected folder.

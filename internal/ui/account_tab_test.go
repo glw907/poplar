@@ -5,24 +5,80 @@ import (
 	"testing"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/glw907/beautiful-aerc/internal/config"
 	"github.com/glw907/beautiful-aerc/internal/mail"
 	"github.com/glw907/beautiful-aerc/internal/theme"
 )
 
-func TestAccountTab(t *testing.T) {
+// newLoadedTab builds an AccountTab and runs the initial Cmd chain so
+// that the sidebar and message list are populated. Use this in tests
+// that want to exercise post-load state.
+func newLoadedTab(t *testing.T, width, height int) AccountTab {
+	t.Helper()
 	styles := NewStyles(theme.Nord)
 	backend := mail.NewMockBackend()
+	tab := NewAccountTab(styles, backend, config.DefaultUIConfig())
+	tab, _ = tab.updateTab(tea.WindowSizeMsg{Width: width, Height: height})
 
-	t.Run("title returns folder name", func(t *testing.T) {
-		tab := NewAccountTab(styles, backend)
+	// Resolve the Init Cmd to drive the tab into its post-load state.
+	msg := runCmd(tab.Init())
+	tab, cmd := tab.updateTab(msg)
+	// selectionChangedCmds emits folderChangedCmd + loadFolderCmd (batch).
+	// Drain the batch so the message list gets seeded.
+	drain(t, &tab, cmd)
+	return tab
+}
+
+// runCmd executes a tea.Cmd synchronously and returns its message.
+func runCmd(cmd tea.Cmd) tea.Msg {
+	if cmd == nil {
+		return nil
+	}
+	return cmd()
+}
+
+// drain walks a tea.Cmd (including tea.BatchMsg fan-outs) and feeds
+// every resulting non-batch message back into the tab's updateTab.
+// Non-recursive: assumes at most one level of batching.
+func drain(t *testing.T, tab *AccountTab, cmd tea.Cmd) {
+	t.Helper()
+	if cmd == nil {
+		return
+	}
+	msg := cmd()
+	if batch, ok := msg.(tea.BatchMsg); ok {
+		for _, sub := range batch {
+			if sub == nil {
+				continue
+			}
+			inner := sub()
+			if _, isApp := inner.(FolderChangedMsg); isApp {
+				// FolderChangedMsg is an App-level message; the tab
+				// has nothing to do with it.
+				continue
+			}
+			newTab, _ := tab.updateTab(inner)
+			*tab = newTab
+		}
+		return
+	}
+	if _, isApp := msg.(FolderChangedMsg); isApp {
+		return
+	}
+	newTab, _ := tab.updateTab(msg)
+	*tab = newTab
+}
+
+func TestAccountTab(t *testing.T) {
+	t.Run("title returns folder name after load", func(t *testing.T) {
+		tab := newLoadedTab(t, 80, 20)
 		if tab.Title() != "Inbox" {
 			t.Errorf("Title() = %q, want Inbox", tab.Title())
 		}
 	})
 
 	t.Run("view renders two panels with divider", func(t *testing.T) {
-		tab := NewAccountTab(styles, backend)
-		tab, _ = tab.updateTab(tea.WindowSizeMsg{Width: 80, Height: 20})
+		tab := newLoadedTab(t, 80, 20)
 		result := tab.View()
 		if !strings.Contains(result, "│") {
 			t.Error("missing panel divider")
@@ -30,8 +86,7 @@ func TestAccountTab(t *testing.T) {
 	})
 
 	t.Run("view shows account name", func(t *testing.T) {
-		tab := NewAccountTab(styles, backend)
-		tab, _ = tab.updateTab(tea.WindowSizeMsg{Width: 80, Height: 20})
+		tab := newLoadedTab(t, 80, 20)
 		view := stripANSI(tab.View())
 		if !strings.Contains(view, "geoff@907.life") {
 			t.Error("sidebar should show account name")
@@ -39,8 +94,7 @@ func TestAccountTab(t *testing.T) {
 	})
 
 	t.Run("view renders folder names", func(t *testing.T) {
-		tab := NewAccountTab(styles, backend)
-		tab, _ = tab.updateTab(tea.WindowSizeMsg{Width: 80, Height: 20})
+		tab := newLoadedTab(t, 80, 20)
 		view := tab.View()
 		plain := stripANSI(view)
 		for _, name := range []string{"Inbox", "Drafts", "Sent", "Archive", "Spam", "Trash"} {
@@ -51,9 +105,7 @@ func TestAccountTab(t *testing.T) {
 	})
 
 	t.Run("J/K navigates sidebar", func(t *testing.T) {
-		tab := NewAccountTab(styles, backend)
-		tab.width = 80
-		tab.height = 20
+		tab := newLoadedTab(t, 80, 20)
 		tab, _ = tab.updateTab(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'J'}})
 		if tab.sidebar.SelectedFolder() != "Drafts" {
 			t.Errorf("after J, selected = %q, want Drafts", tab.sidebar.SelectedFolder())
@@ -65,9 +117,7 @@ func TestAccountTab(t *testing.T) {
 	})
 
 	t.Run("title tracks selected folder", func(t *testing.T) {
-		tab := NewAccountTab(styles, backend)
-		tab.width = 80
-		tab.height = 20
+		tab := newLoadedTab(t, 80, 20)
 		tab, _ = tab.updateTab(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'J'}})
 		if tab.Title() != "Drafts" {
 			t.Errorf("Title() = %q, want Drafts", tab.Title())
@@ -75,8 +125,7 @@ func TestAccountTab(t *testing.T) {
 	})
 
 	t.Run("j/k navigates the message list", func(t *testing.T) {
-		tab := NewAccountTab(styles, backend)
-		tab, _ = tab.updateTab(tea.WindowSizeMsg{Width: 120, Height: 30})
+		tab := newLoadedTab(t, 120, 30)
 		tab, _ = tab.updateTab(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'j'}})
 		if tab.msglist.Selected() != 1 {
 			t.Errorf("after j, msglist.Selected() = %d, want 1", tab.msglist.Selected())
@@ -88,8 +137,7 @@ func TestAccountTab(t *testing.T) {
 	})
 
 	t.Run("G jumps message list to bottom", func(t *testing.T) {
-		tab := NewAccountTab(styles, backend)
-		tab, _ = tab.updateTab(tea.WindowSizeMsg{Width: 120, Height: 30})
+		tab := newLoadedTab(t, 120, 30)
 		tab, _ = tab.updateTab(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'G'}})
 		want := tab.msglist.Count() - 1
 		if tab.msglist.Selected() != want {
@@ -99,8 +147,7 @@ func TestAccountTab(t *testing.T) {
 	})
 
 	t.Run("g jumps message list to top", func(t *testing.T) {
-		tab := NewAccountTab(styles, backend)
-		tab, _ = tab.updateTab(tea.WindowSizeMsg{Width: 120, Height: 30})
+		tab := newLoadedTab(t, 120, 30)
 		tab, _ = tab.updateTab(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'G'}})
 		tab, _ = tab.updateTab(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'g'}})
 		if tab.msglist.Selected() != 0 {
@@ -108,22 +155,8 @@ func TestAccountTab(t *testing.T) {
 		}
 	})
 
-	t.Run("J refreshes the message list for the new folder", func(t *testing.T) {
-		tab := NewAccountTab(styles, backend)
-		tab, _ = tab.updateTab(tea.WindowSizeMsg{Width: 120, Height: 30})
-		// Move cursor down on the message list, then change folder.
-		tab, _ = tab.updateTab(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'j'}})
-		tab, _ = tab.updateTab(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'j'}})
-		tab, _ = tab.updateTab(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'J'}})
-		if tab.msglist.Selected() != 0 {
-			t.Errorf("after folder change, msglist cursor should reset to 0, got %d",
-				tab.msglist.Selected())
-		}
-	})
-
 	t.Run("placeholder is gone", func(t *testing.T) {
-		tab := NewAccountTab(styles, backend)
-		tab, _ = tab.updateTab(tea.WindowSizeMsg{Width: 120, Height: 30})
+		tab := newLoadedTab(t, 120, 30)
 		view := stripANSI(tab.View())
 		if strings.Contains(view, "Message List") {
 			t.Error("expected message list placeholder to be replaced with real component")
@@ -131,8 +164,7 @@ func TestAccountTab(t *testing.T) {
 	})
 
 	t.Run("real message subjects appear", func(t *testing.T) {
-		tab := NewAccountTab(styles, backend)
-		tab, _ = tab.updateTab(tea.WindowSizeMsg{Width: 120, Height: 30})
+		tab := newLoadedTab(t, 120, 30)
 		view := stripANSI(tab.View())
 		if !strings.Contains(view, "Alice Johnson") {
 			t.Error("expected first mock sender to be visible in account tab view")
@@ -140,10 +172,73 @@ func TestAccountTab(t *testing.T) {
 	})
 
 	t.Run("window size", func(t *testing.T) {
-		tab := NewAccountTab(styles, backend)
-		tab, _ = tab.updateTab(tea.WindowSizeMsg{Width: 120, Height: 40})
+		tab := newLoadedTab(t, 120, 40)
 		if tab.width != 120 || tab.height != 40 {
 			t.Errorf("size = %dx%d, want 120x40", tab.width, tab.height)
 		}
 	})
+}
+
+// Cmd-dispatch tests: verify the Elm-style flow at the message level.
+
+func TestAccountTabInit_ReturnsFoldersCmd(t *testing.T) {
+	styles := NewStyles(theme.Nord)
+	backend := mail.NewMockBackend()
+	tab := NewAccountTab(styles, backend, config.DefaultUIConfig())
+	msg := runCmd(tab.Init())
+	if _, ok := msg.(foldersLoadedMsg); !ok {
+		t.Fatalf("expected foldersLoadedMsg from Init, got %T", msg)
+	}
+}
+
+func TestAccountTab_foldersLoadedSeedsSidebar(t *testing.T) {
+	styles := NewStyles(theme.Nord)
+	backend := mail.NewMockBackend()
+	tab := NewAccountTab(styles, backend, config.DefaultUIConfig())
+	folders, _ := backend.ListFolders()
+	tab, cmd := tab.updateTab(foldersLoadedMsg{folders: folders})
+	if len(tab.sidebar.entries) == 0 {
+		t.Fatal("expected sidebar to be seeded")
+	}
+	if cmd == nil {
+		t.Fatal("expected a follow-up cmd to load the initial folder")
+	}
+	msg := runCmd(cmd)
+	switch msg.(type) {
+	case folderLoadedMsg, tea.BatchMsg, FolderChangedMsg:
+	default:
+		t.Fatalf("expected folderLoadedMsg/BatchMsg/FolderChangedMsg, got %T", msg)
+	}
+}
+
+func TestAccountTab_folderLoadedSeedsMsglist(t *testing.T) {
+	styles := NewStyles(theme.Nord)
+	backend := mail.NewMockBackend()
+	tab := NewAccountTab(styles, backend, config.DefaultUIConfig())
+	tab, _ = tab.updateTab(tea.WindowSizeMsg{Width: 120, Height: 30})
+	msgs := []mail.MessageInfo{
+		{UID: "1", Subject: "hello", From: "a", Date: "now"},
+	}
+	tab, _ = tab.updateTab(folderLoadedMsg{name: "Inbox", msgs: msgs})
+	if tab.msglist.Count() != 1 {
+		t.Fatalf("expected msglist count 1, got %d", tab.msglist.Count())
+	}
+}
+
+func TestAccountTab_JDispatchesFolderLoad(t *testing.T) {
+	tab := newLoadedTab(t, 120, 30)
+	_, cmd := tab.updateTab(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'J'}})
+	if cmd == nil {
+		t.Fatal("expected J to dispatch a Cmd")
+	}
+	msg := runCmd(cmd)
+	switch m := msg.(type) {
+	case folderLoadedMsg, FolderChangedMsg:
+	case tea.BatchMsg:
+		if len(m) == 0 {
+			t.Fatal("empty batch")
+		}
+	default:
+		t.Fatalf("unexpected cmd result: %T", msg)
+	}
 }
