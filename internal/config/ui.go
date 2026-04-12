@@ -1,0 +1,130 @@
+package config
+
+import (
+	"fmt"
+	"os"
+
+	"github.com/BurntSushi/toml"
+)
+
+// UIConfig holds poplar's UI tuning. Currently scoped to folder/sidebar
+// behavior. Populated from the [ui] table in accounts.toml.
+type UIConfig struct {
+	// Threading is the default threading state for folders that do not
+	// specify a per-folder override. Default true. Consumer ships in
+	// Pass 2.5b-3.6; this pass parses and stores only.
+	Threading bool
+
+	// Folders holds per-folder overrides keyed by canonical name for
+	// canonical folders (Inbox, Drafts, Sent, Archive, Spam, Trash) or
+	// literal provider name for custom folders.
+	Folders map[string]FolderConfig
+}
+
+// FolderConfig holds per-folder overrides from [ui.folders.<name>]
+// subsections. Any field left at its zero value is treated as "unset"
+// and falls back to the group default.
+type FolderConfig struct {
+	// Rank is the within-group sort key. Zero means "use group default".
+	// Lower values sort first. Ties break on display name.
+	Rank int
+
+	// RankSet distinguishes "unset" from "explicit 0".
+	RankSet bool
+
+	// Label overrides the display name. Empty = use default
+	// (canonical name for canonicals, provider name for custom).
+	Label string
+
+	// Threading overrides the global threading default when Set.
+	// Consumer ships in Pass 2.5b-3.6.
+	Threading    bool
+	ThreadingSet bool
+
+	// Sort is the per-folder sort order. Empty = "date-desc". Consumer
+	// ships in Pass 2.5b-3.6.
+	Sort string
+
+	// Hide drops the folder from the sidebar entirely.
+	Hide bool
+}
+
+// DefaultUIConfig returns an empty UIConfig with sensible defaults.
+// Use as a fallback when accounts.toml has no [ui] section.
+func DefaultUIConfig() UIConfig {
+	return UIConfig{
+		Threading: true,
+		Folders:   map[string]FolderConfig{},
+	}
+}
+
+// rawUI is the on-disk shape of the [ui] table. It uses pointers for
+// optional bool fields so we can distinguish "unset" from "explicit false".
+type rawUI struct {
+	Threading *bool                   `toml:"threading"`
+	Folders   map[string]rawFolderCfg `toml:"folders"`
+}
+
+type rawFolderCfg struct {
+	Rank      *int   `toml:"rank"`
+	Label     string `toml:"label"`
+	Threading *bool  `toml:"threading"`
+	Sort      string `toml:"sort"`
+	Hide      bool   `toml:"hide"`
+}
+
+type rawUIFile struct {
+	UI rawUI `toml:"ui"`
+}
+
+// LoadUI reads the [ui] table from an accounts.toml file and returns
+// a UIConfig. A missing file is an error; a missing [ui] section
+// returns DefaultUIConfig().
+func LoadUI(path string) (UIConfig, error) {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return UIConfig{}, fmt.Errorf("reading ui config: %w", err)
+	}
+
+	var raw rawUIFile
+	if err := toml.Unmarshal(data, &raw); err != nil {
+		return UIConfig{}, fmt.Errorf("parsing ui config: %w", err)
+	}
+
+	out := DefaultUIConfig()
+	if raw.UI.Threading != nil {
+		out.Threading = *raw.UI.Threading
+	}
+
+	for name, fc := range raw.UI.Folders {
+		converted, err := convertFolderCfg(name, fc)
+		if err != nil {
+			return UIConfig{}, err
+		}
+		out.Folders[name] = converted
+	}
+
+	return out, nil
+}
+
+func convertFolderCfg(name string, raw rawFolderCfg) (FolderConfig, error) {
+	out := FolderConfig{
+		Label: raw.Label,
+		Sort:  raw.Sort,
+		Hide:  raw.Hide,
+	}
+	if raw.Rank != nil {
+		out.Rank = *raw.Rank
+		out.RankSet = true
+	}
+	if raw.Threading != nil {
+		out.Threading = *raw.Threading
+		out.ThreadingSet = true
+	}
+	if raw.Sort != "" && raw.Sort != "date-asc" && raw.Sort != "date-desc" {
+		return FolderConfig{}, fmt.Errorf(
+			"ui.folders.%q: invalid sort %q (want \"date-asc\" or \"date-desc\")",
+			name, raw.Sort)
+	}
+	return out, nil
+}
