@@ -36,7 +36,13 @@ func ParseAccounts(path string) ([]AccountConfig, error) {
 	if err != nil {
 		return nil, fmt.Errorf("reading accounts config: %w", err)
 	}
+	return ParseAccountsFromBytes(data)
+}
 
+// ParseAccountsFromBytes parses accounts.toml contents. Callers that
+// have already read the file should pass its bytes here to avoid a
+// second read.
+func ParseAccountsFromBytes(data []byte) ([]AccountConfig, error) {
 	var cf configFile
 	if err := toml.Unmarshal(data, &cf); err != nil {
 		return nil, fmt.Errorf("parsing accounts config: %w", err)

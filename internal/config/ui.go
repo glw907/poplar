@@ -11,8 +11,7 @@ import (
 // behavior. Populated from the [ui] table in accounts.toml.
 type UIConfig struct {
 	// Threading is the default threading state for folders that do not
-	// specify a per-folder override. Default true. Consumer ships in
-	// Pass 2.5b-3.6; this pass parses and stores only.
+	// specify a per-folder override. Default true.
 	Threading bool
 
 	// Folders holds per-folder overrides keyed by canonical name for
@@ -37,12 +36,10 @@ type FolderConfig struct {
 	Label string
 
 	// Threading overrides the global threading default when Set.
-	// Consumer ships in Pass 2.5b-3.6.
 	Threading    bool
 	ThreadingSet bool
 
-	// Sort is the per-folder sort order. Empty = "date-desc". Consumer
-	// ships in Pass 2.5b-3.6.
+	// Sort is the per-folder sort order. Empty = "date-desc".
 	Sort string
 
 	// Hide drops the folder from the sidebar entirely.

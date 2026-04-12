@@ -2,7 +2,6 @@ package config
 
 import (
 	"fmt"
-	"os"
 	"strings"
 
 	"github.com/BurntSushi/toml"
@@ -36,7 +35,7 @@ func RenderFolderSubsections(classified []mail.ClassifiedFolder, existing map[st
 
 func splitByGroup(classified []mail.ClassifiedFolder, existing map[string]bool) (primary, disposal, custom []mail.ClassifiedFolder) {
 	for _, cf := range classified {
-		if existing[subsectionKey(cf)] {
+		if existing[cf.ConfigKey()] {
 			continue
 		}
 		switch cf.Group {
@@ -76,16 +75,6 @@ func renderSubsection(cf mail.ClassifiedFolder) string {
 	return b.String()
 }
 
-// subsectionKey returns the lookup key for UIConfig.Folders and for
-// detecting existing subsections — canonical name for canonicals,
-// provider name for custom.
-func subsectionKey(cf mail.ClassifiedFolder) string {
-	if cf.Canonical != "" {
-		return cf.Canonical
-	}
-	return cf.Folder.Name
-}
-
 // subsectionHeaderKey returns the TOML header key — bare identifier
 // when possible, otherwise a quoted string.
 func subsectionHeaderKey(cf mail.ClassifiedFolder) string {
@@ -116,13 +105,9 @@ func isBareKey(s string) bool {
 	return true
 }
 
-// ExistingFolderKeys parses an accounts.toml file and returns the set
+// ExistingFolderKeys parses accounts.toml bytes and returns the set
 // of subsection keys already present under [ui.folders.<name>].
-func ExistingFolderKeys(path string) (map[string]bool, error) {
-	data, err := os.ReadFile(path)
-	if err != nil {
-		return nil, fmt.Errorf("reading config: %w", err)
-	}
+func ExistingFolderKeys(data []byte) (map[string]bool, error) {
 	var raw rawUIFile
 	if err := toml.Unmarshal(data, &raw); err != nil {
 		return nil, fmt.Errorf("parsing config: %w", err)
@@ -134,18 +119,13 @@ func ExistingFolderKeys(path string) (map[string]bool, error) {
 	return out, nil
 }
 
-// MergeFolderSubsections appends new rendered subsections to the end
-// of the config file at path and returns the merged file contents.
-// Existing content is preserved byte-for-byte. If newContent is empty,
-// the original contents are returned unchanged.
-func MergeFolderSubsections(path, newContent string) (string, error) {
-	data, err := os.ReadFile(path)
-	if err != nil {
-		return "", fmt.Errorf("reading config: %w", err)
-	}
+// MergeFolderSubsections appends newContent to the end of the
+// existing config bytes and returns the merged file contents.
+// Existing content is preserved byte-for-byte. If newContent is
+// empty, the original contents are returned unchanged.
+func MergeFolderSubsections(existing []byte, newContent string) string {
 	if newContent == "" {
-		return string(data), nil
+		return string(existing)
 	}
-	existing := strings.TrimRight(string(data), "\n")
-	return existing + "\n\n" + newContent, nil
+	return strings.TrimRight(string(existing), "\n") + "\n\n" + newContent
 }

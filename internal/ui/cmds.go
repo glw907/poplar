@@ -47,9 +47,11 @@ func loadFoldersCmd(b mail.Backend) tea.Cmd {
 
 // loadFolderCmd returns a Cmd that opens a folder and fetches its
 // header list. The result is a folderLoadedMsg, or a backendErrMsg.
+// Returns nil when name is empty — bubbletea treats a nil Cmd as "no
+// work," so the Update loop skips an otherwise-wasted dispatch.
 func loadFolderCmd(b mail.Backend, name string) tea.Cmd {
 	if name == "" {
-		return func() tea.Msg { return folderLoadedMsg{name: "", msgs: nil} }
+		return nil
 	}
 	return func() tea.Msg {
 		if err := b.OpenFolder(name); err != nil {

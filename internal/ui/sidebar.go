@@ -208,7 +208,7 @@ func (s Sidebar) renderBlankLine() string {
 func buildEntries(classified []mail.ClassifiedFolder, uiCfg config.UIConfig) []folderEntry {
 	var primary, disposal, custom []folderEntry
 	for _, cf := range classified {
-		fc := uiCfg.Folders[folderConfigKey(cf)]
+		fc := uiCfg.Folders[cf.ConfigKey()]
 		if fc.Hide {
 			continue
 		}
@@ -229,25 +229,15 @@ func buildEntries(classified []mail.ClassifiedFolder, uiCfg config.UIConfig) []f
 			custom = append(custom, entry)
 		}
 	}
-	sortEntries(primary, uiCfg, primaryDefaultRank)
-	sortEntries(disposal, uiCfg, disposalDefaultRank)
-	sortEntries(custom, uiCfg, customDefaultRank)
+	sortEntries(primary, uiCfg)
+	sortEntries(disposal, uiCfg)
+	sortEntries(custom, uiCfg)
 
 	out := make([]folderEntry, 0, len(primary)+len(disposal)+len(custom))
 	out = append(out, primary...)
 	out = append(out, disposal...)
 	out = append(out, custom...)
 	return out
-}
-
-// folderConfigKey returns the UIConfig.Folders lookup key for a
-// classified folder. Canonicals key on canonical name; custom folders
-// key on provider name.
-func folderConfigKey(cf mail.ClassifiedFolder) string {
-	if cf.Canonical != "" {
-		return cf.Canonical
-	}
-	return cf.Folder.Name
 }
 
 // folderDepth returns the nested-folder indent depth for a folder name.
@@ -260,40 +250,27 @@ func folderDepth(name string) int {
 	return d
 }
 
-func primaryDefaultRank(cf mail.ClassifiedFolder) int {
-	switch cf.Canonical {
-	case "Inbox":
-		return 100
-	case "Drafts":
-		return 200
-	case "Sent":
-		return 300
-	case "Archive":
-		return 400
-	}
-	return 500
+// canonicalDefaultRank is the implicit in-group sort key for each
+// canonical folder. Custom folders (Canonical == "") fall through to
+// the non-canonical default and are ordered alphabetically.
+var canonicalDefaultRank = map[string]int{
+	"Inbox":   100,
+	"Drafts":  200,
+	"Sent":    300,
+	"Archive": 400,
+	"Spam":    100,
+	"Trash":   200,
 }
 
-func disposalDefaultRank(cf mail.ClassifiedFolder) int {
-	switch cf.Canonical {
-	case "Spam":
-		return 100
-	case "Trash":
-		return 200
-	}
-	return 300
-}
+const nonCanonicalDefaultRank = 1000
 
-func customDefaultRank(_ mail.ClassifiedFolder) int {
-	return 1000
-}
-
-// sortEntries orders a group by (rank, display name). Rank comes from
-// user config if set, otherwise from the group's default-rank function.
-func sortEntries(entries []folderEntry, uiCfg config.UIConfig, defaultRank func(mail.ClassifiedFolder) int) {
+// sortEntries orders a group by (rank, display name). Rank comes
+// from user config if set, otherwise from canonicalDefaultRank for
+// canonicals or nonCanonicalDefaultRank for custom folders.
+func sortEntries(entries []folderEntry, uiCfg config.UIConfig) {
 	sort.SliceStable(entries, func(i, j int) bool {
-		ri := rankOf(entries[i], uiCfg, defaultRank)
-		rj := rankOf(entries[j], uiCfg, defaultRank)
+		ri := rankOf(entries[i].cf, uiCfg)
+		rj := rankOf(entries[j].cf, uiCfg)
 		if ri != rj {
 			return ri < rj
 		}
@@ -301,12 +278,14 @@ func sortEntries(entries []folderEntry, uiCfg config.UIConfig, defaultRank func(
 	})
 }
 
-func rankOf(e folderEntry, uiCfg config.UIConfig, defaultRank func(mail.ClassifiedFolder) int) int {
-	fc := uiCfg.Folders[folderConfigKey(e.cf)]
-	if fc.RankSet {
+func rankOf(cf mail.ClassifiedFolder, uiCfg config.UIConfig) int {
+	if fc := uiCfg.Folders[cf.ConfigKey()]; fc.RankSet {
 		return fc.Rank
 	}
-	return defaultRank(e.cf)
+	if r, ok := canonicalDefaultRank[cf.Canonical]; ok {
+		return r
+	}
+	return nonCanonicalDefaultRank
 }
 
 // sidebarIcon returns the Nerd Font icon for a classified folder.

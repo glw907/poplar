@@ -1,8 +1,6 @@
 package config
 
 import (
-	"os"
-	"path/filepath"
 	"strings"
 	"testing"
 
@@ -87,32 +85,16 @@ func TestRenderFolderSubsections_QuotesCustomNames(t *testing.T) {
 }
 
 func TestMergeFolderSubsections_EmptyNewContent(t *testing.T) {
-	dir := t.TempDir()
-	path := filepath.Join(dir, "accounts.toml")
 	orig := "[ui]\nthreading = true\n"
-	if err := os.WriteFile(path, []byte(orig), 0644); err != nil {
-		t.Fatal(err)
-	}
-	got, err := MergeFolderSubsections(path, "")
-	if err != nil {
-		t.Fatal(err)
-	}
+	got := MergeFolderSubsections([]byte(orig), "")
 	if got != orig {
 		t.Errorf("expected unchanged file, got %q", got)
 	}
 }
 
 func TestMergeFolderSubsections_Appends(t *testing.T) {
-	dir := t.TempDir()
-	path := filepath.Join(dir, "accounts.toml")
 	orig := "[ui]\nthreading = true\n"
-	if err := os.WriteFile(path, []byte(orig), 0644); err != nil {
-		t.Fatal(err)
-	}
-	got, err := MergeFolderSubsections(path, "[ui.folders.Inbox]\n# rank = 0\n")
-	if err != nil {
-		t.Fatal(err)
-	}
+	got := MergeFolderSubsections([]byte(orig), "[ui.folders.Inbox]\n# rank = 0\n")
 	want := "[ui]\nthreading = true\n\n[ui.folders.Inbox]\n# rank = 0\n"
 	if got != want {
 		t.Errorf("merge mismatch\n got: %q\nwant: %q", got, want)
@@ -120,8 +102,6 @@ func TestMergeFolderSubsections_Appends(t *testing.T) {
 }
 
 func TestExistingFolderKeys(t *testing.T) {
-	dir := t.TempDir()
-	path := filepath.Join(dir, "accounts.toml")
 	contents := `[ui]
 threading = true
 
@@ -131,10 +111,7 @@ rank = 1
 [ui.folders."Lists/golang"]
 rank = 5
 `
-	if err := os.WriteFile(path, []byte(contents), 0644); err != nil {
-		t.Fatal(err)
-	}
-	keys, err := ExistingFolderKeys(path)
+	keys, err := ExistingFolderKeys([]byte(contents))
 	if err != nil {
 		t.Fatal(err)
 	}

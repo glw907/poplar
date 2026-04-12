@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/glw907/beautiful-aerc/internal/aercfork/xdg"
 	"github.com/glw907/beautiful-aerc/internal/config"
 	"github.com/glw907/beautiful-aerc/internal/mail"
 	"github.com/spf13/cobra"
@@ -33,14 +34,15 @@ func newConfigInitCmd() *cobra.Command {
 func runConfigInit(cmd *cobra.Command, f configInitFlags) error {
 	path := f.config
 	if path == "" {
-		p, err := defaultConfigPath()
-		if err != nil {
-			return err
-		}
-		path = p
+		path = xdg.ConfigPath("poplar", "accounts.toml")
 	}
 
-	accounts, err := config.ParseAccounts(path)
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return fmt.Errorf("reading config: %w", err)
+	}
+
+	accounts, err := config.ParseAccountsFromBytes(data)
 	if err != nil {
 		return fmt.Errorf("loading accounts: %w", err)
 	}
@@ -61,16 +63,13 @@ func runConfigInit(cmd *cobra.Command, f configInitFlags) error {
 	}
 	classified := mail.Classify(folders)
 
-	existing, err := config.ExistingFolderKeys(path)
+	existing, err := config.ExistingFolderKeys(data)
 	if err != nil {
 		return fmt.Errorf("reading existing folder keys: %w", err)
 	}
 
 	rendered := config.RenderFolderSubsections(classified, existing)
-	merged, err := config.MergeFolderSubsections(path, rendered)
-	if err != nil {
-		return fmt.Errorf("merging: %w", err)
-	}
+	merged := config.MergeFolderSubsections(data, rendered)
 
 	if !f.write {
 		fmt.Fprint(cmd.OutOrStdout(), merged)
@@ -89,17 +88,6 @@ func openBackendForInit(acct config.AccountConfig) (mail.Backend, error) {
 	default:
 		return nil, fmt.Errorf("backend %q not yet supported by config init (Pass 3)", acct.Backend)
 	}
-}
-
-func defaultConfigPath() (string, error) {
-	if dir := os.Getenv("XDG_CONFIG_HOME"); dir != "" {
-		return filepath.Join(dir, "poplar", "accounts.toml"), nil
-	}
-	home, err := os.UserHomeDir()
-	if err != nil {
-		return "", fmt.Errorf("locating home dir: %w", err)
-	}
-	return filepath.Join(home, ".config", "poplar", "accounts.toml"), nil
 }
 
 // writeAtomically writes content to path via a temp file + rename.

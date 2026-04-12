@@ -20,6 +20,17 @@ type ClassifiedFolder struct {
 	Group       Group
 }
 
+// ConfigKey returns the lookup key used by UIConfig.Folders and the
+// TOML writer: canonical name for classified canonicals, provider
+// name for custom folders. Callers should prefer this over recomputing
+// the rule — it's the single source of truth.
+func (cf ClassifiedFolder) ConfigKey() string {
+	if cf.Canonical != "" {
+		return cf.Canonical
+	}
+	return cf.Folder.Name
+}
+
 // Classify maps raw backend folders into ClassifiedFolders.
 // Priority: role attribute, then alias table, then Custom fallback.
 // Matching is case-insensitive exact match on the provider name.
