@@ -636,3 +636,93 @@ types are still subject to brainstorm refinement (see
 STATUS.md "Still open" list), but the location and shape of
 the section is fixed.
 **Date:** 2026-04-12 (Pass 2.5b-3.5 brainstorm)
+
+### Pass 2.5b-3.5 split: config/sidebar vs threading/fold
+**Decision:** The "threaded view + UI config" pass is split
+along its natural seam. Pass 2.5b-3.5 becomes "UI config +
+sidebar polish + docs cleanup" — first `[ui]` section, folder
+auto-discovery, group classification, within-group ranking,
+nested one-space indent, keybindings-doc cleanup. Pass 2.5b-3.6
+becomes "threading + fold (index view completion)" — thread
+fields on `mail.MessageInfo`, `├─ └─ │` prefixes, per-thread
+fold state, `Space`/`F`/`U` keys, `[N]` collapsed badge, sort
+interaction. 3.5 parses and stores the threading config fields
+but has no consumer until 3.6.
+**Rationale:** The original bundled scope had three unrelated
+themes (threading render, config, docs cleanup) held together
+only by the fact that the per-folder threading override lives
+in the config section. Splitting gives each pass a single
+sentence of description ("poplar understands UI config and
+renders the sidebar right" vs "poplar threads and folds"),
+lets 3.5 ship visible value standalone (real folder hierarchy
+rendered correctly), and turns 3.6 from a two-key follow-up
+into a proper pass that captures all the work genuinely
+entangled with fold (data model, render, navigation, sort,
+collapsed badge). The cost — fields parsed in 3.5 that sit
+unused for one pass — is a well-established Go pattern and
+much smaller than the cost of bundling themes that don't share
+rationale.
+**Date:** 2026-04-12 (Pass 2.5b-3.5 brainstorm, pre-split)
+
+### Thread fold key: `Space`, dual meaning in visual-select mode
+**Decision:** `Space` is the thread fold-toggle key when
+outside visual-select mode. Inside visual-select mode (Pass 6)
+`Space` retains its reserved role as the row-toggle key. The
+two meanings are disambiguated by mode — visual-select already
+changes the footer, row highlighting, and the set of "live"
+triage keys, so a key meaning different things inside vs.
+outside that mode is consistent with the mode design rather
+than an exception to it. The two actions don't overlap in
+practice either: users don't fold threads while building a
+multi-message triage set.
+**Rationale:** `Space` has the stronger claim from user
+expectation — ranger, nnn, lazygit, k9s, and most
+file-manager-adjacent TUIs use `Space` for "fold/toggle
+whatever's under the cursor". The earlier reservation of
+`Space` exclusively for multi-select (STATUS.md pre-split)
+was defensible but not load-bearing: `m`, `x`, or a vim-style
+range model would all work for multi-select's per-row toggle,
+and none is actively better than `Space`. The "single meaning
+per key" rule is about forbidding hidden contextual shifts
+*within* a single mode, not about forbidding modes from
+changing what keys mean — that's literally what a mode is.
+`Tab` was the other serious candidate; it was passed over
+because it already means "link picker" in the viewer context,
+which creates the same kind of split without the upside of
+matching modern-client fold convention.
+**Date:** 2026-04-12 (Pass 2.5b-3.5 brainstorm)
+
+### Fold-all / unfold-all: `F` / `U`, Pass 2.5b-3.6
+**Decision:** `F` (fold-all) and `U` (unfold-all) are the
+reserved keys for bulk fold actions. Both ship in Pass
+2.5b-3.6 alongside the per-thread `Space` toggle, not before.
+Neither is bound in Pass 2.5b-3.5; `keybindings.md` marks them
+reserved and points at 3.6 as the delivery pass.
+**Rationale:** Fold-all is the primary bulk action users will
+reach for ("walk into a busy folder, collapse everything,
+skim roots"). Unfold-all is rarer but cheap to ship once
+fold-all exists. Capital letters were chosen to pair with
+lowercase `Space` — uppercase single keys are the poplar idiom
+for "same action, bigger scope" (cf. `J/K` vs `j/k`, `R` vs
+`r`). `Shift-Space` was considered and rejected because many
+terminal emulators drop the shift modifier on bare space and
+send plain space instead — the keypress is not reliable
+cross-platform. Fold-all / unfold-all are a blocker for "index
+view done," not polish, which is why 3.6 exists as a dedicated
+pass rather than a post-hoc follow-up.
+**Date:** 2026-04-12 (Pass 2.5b-3.5 brainstorm)
+
+### Runtime threading toggle: dropped
+**Decision:** Poplar has no single-key runtime threading
+toggle (e.g. "flat view just for this session"). Threading is
+controlled entirely via config — the global `threading`
+default and per-folder `[ui.folders.<name>] threading = false`
+overrides.
+**Rationale:** Once a user has tuned per-folder threading
+preferences, runtime flipping becomes noise — the
+Inbox-set-flat user never wants Inbox threaded, the
+Archive-set-threaded user never wants Archive flat. YAGNI. If
+a compelling runtime use case turns up during real daily use,
+adding a key later is cheap. Better Pine means fewer knobs,
+not more.
+**Date:** 2026-04-12 (Pass 2.5b-3.5 brainstorm)

@@ -36,7 +36,8 @@ Ready for message viewer prototype (Pass 2.5b-4).
 | 2.5b-chrome | Chrome redesign: drop tabs, frame, status, footer | done |
 | 2.5b-2 | Prototype: sidebar | done |
 | 2.5b-3 | Prototype: message list | done |
-| 2.5b-3.5 | Prototype: threaded view + UI config | pending |
+| 2.5b-3.5 | Prototype: UI config + sidebar polish | pending |
+| 2.5b-3.6 | Prototype: threading + fold (index view completion) | pending |
 | 2.5b-4 | Prototype: message viewer | pending |
 | 2.5b-5 | Prototype: help popover | pending |
 | 2.5b-6 | Prototype: status/toast system | pending |
@@ -77,168 +78,185 @@ Ready for message viewer prototype (Pass 2.5b-4).
 
 ### Next steps
 
-1. **Execute Pass 2.5b-3.5** — threaded view + UI config
+1. **Execute Pass 2.5b-3.5** — UI config + sidebar polish + docs cleanup
+2. **Execute Pass 2.5b-3.6** — threading + fold (index view completion)
 
 ### Next starter prompt
 
-> Resume Pass 2.5b-3.5: threaded message list view + intelligent
-> folder config + keybindings-doc cleanup. A previous brainstorm
-> session settled several questions and recorded them below and
-> in the keybindings / architecture / wireframe docs. **Open this
-> session by brainstorming only the remaining open questions** —
-> do not re-litigate the settled ones. Read the wireframes at
-> `docs/poplar/wireframes.md` (section 3 — message list, plus
-> §7 screen state #14 "Threaded View"), the architecture doc at
-> `docs/poplar/architecture.md`, the keybinding map at
-> `docs/poplar/keybindings.md`, and the styling reference at
-> `docs/poplar/styling.md`. Aerc's per-folder
-> `[ui:folder=Inbox]` `threading-enabled = true` model is the
-> closest prior art for the per-folder override.
+> Start Pass 2.5b-3.5: UI config + sidebar polish + keybindings-doc
+> cleanup. This pass adds the first `[ui]` section to
+> `~/.config/poplar/accounts.toml`, uses it to auto-discover and
+> rank folders in the sidebar, renders nested folders with a
+> one-space indent, and finishes the keybindings-doc cleanup.
+> **Threading render, fold state, and the `Space`/`F`/`U` keys all
+> belong to the next pass (2.5b-3.6), not this one.** Schema
+> fields for threading are still parsed and stored in this pass —
+> they sit unused in `UIConfig` until 2.5b-3.6 wires the consumer.
 >
-> **Goal.** Three things land in this pass, because they all
-> revolve around the first `[ui]` config section and the
-> sidebar/message-list surfaces that consume it:
+> **Open this session by brainstorming the open questions below.**
+> Read the wireframes at `docs/poplar/wireframes.md` (§2 sidebar
+> and §3 message list), the architecture doc at
+> `docs/poplar/architecture.md` (especially "Sidebar folder groups
+> are load-bearing", "Nested folders render flat with one-space
+> indent", "First `[ui]` config section", and the new "Pass
+> 2.5b-3.5 split" decision), the keybindings doc at
+> `docs/poplar/keybindings.md`, the styling reference at
+> `docs/poplar/styling.md`, and the existing sidebar code at
+> `internal/ui/sidebar.go`.
 >
-> 1. **Threaded display in the message list** — the wireframe
->    shows this as the default state.
-> 2. **Intelligent folder config** — auto-discover personal
->    folders, display alphabetically by default, allow the user
->    to override order, threading, and sort.
-> 3. **Keybindings doc cleanup** — `docs/poplar/keybindings.md`
->    has already been partially cleaned up (drop `:` command
->    mode, mark multi-select as deferred to Pass 6). Finish the
->    cleanup as part of this pass by adding the thread-fold key
->    once it's settled.
+> **Goal.** Three things land in this pass:
+>
+> 1. **First `[ui]` section** in `~/.config/poplar/accounts.toml`,
+>    parsed into a `UIConfig` struct, threaded through `App` →
+>    `AccountTab` → children as read-only at construction. Global
+>    defaults plus per-folder overrides
+>    (`[ui.folders.<name>] rank = N, threading = false, sort = ...`).
+>    Threading-related fields are parsed and stored this pass but
+>    have no consumer until 2.5b-3.6.
+> 2. **Sidebar polish**: folder auto-discovery,
+>    Primary/Disposal/Custom group classification, within-group
+>    ranking by `rank` field, alphabetical fallback in the Custom
+>    group, one-space indent for folders whose names contain `/`.
+> 3. **Keybindings doc cleanup**: drop remaining `:` references,
+>    mark `v`/`Space` as reserved (deferred to Pass 6 / 2.5b-3.6),
+>    mark `F`/`U` as reserved (deferred to 2.5b-3.6), resolve
+>    remaining wireframe TBDs about fold keys by pointing at
+>    2.5b-3.6, confirm the footer drop-rank table is still
+>    accurate.
 >
 > ---
 >
 > **Settled (do not re-brainstorm):**
 >
-> - **Threading default is ON globally.** Per-folder override
->   via `[ui.folders.<name>]`. Matches the wireframe, matches
->   modern client expectations (Fastmail/Apple Mail/Gmail), and
->   "Better Pine" is about UX polish, not pine defaults.
-> - **Sidebar folder groups are load-bearing.** The
->   Primary / Disposal / Custom three-group structure from the
->   architecture doc stays. Ranking happens *within* a group.
->   Canonical folders keep their canonical order unless
->   explicitly reordered. Custom folders alphabetize by default;
->   user can override with explicit ranks.
-> - **Nested folders render flat with a one-space indent.**
->   Folder names containing `/` (e.g. `Lists/golang`) get an
->   extra leading space so the alphabetical adjacency of
->   siblings reads as a visual group. No tree view, no
->   expand/collapse — pure render polish on top of the flat
->   data model. Tree view was explicitly rejected (see
->   architecture.md — aerc tried it and it didn't work out).
-> - **`v` stays as the designed multi-select entry.** Whole
->   feature is deferred to Pass 6; `v` and `Space` are reserved
->   in the keybindings doc but marked as future. This is the
->   reason `Space` is NOT free for thread-fold toggle.
-> - **`:` command mode is dropped entirely.** Every use case in
->   the wireframes has a more direct path (key or modal
->   picker). Pass 7 is now just "Search," not "Command mode +
->   search." The `: cmd` hint is out of the footer. Added to
->   the architecture doc as a design decision.
-> - **`n`/`N` stay in the footer as aspirational hints** even
->   though Pass 7 search isn't wired yet. Footer philosophy is
->   "show what it will look like when done" — future hints are
->   deliberate.
-> - **Keybinding doc cleanup is in scope for this pass**, not a
->   separate item. Multi-key artifacts in the wireframes
->   (`zo`/`zc`/`za`, `gg`, `gi`/`gd`/etc.) have already been
->   corrected where the replacement is settled (`gg` → `G`,
->   `gi`…`gt` → `I`/`D`/`S`/`A`/`X`/`T`). Fold keys in the
->   wireframe annotations still read "TBD" until this pass
->   picks one.
+> - Pass scope is split — threading render and fold state are
+>   **not** in this pass. See architecture.md "Pass 2.5b-3.5
+>   split".
+> - Sidebar groups are load-bearing (Primary / Disposal / Custom).
+>   User config ranks *within* a group; folders cannot move across
+>   groups.
+> - Canonical folders keep their canonical order unless explicitly
+>   reranked; custom folders alphabetize by default.
+> - Nested folders get a one-space indent, no tree view.
+> - `[ui]` is the first non-account config section; the pattern it
+>   establishes will be reused for future UI-tuning sections.
+> - `:` command mode is dropped entirely — every action is a key
+>   or a modal picker.
 >
 > ---
 >
-> **Still open — settle these first, then implement:**
+> **Still open — brainstorm these first:**
 >
-> - **Thread fold key.** Candidate set narrowed to `Tab`
->   (unbound, expand/collapse convention from lazygit/k9s) or
->   `Space` (best ergonomics, file-manager convention). The
->   wrinkle: `Space` is reserved for multi-select's
->   "toggle selection on current row" action per
->   keybindings.md. Leaning toward `Tab` on collision-avoidance
->   grounds, but the user raised the "isn't Space what users
->   expect?" point and it wasn't resolved before the brainstorm
->   was paused. **This is the first question to settle.**
->   Also decide whether fold-all / unfold-all ship in this pass
->   or defer.
-> - **Runtime threading toggle.** Should there be a single-key
->   runtime flip (e.g. "flat view just for this session")? The
->   prior recommendation was to drop it — config-only — on
->   YAGNI + Better Pine grounds. Not confirmed.
-> - **Sort interaction.** Threads sort by latest reply, children
->   render chronologically inside the parent. Confirm this
->   matches what the user wants.
-> - **Exact config schema.** Once fold keys and ordering are
->   settled, finalize the `[ui]` + `[ui.folders.<name>]` shape:
->   what fields, what key names, what types, what defaults.
->   Draft below is illustrative, not final.
-> - **Data model details.** Thread ID / parent reference /
->   depth on `mail.MessageInfo` vs a sibling type. JMAP supplies
->   thread info natively; IMAP grouping is a Pass 8 concern.
+> - **Exact config field names, types, defaults.** Settle the
+>   global fields (`threading`, maybe `folder-order`, maybe a hide
+>   list), the per-folder fields (`rank`, `threading`, `sort`,
+>   maybe `hide`), and their types (int rank vs float rank, string
+>   sort vs enum).
+> - **Folder auto-discovery and classification rules.** How does
+>   poplar decide which provider folder is "Inbox" — role attr,
+>   canonical name match, alias list? How are `[Gmail]/Sent Mail`,
+>   `Sent Items`, etc. mapped to canonical names? Is
+>   classification done in `internal/mail/` or `internal/poplar/`?
+>   Does the mock backend need to exercise the classifier?
+> - **Within-group rank semantics.** Positive int? Floats for
+>   insertion? Ties broken alphabetically? Is negative rank valid
+>   (pin-to-bottom)?
+> - **`[ui.folders.<name>]` key: canonical or provider name?**
+>   Canonical is more portable across providers; provider is more
+>   literal. Pick one and document.
+> - **Nested indent: one level or scales with depth?**
+>   `Lists/golang` is one indent. Would `Projects/Acme/Planning`
+>   be two indents, or still just one?
+> - **Hide folders via config?** Some users have provider-injected
+>   folders they never want to see (e.g. `[Gmail]/All Mail`).
+>   Include a hide mechanism now or defer?
+> - **Where does `UIConfig` live?** `internal/poplar/ui_config.go`
+>   alongside `AccountConfig`, or a new `internal/config/` package?
+> - **Exact delta for keybindings-doc cleanup.** The doc is
+>   mostly clean — confirm what still needs to change.
 >
-> ---
+> **Approach.** Brainstorm the open questions above, then write a
+> short plan doc at
+> `docs/superpowers/plans/2026-04-12-poplar-ui-config.md`, then
+> implement. Standard pass-end checklist applies.
+
+### Follow-up starter prompt (Pass 2.5b-3.6)
+
+> After Pass 2.5b-3.5 lands, resume with Pass 2.5b-3.6: threading
+> display + fold state + index-view completion. Read the
+> wireframes at `docs/poplar/wireframes.md` (§3 message list,
+> §7 screen state #14 threaded view), the architecture doc at
+> `docs/poplar/architecture.md` (especially the threading/sidebar
+> decisions, the Pass split decision, the Space-fold-key decision,
+> and the F/U reservation), the keybindings doc at
+> `docs/poplar/keybindings.md`, and the existing `MessageList`
+> code at `internal/ui/msglist.go`. Pass 2.5b-3.5 already parses
+> the threading config fields — this pass wires the consumer.
 >
-> **Implementation outline (subject to brainstorm refinement):**
+> **Goal.** This pass completes the index view:
 >
-> 1. **Data model** — extend `mail.MessageInfo` (or add a
->    sibling type) with thread ID, parent reference, and depth.
-> 2. **Mock backend** — add at least one threaded conversation
->    to `internal/mail/mock.go`. Use the wireframe example
->    (Frank Lee → Grace Kim → Frank Lee).
-> 3. **Render** — thread prefix glyphs in the subject column
->    in `FgDim`: `├─` has-siblings, `└─` last-sibling, `│` stem.
+> 1. Thread fields on `mail.MessageInfo` (thread id, parent ref,
+>    depth) and the mock backend gains at least one threaded
+>    conversation.
+> 2. Render `├─ └─ │` prefixes in the subject column in `FgDim`.
 >    Document new style slot(s) in `docs/poplar/styling.md`
 >    **before** writing renderer code (doc-first rule).
-> 4. **Fold state** — per-thread expanded/collapsed on
->    `MessageList`. `j/k` skip hidden children. Cursor never
->    lands on a collapsed child. Collapsed thread shows `[N]`
->    count badge in `fg_dim` before the subject
->    (wireframes.md:515).
-> 5. **Config** — first `[ui]` section in
->    `~/.config/poplar/accounts.toml`. Illustrative draft:
->    ```toml
->    [ui]
->    threading = true          # global default
->    folder-order = "grouped"  # Primary / Disposal / Custom,
->                              #   alpha within Custom (default)
+> 3. Per-thread fold state on `MessageList`. Fold-toggle with
+>    `Space` (outside visual mode), fold-all with `F`, unfold-all
+>    with `U`. `j/k` skips hidden children. Cursor never lands on
+>    a collapsed child. Collapsed thread shows `[N]` count badge
+>    in `fg_dim` before the subject.
+> 4. Consume the `[ui.folders.<name>] threading = ...` field that
+>    Pass 2.5b-3.5 parsed. Flip threading on/off per folder.
+> 5. Sort interaction: thread roots sort by the folder's existing
+>    sort order (one knob), children always render chronological
+>    ascending. No separate thread-activity sort.
+> 6. Footer gains the fold hint; `keybindings.md` promotes
+>    `Space`/`F`/`U` from reserved to live.
 >
->    [ui.folders."Inbox"]
->    threading = false
->    sort = "oldest-first"
+> ---
 >
->    [ui.folders."Notifications"]
->    rank = 10
->    threading = false
+> **Settled (do not re-brainstorm):**
 >
->    [ui.folders."Lists/golang"]
->    rank = 1                  # pin to top of Custom group
->    ```
->    Finalize key names during brainstorm. Add a `UIConfig`
->    struct in `internal/poplar/` (or `internal/config/`),
->    wire it through `App` → `AccountTab` → `Sidebar` +
->    `MessageList` as a read-only field at construction.
->    Document the schema in `docs/poplar/architecture.md`
->    since this is the first `[ui]` section and sets the
->    pattern for future ones.
-> 6. **Sidebar** — apply the folder-order policy in
->    `Sidebar.SetFolders` (group classification, within-group
->    ranking, alpha fallback). Add the one-space indent for
->    folders whose names contain `/`.
-> 7. **Keybindings-doc cleanup** — add the chosen thread-fold
->    key to `keybindings.md`, update the footer examples and
->    drop-rank table, resolve the remaining `TBD` placeholders
->    in `wireframes.md` annotations.
+> - `Space` is the fold key outside visual mode; inside visual
+>   mode (Pass 6) `Space` toggles row selection — disambiguated
+>   by mode. See architecture.md "Thread fold key: Space, dual
+>   meaning in visual-select mode".
+> - `F` (fold-all) and `U` (unfold-all) are the reserved keys for
+>   bulk fold, shipping in this pass. Shift-Space was rejected
+>   because terminals don't send it reliably.
+> - No runtime threading toggle — config only. See architecture.md
+>   "Runtime threading toggle: dropped".
+> - Threading default ON globally, per-folder override via the
+>   `[ui.folders.<name>]` subsection 2.5b-3.5 establishes.
+> - Thread prefixes use box-drawing `├─ └─ │` in `FgDim` per the
+>   wireframe.
 >
-> **Approach.** Brainstorm the remaining open questions first
-> (start with the fold key — that's the unfinished thread),
-> then write a short plan doc at
-> `docs/superpowers/plans/2026-04-12-poplar-threading.md`,
+> ---
+>
+> **Still open — brainstorm these:**
+>
+> - **Sort interaction confirmation.** Folder's existing sort
+>   setting orders thread roots (by root date), children always
+>   chronological ascending. The alternative — threading overrides
+>   folder sort, always uses latest-activity ordering — was
+>   discussed and the one-knob model is the lean. Confirm before
+>   implementing.
+> - **Data model shape.** Thread id / parent ref / depth as fields
+>   on `mail.MessageInfo`, or a sibling `ThreadInfo` type? JMAP
+>   supplies thread info natively; IMAP needs Message-ID /
+>   References header parsing (Pass 8 concern).
+> - **Fold state model.** Per-session in-memory only, or
+>   persisted? Default fold state when opening a folder (all
+>   unfolded? previous state? all folded if threading is on?).
+> - **Thread root identification.** The earliest message in the
+>   thread, or the topmost in current sort order? Determines which
+>   message stays visible when the thread is collapsed.
+> - **Mock backend threaded conversation content.** The wireframe
+>   shows Frank Lee → Grace Kim → Frank Lee; reuse that or pick
+>   a different example.
+>
+> **Approach.** Brainstorm the open questions, then write a plan
+> doc at `docs/superpowers/plans/2026-04-12-poplar-threading.md`,
 > then implement. Standard pass-end checklist applies.
 
 ### Pass-end checklist
