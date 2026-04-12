@@ -7,7 +7,13 @@ convention: J/K folders, j/k messages). One pane, no focus cycling
 (like pine) — every key is always live, no Tab switching. Status bar
 syncs with selected folder. Semantic style map codified in
 `docs/poplar/styling.md` — every `Styles` field has a documented role
-and palette slot. Ready for message list prototype (Pass 2.5b-3).
+and palette slot. Footer is responsive: per-hint `dropRank` (0–10)
+drops nav first, then niche modes, then secondary actions, keeping
+the primary email loop (`d a r/R c`) plus the always-pinned
+`? : q` escape hatch even at 40 columns. Hint definitions, shared
+triage/reply groups, and group functions all live in `footer.go`;
+`keys.go` is dispatch-only. Ready for message list prototype
+(Pass 2.5b-3).
 
 ## Passes
 
