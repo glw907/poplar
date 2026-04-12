@@ -43,7 +43,7 @@ func TestAccountTab(t *testing.T) {
 		tab, _ = tab.updateTab(tea.WindowSizeMsg{Width: 80, Height: 20})
 		view := tab.View()
 		plain := stripANSI(view)
-		for _, name := range []string{"Inbox", "Drafts", "Sent", "Archive", "Spam", "Trash"} {
+		for _, name := range []string{"Inbox", "Drafts", "Sent", "Archive", "Junk", "Trash"} {
 			if !strings.Contains(plain, name) {
 				t.Errorf("missing folder %q in sidebar", name)
 			}

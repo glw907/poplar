@@ -25,7 +25,7 @@ func NewMockBackend() *MockBackend {
 			{Name: "Drafts", Exists: 2, Unseen: 0, Role: "drafts"},
 			{Name: "Sent", Exists: 145, Unseen: 0, Role: "sent"},
 			{Name: "Archive", Exists: 1893, Unseen: 0, Role: "archive"},
-			{Name: "Spam", Exists: 12, Unseen: 12, Role: "junk"},
+			{Name: "Junk", Exists: 12, Unseen: 12, Role: ""},
 			{Name: "Trash", Exists: 5, Unseen: 0, Role: "trash"},
 			{Name: "Notifications", Exists: 47, Unseen: 0, Role: ""},
 			{Name: "Remind", Exists: 8, Unseen: 0, Role: ""},
