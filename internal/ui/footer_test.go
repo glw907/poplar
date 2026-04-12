@@ -125,11 +125,18 @@ func TestFooterView(t *testing.T) {
 	t.Run("responsive: triage drops last before app", func(t *testing.T) {
 		f := NewFooter(styles)
 		f.SetContext(AccountContext)
-		// At width 60 we should have room for a triage action plus the
-		// app group, but not the full reply/compose group.
+		// At width 60 the minimum email loop survives: primary triage
+		// (d/a), compose, and the always-kept app group. Reply (r/R)
+		// has dropped but compose has not.
 		result := stripANSI(f.View(60))
 		if !strings.Contains(result, "d del") {
 			t.Error("d del should still be present at width 60")
+		}
+		if !strings.Contains(result, "c compose") {
+			t.Error("c compose should still be present at width 60")
+		}
+		if strings.Contains(result, "r/R reply") {
+			t.Error("r/R reply should be dropped at width 60")
 		}
 		if !strings.Contains(result, "? help") {
 			t.Error("? help should still be present at width 60")
