@@ -33,16 +33,13 @@ ANY Go code.** Key rules:
 - Table-driven tests, no assertion libraries
 - `make check` (vet + test) must pass before any commit
 
-## MANDATORY: Go Skill
-
-**Use superpowers:go skill for all Go development tasks.**
-
 ## Project Structure
 
 ```
 cmd/mailrender/        CLI: filters, themes, compose (cobra)
 cmd/fastmail-cli/      CLI: rules, masked, folders (cobra)
 cmd/tidytext/          CLI: fix, config (cobra)
+cmd/poplar/            Poplar bubbletea email client entry point
 internal/filter/       Content pipeline: CleanHTML, CleanPlain (raw email -> markdown)
 internal/content/      Block model + lipgloss renderer (ParseBlocks, RenderBody, RenderHeaders)
 internal/compose/      Compose buffer normalization (mailrender compose)
@@ -51,6 +48,10 @@ internal/tidy/         Prose tidying: config, prompt, API
 internal/jmap/         JMAP session, mail ops, masked email
 internal/header/       RFC 2822 header parsing
 internal/rules/        Local JSON rule file operations
+internal/ui/           Poplar bubbletea components (app, sidebar, msglist, styles, footer)
+internal/mail/         Poplar Backend interface, poplar-native types, mock backend
+internal/poplar/       Poplar AccountConfig and poplar-specific types
+internal/aercfork/     Forked aerc workers (IMAP + JMAP) and supporting packages
 e2e/                   E2E tests (build binary, pipe fixtures, golden files)
 .config/aerc/          aerc configuration files + themes
 .config/nvim-mail/     Neovim compose editor profile
@@ -73,15 +74,18 @@ a library feature already exists.
 
 Themes are compiled Go values in `internal/theme/`. Each theme
 is a `Palette` (16 hex colors) → `NewCompiledTheme()` →
-`*CompiledTheme` with lipgloss.Style fields. Three built-in
-themes: Nord, SolarizedDark, GruvboxDark.
+`*CompiledTheme` with lipgloss.Style fields. Ships 15 themes
+(10 dark, 5 light) with One Dark as the default.
 
 **Never hardcode ANSI color codes in Go source.** All styling
 must use lipgloss styles from `CompiledTheme`.
 
 Generate aerc styleset: `mailrender themes generate [name]`.
-See `docs/styling.md` for visual hierarchy and `docs/themes.md`
-for the theme reference.
+See `docs/themes.md` for the theme reference and
+`docs/styling.md` for mailrender visual hierarchy.
+`docs/poplar/styling.md` (imported at the top of this file) is
+the separate, authoritative map for poplar UI surfaces — don't
+confuse the two.
 
 ## Build
 
@@ -98,26 +102,21 @@ make install   # install all four to ~/.local/bin/
 - **E2E tests:** build binary in TestMain, pipe fixtures, golden files
 - **Live verification:** see `.claude/docs/tmux-testing.md`
 
-**MANDATORY: When the user reports a rendering problem, always
-verify the fix against the live email.** Fetch the raw HTML via
-the Fastmail JMAP API (see memory for access details), pipe it
-through the rebuilt binary, and confirm the issue is resolved.
-Do not rely solely on unit tests or synthetic fixtures.
+**MANDATORY: Install and verify live before finishing any
+rendering work.** The loop is: `make install` → render the real
+message in aerc via tmux-testing (`.claude/docs/tmux-testing.md`)
+→ confirm the fix. When the user reports a rendering problem,
+fetch the raw HTML via the Fastmail JMAP API (see memory) and
+pipe it through the rebuilt binary — do not rely on unit tests
+or synthetic fixtures alone.
 
-**MANDATORY: Always verify rendering changes in aerc** after
-`make install`. Use tmux-testing (`.claude/docs/tmux-testing.md`)
-to render the email and inspect the output. This is a normal part
-of the workflow, not an optional step.
-
-**MANDATORY: Always install changes before finishing work.**
-Run `make install` after any binary changes. For config changes,
-there are two copies: the project repo (`.config/aerc/`) has the
-distributable starter config; `~/.dotfiles/beautiful-aerc/` has
-the user's local config deployed via `stow -R beautiful-aerc`.
-The local config will differ in personal settings (signature,
-account, mailbox names/order) and optional tool keybindings
-(tidytext, fastmail-cli). Update whichever copy is appropriate
-for the change; update both when the change applies to both.
+**Config has two copies.** The project repo (`.config/aerc/`)
+holds the distributable starter config; `~/.dotfiles/beautiful-aerc/`
+holds the user's local config deployed via `stow -R beautiful-aerc`.
+The local copy diverges in personal settings (signature, account,
+mailbox names/order) and optional tool keybindings (tidytext,
+fastmail-cli). Update whichever copy the change targets — update
+both when it applies to both.
 
 ## Corpus
 

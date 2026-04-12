@@ -8,7 +8,7 @@
 
 **Tech Stack:** Go 1.26, bubbletea, bubbles (help, key), lipgloss, existing `internal/theme` and `internal/mail` packages.
 
-**Mandatory conventions:** Read and follow `~/.claude/docs/go-conventions.md` and `~/.claude/docs/elm-conventions.md` before writing any code. Use `superpowers:go` skill for all Go development tasks.
+**Mandatory conventions:** Read and follow `~/.claude/docs/go-conventions.md` and `~/.claude/docs/elm-conventions.md` before writing any code.
 
 **Design spec:** `docs/superpowers/specs/2026-04-10-poplar-chrome-shell-design.md`
 

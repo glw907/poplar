@@ -78,7 +78,6 @@ make check
 
 Run the standard quality passes:
 - `make check` (vet + tests)
-- `/go-review` (Go convention review)
 - `/simplify` (code quality review)
 
 ### 7. Ship
