@@ -126,6 +126,41 @@ features as they come online.
 the footer — disposal folders are jumped to rarely enough that
 the footer real estate is better spent elsewhere.
 
+### Responsive footer
+
+Each hint has a `dropRank` (0-10). When the terminal is too
+narrow to fit every hint, the footer drops hints in descending
+rank order until the content fits. Rank 0 hints (`? help`,
+`: cmd`, `q quit`) are always kept as an escape hatch — even on
+a 40-column terminal you can reach help and quit.
+
+Drop tiers (highest rank → first to go):
+
+| Rank | Hints | Why drop first |
+|------|-------|----------------|
+| 10–9 | `j/k/J/K nav`, `I/D/S/A folders` | Vim/arrow users don't need the hint |
+| 8 | `v select` | Niche mode, discoverable in `?` help |
+| 7 | `n/N results` | Only useful after `/`, infer from convention |
+| 5 | `. read` | Secondary triage |
+| 4 | `s star` | Secondary triage |
+| 3 | `f fwd`, `/ find` | Tertiary actions |
+| 2 | `r/R reply`, `c compose` | Primary compose actions |
+| 1 | `d del`, `a archive` | Primary triage |
+| 0 | `? help`, `: cmd`, `q quit` | Always kept |
+
+Approximate breakpoints (account context):
+
+- **155+ cols**: full footer (all 14 hints)
+- **140**: nav drops
+- **100–120**: tools degrade (`v`, `n/N`)
+- **80**: triage trims to del/archive, only `/ find` from tools
+- **60**: minimum email loop (`d`, `a`, `c`, app)
+- **40**: survival (one triage hint + app)
+
+A group with no remaining visible hints collapses with its
+preceding `┊` separator, so the footer never shows hanging
+separators or empty groups.
+
 ### Viewer footer
 
 ```

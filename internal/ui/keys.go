@@ -2,9 +2,6 @@ package ui
 
 import "github.com/charmbracelet/bubbles/key"
 
-// keyGroup is a slice of bindings that belong together visually.
-type keyGroup []key.Binding
-
 // GlobalKeys are handled by the root App model.
 type GlobalKeys struct {
 	Help key.Binding
@@ -43,89 +40,98 @@ func NewFolderJumpKeys() FolderJumpKeys {
 	}
 }
 
-// AccountKeys groups for the unified one-pane account footer:
-// folder nav, message nav, triage, reply, and app keys are all live.
-type AccountKeys struct {
-	nav    keyGroup
-	triage keyGroup
-	reply  keyGroup
-	app    keyGroup
+// footerHint is one entry in the footer's keybinding display. These
+// are display-only — actual key dispatch lives in each component's
+// Update method. dropRank controls responsive behavior: when the
+// footer can't fit the full hint list, hints with higher dropRank
+// are dropped first. dropRank 0 hints are always kept (escape hatch
+// so the user can always reach help/quit).
+type footerHint struct {
+	key      string
+	desc     string
+	dropRank int
 }
+
+// hint is a short constructor for footerHint literals.
+func hint(key, desc string, dropRank int) footerHint {
+	return footerHint{key: key, desc: desc, dropRank: dropRank}
+}
+
+// AccountKeys produces the unified one-pane account footer hints.
+type AccountKeys struct{}
 
 // NewAccountKeys returns the default account view key bindings.
+func NewAccountKeys() AccountKeys { return AccountKeys{} }
+
+// FooterGroups returns the footer hint groups in display order.
 //
-// The nav group compresses multi-key bindings into single entries
-// (j/k/J/K, I/D/S/A) so the footer has room for the full set of
-// planned account-view hints, including actions that are not yet
-// operative (`. read`, `v select`, `n/N results`).
-func NewAccountKeys() AccountKeys {
-	return AccountKeys{
-		nav: keyGroup{
-			key.NewBinding(key.WithKeys("j"), key.WithHelp("j/k/J/K", "nav")),
-			key.NewBinding(key.WithKeys("I"), key.WithHelp("I/D/S/A", "folders")),
+// Hints are tagged with a per-hint drop rank that drives responsive
+// behavior. Rough drop order (highest rank first):
+//
+//   - nav entries (10, 9) — vim/arrow users don't need the hint
+//   - v select (8), n/N results (7) — niche modes, discoverable via help
+//   - . read (5), s star (4), f fwd (3), / find (3) — secondary actions
+//   - r/R reply (2), c compose (2) — primary compose actions
+//   - d del (1), a archive (1) — primary triage
+//   - ? help (0), : cmd (0), q quit (0) — always kept
+func (k AccountKeys) FooterGroups() [][]footerHint {
+	return [][]footerHint{
+		{
+			hint("j/k/J/K", "nav", 10),
+			hint("I/D/S/A", "folders", 9),
 		},
-		triage: keyGroup{
-			key.NewBinding(key.WithKeys("d"), key.WithHelp("d", "del")),
-			key.NewBinding(key.WithKeys("a"), key.WithHelp("a", "archive")),
-			key.NewBinding(key.WithKeys("s"), key.WithHelp("s", "star")),
-			key.NewBinding(key.WithKeys("."), key.WithHelp(".", "read")),
+		{
+			hint("d", "del", 1),
+			hint("a", "archive", 1),
+			hint("s", "star", 4),
+			hint(".", "read", 5),
 		},
-		reply: keyGroup{
-			key.NewBinding(key.WithKeys("r"), key.WithHelp("r/R", "reply")),
-			key.NewBinding(key.WithKeys("f"), key.WithHelp("f", "fwd")),
-			key.NewBinding(key.WithKeys("c"), key.WithHelp("c", "compose")),
+		{
+			hint("r/R", "reply", 2),
+			hint("f", "fwd", 3),
+			hint("c", "compose", 2),
 		},
-		app: keyGroup{
-			key.NewBinding(key.WithKeys("/"), key.WithHelp("/", "find")),
-			key.NewBinding(key.WithKeys("n"), key.WithHelp("n/N", "results")),
-			key.NewBinding(key.WithKeys("v"), key.WithHelp("v", "select")),
-			key.NewBinding(key.WithKeys("?"), key.WithHelp("?", "help")),
-			key.NewBinding(key.WithKeys(":"), key.WithHelp(":", "cmd")),
-			key.NewBinding(key.WithKeys("q"), key.WithHelp("q", "quit")),
+		{
+			hint("/", "find", 3),
+			hint("n/N", "results", 7),
+			hint("v", "select", 8),
+		},
+		{
+			hint("?", "help", 0),
+			hint(":", "cmd", 0),
+			hint("q", "quit", 0),
 		},
 	}
 }
 
-// Groups returns the keybinding groups for footer rendering.
-func (k AccountKeys) Groups() []keyGroup {
-	return []keyGroup{k.nav, k.triage, k.reply, k.app}
-}
-
-// ViewerKeys groups for the viewer footer.
-type ViewerKeys struct {
-	triage keyGroup
-	reply  keyGroup
-	viewer keyGroup
-}
+// ViewerKeys produces the viewer footer hints.
+type ViewerKeys struct{}
 
 // NewViewerKeys returns the default viewer key bindings.
+func NewViewerKeys() ViewerKeys { return ViewerKeys{} }
+
+// FooterGroups returns the viewer footer hint groups in display order.
 //
-// Includes planned hints that aren't yet wired up (`. read`,
-// `c compose`, `: cmd`) so the footer shows the full viewer
-// vocabulary as the implementation catches up.
-func NewViewerKeys() ViewerKeys {
-	return ViewerKeys{
-		triage: keyGroup{
-			key.NewBinding(key.WithKeys("d"), key.WithHelp("d", "del")),
-			key.NewBinding(key.WithKeys("a"), key.WithHelp("a", "archive")),
-			key.NewBinding(key.WithKeys("s"), key.WithHelp("s", "star")),
-			key.NewBinding(key.WithKeys("."), key.WithHelp(".", "read")),
+// Drop ranks: reply drops before triage (triage is more essential in
+// the viewer). Tab/q/?/: are always kept.
+func (k ViewerKeys) FooterGroups() [][]footerHint {
+	return [][]footerHint{
+		{
+			hint("d", "del", 1),
+			hint("a", "archive", 1),
+			hint("s", "star", 4),
+			hint(".", "read", 5),
 		},
-		reply: keyGroup{
-			key.NewBinding(key.WithKeys("r"), key.WithHelp("r/R", "reply")),
-			key.NewBinding(key.WithKeys("f"), key.WithHelp("f", "fwd")),
-			key.NewBinding(key.WithKeys("c"), key.WithHelp("c", "compose")),
+		{
+			hint("r/R", "reply", 2),
+			hint("f", "fwd", 3),
+			hint("c", "compose", 2),
 		},
-		viewer: keyGroup{
-			key.NewBinding(key.WithKeys("tab"), key.WithHelp("Tab", "links")),
-			key.NewBinding(key.WithKeys("q"), key.WithHelp("q", "close")),
-			key.NewBinding(key.WithKeys("?"), key.WithHelp("?", "help")),
-			key.NewBinding(key.WithKeys(":"), key.WithHelp(":", "cmd")),
+		{
+			hint("Tab", "links", 0),
+			hint("q", "close", 0),
+			hint("?", "help", 0),
+			hint(":", "cmd", 0),
 		},
 	}
-}
-
-// Groups returns the keybinding groups for footer rendering.
-func (k ViewerKeys) Groups() []keyGroup {
-	return []keyGroup{k.triage, k.reply, k.viewer}
 }

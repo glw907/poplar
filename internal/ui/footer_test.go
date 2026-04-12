@@ -74,4 +74,77 @@ func TestFooterView(t *testing.T) {
 			t.Error("footer should start with 1-space padding")
 		}
 	})
+
+	t.Run("responsive: nav drops first when space is tight", func(t *testing.T) {
+		f := NewFooter(styles)
+		f.SetContext(AccountContext)
+		result := stripANSI(f.View(130))
+		if strings.Contains(result, "j/k/J/K") {
+			t.Error("nav hint j/k/J/K should be dropped at narrow width")
+		}
+		if strings.Contains(result, "I/D/S/A") {
+			t.Error("nav hint I/D/S/A should be dropped at narrow width")
+		}
+		if !strings.Contains(result, "d del") {
+			t.Error("triage should still be present at width 130")
+		}
+		if !strings.Contains(result, "? help") {
+			t.Error("? help should still be present at width 130")
+		}
+	})
+
+	t.Run("responsive: tools drop before triage and reply", func(t *testing.T) {
+		f := NewFooter(styles)
+		f.SetContext(AccountContext)
+		result := stripANSI(f.View(90))
+		if strings.Contains(result, "v select") {
+			t.Error("v select should be dropped at width 90")
+		}
+		if strings.Contains(result, "n/N results") {
+			t.Error("n/N results should be dropped at width 90")
+		}
+		if !strings.Contains(result, "d del") {
+			t.Error("d del should still be present at width 90")
+		}
+		if !strings.Contains(result, "r/R reply") {
+			t.Error("r/R reply should still be present at width 90")
+		}
+	})
+
+	t.Run("responsive: app group never drops", func(t *testing.T) {
+		f := NewFooter(styles)
+		f.SetContext(AccountContext)
+		result := stripANSI(f.View(40))
+		for _, want := range []string{"? help", ": cmd", "q quit"} {
+			if !strings.Contains(result, want) {
+				t.Errorf("rank-0 hint %q should always be present", want)
+			}
+		}
+	})
+
+	t.Run("responsive: triage drops last before app", func(t *testing.T) {
+		f := NewFooter(styles)
+		f.SetContext(AccountContext)
+		// At width 60 we should have room for a triage action plus the
+		// app group, but not the full reply/compose group.
+		result := stripANSI(f.View(60))
+		if !strings.Contains(result, "d del") {
+			t.Error("d del should still be present at width 60")
+		}
+		if !strings.Contains(result, "? help") {
+			t.Error("? help should still be present at width 60")
+		}
+	})
+
+	t.Run("viewer context drops reply before triage", func(t *testing.T) {
+		f := NewFooter(styles)
+		f.SetContext(ViewerContext)
+		result := stripANSI(f.View(60))
+		if !strings.Contains(result, "d del") {
+			t.Error("viewer triage should survive at width 60")
+		}
+		if !strings.Contains(result, "Tab links") {
+			t.Error("viewer affordances should survive at width 60")
+		}
+	})
 }
