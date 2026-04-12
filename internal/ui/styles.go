@@ -33,15 +33,14 @@ type Styles struct {
 	// Selection (used by focus cycling)
 	Selection lipgloss.Style
 
-	// Sidebar
-	SidebarBg           lipgloss.Style
-	SidebarAccount      lipgloss.Style
-	SidebarSelected     lipgloss.Style
-	SidebarFolder       lipgloss.Style
-	SidebarFolderUnread lipgloss.Style
-	SidebarIconUnread   lipgloss.Style
-	SidebarCount        lipgloss.Style
-	SidebarIndicator    lipgloss.Style
+	// Sidebar. All sidebar rows use SidebarBg as their background.
+	// Selected rows override with SidebarSelected (BgSelection).
+	SidebarBg        lipgloss.Style
+	SidebarAccount   lipgloss.Style
+	SidebarSelected  lipgloss.Style
+	SidebarFolder    lipgloss.Style
+	SidebarUnread    lipgloss.Style
+	SidebarIndicator lipgloss.Style
 
 	// Placeholder text
 	Dim lipgloss.Style
@@ -101,14 +100,10 @@ func NewStyles(t *theme.CompiledTheme) Styles {
 			Background(t.BgSelection),
 		SidebarFolder: lipgloss.NewStyle().
 			Foreground(t.FgBase),
-		SidebarFolderUnread: lipgloss.NewStyle().
-			Foreground(t.AccentTertiary),
-		SidebarIconUnread: lipgloss.NewStyle().
-			Foreground(t.AccentTertiary),
-		SidebarCount: lipgloss.NewStyle().
-			Foreground(t.AccentTertiary),
+		SidebarUnread: lipgloss.NewStyle().
+			Foreground(t.FgBright).Bold(true),
 		SidebarIndicator: lipgloss.NewStyle().
-			Foreground(t.AccentPrimary),
+			Foreground(t.AccentSecondary),
 
 		Dim: lipgloss.NewStyle().
 			Foreground(t.FgDim),

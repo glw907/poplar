@@ -8,6 +8,7 @@ mailrender, fastmail-cli, tidytext, poplar.
 
 @docs/poplar/STATUS.md
 @docs/poplar/architecture.md
+@docs/poplar/styling.md
 
 ## MANDATORY: Elm Architecture (Poplar UI)
 

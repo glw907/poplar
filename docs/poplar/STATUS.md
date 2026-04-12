@@ -1,10 +1,13 @@
 # Poplar Status
 
 **Current state:** Sidebar prototype complete. Three folder groups with
-blank-line separators, `┃` focus indicator, unread count badges,
-j/k/G navigation, Tab focus cycling between sidebar and message list,
-status bar syncs with selected folder. Ready for message list prototype
-(Pass 2.5b-3).
+blank-line separators, `┃` focus indicator (matches account accent),
+bold-white unread folders and counts, J/K/G navigation (aerc
+convention: J/K folders, j/k messages), Tab focus cycling between
+sidebar and message list, status bar and footer sync with focused
+panel. Semantic style map codified in `docs/poplar/styling.md` —
+every `Styles` field has a documented role and palette slot. Ready
+for message list prototype (Pass 2.5b-3).
 
 ## Passes
 
@@ -51,6 +54,7 @@ status bar syncs with selected folder. Ready for message list prototype
 - [Chrome redesign spec](../superpowers/specs/2026-04-11-poplar-chrome-redesign-design.md)
 - [Chrome redesign plan](../superpowers/plans/2026-04-11-poplar-chrome-redesign.md)
 - [Keybinding map](../poplar/keybindings.md)
+- [Styling reference](../poplar/styling.md)
 - [Theme selection spec](../superpowers/specs/2026-04-11-poplar-themes-design.md)
 - [Theme selection plan](../superpowers/plans/2026-04-11-poplar-themes.md)
 - [Compose system spec](../superpowers/specs/2026-04-11-poplar-compose-design.md)
@@ -65,12 +69,15 @@ status bar syncs with selected folder. Ready for message list prototype
 
 > Start Pass 2.5b-3: message list prototype. Read the wireframes
 > at `docs/poplar/wireframes.md` (section 3), the architecture doc
-> at `docs/poplar/architecture.md`, and the keybinding map at
-> `docs/poplar/keybindings.md`. The sidebar (Pass 2.5b-2) is
+> at `docs/poplar/architecture.md`, the keybinding map at
+> `docs/poplar/keybindings.md`, and the styling reference at
+> `docs/poplar/styling.md`. The sidebar (Pass 2.5b-2) is
 > complete — folder list with groups, selection, unread badges,
-> j/k/G navigation, Tab focus cycling. Replace the "Message List"
+> J/K/G navigation, Tab focus cycling. Replace the "Message List"
 > placeholder in AccountTab's right panel with a real message list
-> component using mock data from `internal/mail/mock.go`.
+> component using mock data from `internal/mail/mock.go`. Before
+> adding any new styles, add them to `styling.md` first so the
+> semantic role is documented alongside the palette assignment.
 
 ### Pass-end checklist
 

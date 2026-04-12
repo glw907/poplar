@@ -34,7 +34,7 @@ func NewApp(t *theme.CompiledTheme, backend mail.Backend) App {
 	}
 	sb.SetConnectionState(Connected)
 
-	return App{
+	app := App{
 		acct:      acct,
 		styles:    styles,
 		topLine:   NewTopLine(styles),
@@ -42,6 +42,8 @@ func NewApp(t *theme.CompiledTheme, backend mail.Backend) App {
 		footer:    NewFooter(styles),
 		keys:      NewGlobalKeys(),
 	}
+	app.updateFooterContext()
+	return app
 }
 
 // Init returns no initial command.
@@ -59,6 +61,7 @@ func (m App) Update(msg tea.Msg) (App, tea.Cmd) {
 		var cmd tea.Cmd
 		m.acct, cmd = m.acct.Update(contentMsg)
 		cmds = append(cmds, cmd)
+		m.updateFooterContext()
 		return m, tea.Batch(cmds...)
 
 	case tea.KeyMsg:

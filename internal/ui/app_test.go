@@ -138,6 +138,13 @@ func TestApp(t *testing.T) {
 		}
 	})
 
+	t.Run("footer starts in sidebar context", func(t *testing.T) {
+		app := NewApp(theme.Nord, backend)
+		if app.footer.context != SidebarContext {
+			t.Errorf("footer context = %d, want SidebarContext (sidebar is focused on startup)", app.footer.context)
+		}
+	})
+
 	t.Run("status bar updates on sidebar navigation", func(t *testing.T) {
 		app := NewApp(theme.Nord, backend)
 		app, _ = app.Update(tea.WindowSizeMsg{Width: 80, Height: 20})

@@ -109,7 +109,6 @@ func (m AccountTab) View() string {
 	sw := min(sidebarWidth, m.width/2)
 	mw := m.width - sw - 1 // -1 for divider
 
-	// Account name line + blank line + folder rows = sidebar view
 	acctLine := m.styles.SidebarAccount.Width(sw).Render(" " + m.backend.AccountName())
 	blank := m.styles.SidebarBg.Width(sw).Render("")
 
@@ -122,9 +121,8 @@ func (m AccountTab) View() string {
 		sidebarLines = append(sidebarLines, strings.Split(sidebarFolders, "\n")...)
 	}
 
-	// Pad to height
 	for len(sidebarLines) < m.height {
-		sidebarLines = append(sidebarLines, strings.Repeat(" ", sw))
+		sidebarLines = append(sidebarLines, blank)
 	}
 	if len(sidebarLines) > m.height {
 		sidebarLines = sidebarLines[:m.height]

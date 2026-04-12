@@ -120,8 +120,7 @@ func (s Sidebar) View() string {
 		return ""
 	}
 
-	// Build background styles once for all rows.
-	plainBg := lipgloss.NewStyle()
+	plainBg := s.styles.SidebarBg
 	selectedBg := s.styles.SidebarSelected
 
 	var lines []string
@@ -173,25 +172,17 @@ func (s Sidebar) renderRow(idx int, entry folderEntry, bgStyle lipgloss.Style) s
 		indicator = bgStyle.Render(" ")
 	}
 
-	// Icon
-	iconStyle := s.styles.SidebarFolder
+	textStyle := s.styles.SidebarFolder
 	if hasUnread {
-		iconStyle = s.styles.SidebarIconUnread
+		textStyle = s.styles.SidebarUnread
 	}
-	icon := withBg(iconStyle).Render(entry.icon)
+	icon := withBg(textStyle).Render(entry.icon)
+	name := withBg(textStyle).Render(entry.folder.Name)
 
-	// Folder name
-	nameStyle := s.styles.SidebarFolder
-	if hasUnread {
-		nameStyle = s.styles.SidebarFolderUnread
-	}
-	name := withBg(nameStyle).Render(entry.folder.Name)
-
-	// Unread count (right-aligned, only when > 0)
 	var countStr string
 	var countWidth int
 	if hasUnread {
-		countStr = withBg(s.styles.SidebarCount).Render(fmt.Sprintf("%d", entry.folder.Unseen))
+		countStr = withBg(textStyle).Render(fmt.Sprintf("%d", entry.folder.Unseen))
 		countWidth = lipgloss.Width(countStr)
 	}
 
@@ -216,9 +207,9 @@ func (s Sidebar) renderRow(idx int, entry folderEntry, bgStyle lipgloss.Style) s
 	return row
 }
 
-// renderBlankLine renders an empty line at the sidebar width.
+// renderBlankLine renders an empty line at the sidebar width with the sidebar background.
 func (s Sidebar) renderBlankLine() string {
-	return strings.Repeat(" ", s.width)
+	return s.styles.SidebarBg.Width(s.width).Render("")
 }
 
 // sidebarIcon returns the Nerd Font icon for a folder based on role and name.
