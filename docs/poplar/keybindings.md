@@ -101,25 +101,36 @@ to the current context. Bindings are grouped logically with
 
 ### Account footer
 
-The unified one-pane footer. `j/k` and `J/K` both live, triage
-and reply always available. Primary folder jumps (`I/D/S/A`) sit
-in the nav group so they read as navigation aids.
+The unified one-pane footer. Multi-key bindings are compressed
+(`j/k/J/K`, `I/D/S/A`) into single hint entries so the footer
+has room for every account-view action, including hints for
+features that aren't yet wired up.
 
 ```
- j/k:messages  J/K:folders  I:inbox  D:drafts  S:sent  A:archive  ┊  d:del  a:archive  s:star  ┊  r:reply  R:all  f:fwd  c:compose  ┊  /:search  ?:help  ::cmd
- ◂── navigation ─────────────────────────────────────────────────▸   ◂── triage ──────────────▸   ◂── reply/compose ──────────────▸   ◂── app ──────────▸
+ j/k/J/K nav  I/D/S/A folders ┊ d del  a archive  s star  . read ┊ r reply  R all  f fwd  c compose ┊ / find  n/N results  v select  ? help  : cmd
+ ◂── navigation ─────────────▸  ◂── triage ─────────────────────▸  ◂── reply/compose ─────────────▸  ◂── tools & app ──────────────────────────▸
 ```
+
+**Compressed nav hints.** `j/k/J/K nav` covers both `j/k`
+(messages) and `J/K` (folders) as one navigation affordance.
+`I/D/S/A folders` covers inbox/drafts/sent/archive jumps.
+Expanding these into six entries took too much room — the
+compressed form tells a vim-literate user everything they need.
+
+**Future hints shown.** `. read`, `v select`, and `n/N results`
+are in the footer even though the actions aren't implemented
+yet. This surfaces the full planned vocabulary so users discover
+features as they come online.
 
 `X` (Spam) and `T` (Trash) are still live keys but omitted from
 the footer — disposal folders are jumped to rarely enough that
-the footer real estate is better spent on hints for the primary
-group.
+the footer real estate is better spent elsewhere.
 
 ### Viewer footer
 
 ```
- d:del  a:archive  s:star  ┊  r:reply  R:all  f:fwd  ┊  Tab:links  q:close  ?:help
- ◂── triage ──────────────▸   ◂── reply ─────────▸      ◂── viewer / app ──────────▸
+ d del  a archive  s star  . read ┊ r reply  R all  f fwd  c compose ┊ Tab links  q close  ? help  : cmd
+ ◂── triage ─────────────────────▸  ◂── reply/compose ─────────────▸  ◂── viewer / app ───────────────▸
 ```
 
 ### Group separator

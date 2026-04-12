@@ -19,25 +19,25 @@ func TestFooterView(t *testing.T) {
 		}
 	})
 
-	t.Run("account context has nav group", func(t *testing.T) {
+	t.Run("account context has compressed nav group", func(t *testing.T) {
 		f := NewFooter(styles)
 		f.SetContext(AccountContext)
 		result := stripANSI(f.View(160))
-		if !strings.Contains(result, "j/k messages") {
-			t.Error("missing j/k messages")
+		if !strings.Contains(result, "j/k/J/K nav") {
+			t.Error("missing j/k/J/K nav")
 		}
-		if !strings.Contains(result, "J/K folders") {
-			t.Error("missing J/K folders")
+		if !strings.Contains(result, "I/D/S/A folders") {
+			t.Error("missing I/D/S/A folders")
 		}
 	})
 
-	t.Run("account context has folder jumps in nav group", func(t *testing.T) {
+	t.Run("account context has planned future hints", func(t *testing.T) {
 		f := NewFooter(styles)
 		f.SetContext(AccountContext)
-		result := stripANSI(f.View(160))
-		for _, want := range []string{"I inbox", "D drafts", "S sent", "A archive"} {
+		result := stripANSI(f.View(200))
+		for _, want := range []string{". read", "v select", "n/N results"} {
 			if !strings.Contains(result, want) {
-				t.Errorf("missing folder jump hint %q", want)
+				t.Errorf("missing future hint %q", want)
 			}
 		}
 	})

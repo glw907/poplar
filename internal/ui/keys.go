@@ -53,21 +53,22 @@ type AccountKeys struct {
 }
 
 // NewAccountKeys returns the default account view key bindings.
+//
+// The nav group compresses multi-key bindings into single entries
+// (j/k/J/K, I/D/S/A) so the footer has room for the full set of
+// planned account-view hints, including actions that are not yet
+// operative (`. read`, `v select`, `n/N results`).
 func NewAccountKeys() AccountKeys {
-	fj := NewFolderJumpKeys()
 	return AccountKeys{
 		nav: keyGroup{
-			key.NewBinding(key.WithKeys("j"), key.WithHelp("j/k", "messages")),
-			key.NewBinding(key.WithKeys("J"), key.WithHelp("J/K", "folders")),
-			fj.Inbox,
-			fj.Drafts,
-			fj.Sent,
-			fj.Archive,
+			key.NewBinding(key.WithKeys("j"), key.WithHelp("j/k/J/K", "nav")),
+			key.NewBinding(key.WithKeys("I"), key.WithHelp("I/D/S/A", "folders")),
 		},
 		triage: keyGroup{
 			key.NewBinding(key.WithKeys("d"), key.WithHelp("d", "del")),
 			key.NewBinding(key.WithKeys("a"), key.WithHelp("a", "archive")),
 			key.NewBinding(key.WithKeys("s"), key.WithHelp("s", "star")),
+			key.NewBinding(key.WithKeys("."), key.WithHelp(".", "read")),
 		},
 		reply: keyGroup{
 			key.NewBinding(key.WithKeys("r"), key.WithHelp("r", "reply")),
@@ -76,7 +77,9 @@ func NewAccountKeys() AccountKeys {
 			key.NewBinding(key.WithKeys("c"), key.WithHelp("c", "compose")),
 		},
 		app: keyGroup{
-			key.NewBinding(key.WithKeys("/"), key.WithHelp("/", "search")),
+			key.NewBinding(key.WithKeys("/"), key.WithHelp("/", "find")),
+			key.NewBinding(key.WithKeys("n"), key.WithHelp("n/N", "results")),
+			key.NewBinding(key.WithKeys("v"), key.WithHelp("v", "select")),
 			key.NewBinding(key.WithKeys("?"), key.WithHelp("?", "help")),
 			key.NewBinding(key.WithKeys(":"), key.WithHelp(":", "cmd")),
 		},
@@ -96,22 +99,29 @@ type ViewerKeys struct {
 }
 
 // NewViewerKeys returns the default viewer key bindings.
+//
+// Includes planned hints that aren't yet wired up (`. read`,
+// `c compose`, `: cmd`) so the footer shows the full viewer
+// vocabulary as the implementation catches up.
 func NewViewerKeys() ViewerKeys {
 	return ViewerKeys{
 		triage: keyGroup{
 			key.NewBinding(key.WithKeys("d"), key.WithHelp("d", "del")),
 			key.NewBinding(key.WithKeys("a"), key.WithHelp("a", "archive")),
 			key.NewBinding(key.WithKeys("s"), key.WithHelp("s", "star")),
+			key.NewBinding(key.WithKeys("."), key.WithHelp(".", "read")),
 		},
 		reply: keyGroup{
 			key.NewBinding(key.WithKeys("r"), key.WithHelp("r", "reply")),
 			key.NewBinding(key.WithKeys("R"), key.WithHelp("R", "all")),
 			key.NewBinding(key.WithKeys("f"), key.WithHelp("f", "fwd")),
+			key.NewBinding(key.WithKeys("c"), key.WithHelp("c", "compose")),
 		},
 		viewer: keyGroup{
 			key.NewBinding(key.WithKeys("tab"), key.WithHelp("Tab", "links")),
 			key.NewBinding(key.WithKeys("q"), key.WithHelp("q", "close")),
 			key.NewBinding(key.WithKeys("?"), key.WithHelp("?", "help")),
+			key.NewBinding(key.WithKeys(":"), key.WithHelp(":", "cmd")),
 		},
 	}
 }
