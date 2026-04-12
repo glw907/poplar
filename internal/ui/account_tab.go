@@ -25,7 +25,7 @@ type AccountTab struct {
 // NewAccountTab creates an AccountTab using the given styles and backend.
 func NewAccountTab(styles Styles, backend mail.Backend) AccountTab {
 	folders, _ := backend.ListFolders()
-	sb := NewSidebar(styles, folders, sidebarWidth, 1)
+	sb := newSidebarFromFolders(styles, folders, sidebarWidth, 1)
 
 	tab := AccountTab{
 		styles:  styles,

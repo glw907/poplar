@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/charmbracelet/lipgloss"
+	"github.com/glw907/beautiful-aerc/internal/config"
 	"github.com/glw907/beautiful-aerc/internal/mail"
 	"github.com/glw907/beautiful-aerc/internal/theme"
 )
@@ -15,7 +16,7 @@ func TestSidebar(t *testing.T) {
 	folders := mockFolders()
 
 	t.Run("renders all folders", func(t *testing.T) {
-		sb := NewSidebar(styles, folders, 30, 20)
+		sb := newSidebarFromFolders(styles, folders, 30, 20)
 		view := sb.View()
 		plain := stripANSI(view)
 		for _, f := range folders {
@@ -26,7 +27,7 @@ func TestSidebar(t *testing.T) {
 	})
 
 	t.Run("groups separated by blank lines", func(t *testing.T) {
-		sb := NewSidebar(styles, folders, 30, 20)
+		sb := newSidebarFromFolders(styles, folders, 30, 20)
 		view := sb.View()
 		plain := stripANSI(view)
 		lines := strings.Split(plain, "\n")
@@ -43,7 +44,7 @@ func TestSidebar(t *testing.T) {
 	})
 
 	t.Run("initial selection is first folder", func(t *testing.T) {
-		sb := NewSidebar(styles, folders, 30, 20)
+		sb := newSidebarFromFolders(styles, folders, 30, 20)
 		if sb.Selected() != 0 {
 			t.Errorf("initial selection = %d, want 0", sb.Selected())
 		}
@@ -53,7 +54,7 @@ func TestSidebar(t *testing.T) {
 	})
 
 	t.Run("unread count shown only when positive", func(t *testing.T) {
-		sb := NewSidebar(styles, folders, 30, 20)
+		sb := newSidebarFromFolders(styles, folders, 30, 20)
 		view := sb.View()
 		plain := stripANSI(view)
 		lines := strings.Split(plain, "\n")
@@ -77,7 +78,7 @@ func TestSidebar(t *testing.T) {
 	})
 
 	t.Run("selected row has selection indicator", func(t *testing.T) {
-		sb := NewSidebar(styles, folders, 30, 20)
+		sb := newSidebarFromFolders(styles, folders, 30, 20)
 		view := sb.View()
 		plain := stripANSI(view)
 		lines := strings.Split(plain, "\n")
@@ -95,7 +96,7 @@ func TestSidebar(t *testing.T) {
 	})
 
 	t.Run("all lines same display width", func(t *testing.T) {
-		sb := NewSidebar(styles, folders, 30, 20)
+		sb := newSidebarFromFolders(styles, folders, 30, 20)
 		view := sb.View()
 		lines := strings.Split(view, "\n")
 		for i, line := range lines {
@@ -108,7 +109,7 @@ func TestSidebar(t *testing.T) {
 	})
 
 	t.Run("j moves down", func(t *testing.T) {
-		sb := NewSidebar(styles, folders, 30, 20)
+		sb := newSidebarFromFolders(styles, folders, 30, 20)
 		sb.MoveDown()
 		if sb.Selected() != 1 {
 			t.Errorf("after MoveDown, selected = %d, want 1", sb.Selected())
@@ -119,7 +120,7 @@ func TestSidebar(t *testing.T) {
 	})
 
 	t.Run("k moves up", func(t *testing.T) {
-		sb := NewSidebar(styles, folders, 30, 20)
+		sb := newSidebarFromFolders(styles, folders, 30, 20)
 		sb.MoveDown()
 		sb.MoveDown()
 		sb.MoveUp()
@@ -129,7 +130,7 @@ func TestSidebar(t *testing.T) {
 	})
 
 	t.Run("k at top stays at 0", func(t *testing.T) {
-		sb := NewSidebar(styles, folders, 30, 20)
+		sb := newSidebarFromFolders(styles, folders, 30, 20)
 		sb.MoveUp()
 		if sb.Selected() != 0 {
 			t.Errorf("MoveUp at top: selected = %d, want 0", sb.Selected())
@@ -137,7 +138,7 @@ func TestSidebar(t *testing.T) {
 	})
 
 	t.Run("j at bottom stays at last", func(t *testing.T) {
-		sb := NewSidebar(styles, folders, 30, 20)
+		sb := newSidebarFromFolders(styles, folders, 30, 20)
 		for i := 0; i < 20; i++ {
 			sb.MoveDown()
 		}
@@ -148,7 +149,7 @@ func TestSidebar(t *testing.T) {
 	})
 
 	t.Run("G moves to bottom", func(t *testing.T) {
-		sb := NewSidebar(styles, folders, 30, 20)
+		sb := newSidebarFromFolders(styles, folders, 30, 20)
 		sb.MoveToBottom()
 		last := len(folders) - 1
 		if sb.Selected() != last {
@@ -157,7 +158,7 @@ func TestSidebar(t *testing.T) {
 	})
 
 	t.Run("gg moves to top", func(t *testing.T) {
-		sb := NewSidebar(styles, folders, 30, 20)
+		sb := newSidebarFromFolders(styles, folders, 30, 20)
 		sb.MoveDown()
 		sb.MoveDown()
 		sb.MoveDown()
@@ -168,7 +169,7 @@ func TestSidebar(t *testing.T) {
 	})
 
 	t.Run("height exactly matches", func(t *testing.T) {
-		sb := NewSidebar(styles, folders, 30, 15)
+		sb := newSidebarFromFolders(styles, folders, 30, 15)
 		view := sb.View()
 		lines := strings.Split(view, "\n")
 		if len(lines) != 15 {
@@ -177,7 +178,7 @@ func TestSidebar(t *testing.T) {
 	})
 
 	t.Run("spam shows unread count 12", func(t *testing.T) {
-		sb := NewSidebar(styles, folders, 30, 20)
+		sb := newSidebarFromFolders(styles, folders, 30, 20)
 		view := sb.View()
 		plain := stripANSI(view)
 		lines := strings.Split(plain, "\n")
@@ -191,7 +192,7 @@ func TestSidebar(t *testing.T) {
 	})
 
 	t.Run("selected icon tracks selection", func(t *testing.T) {
-		sb := NewSidebar(styles, folders, 30, 20)
+		sb := newSidebarFromFolders(styles, folders, 30, 20)
 		if sb.SelectedIcon() != "󰇰" {
 			t.Errorf("SelectedIcon() = %q, want inbox icon", sb.SelectedIcon())
 		}
@@ -202,11 +203,119 @@ func TestSidebar(t *testing.T) {
 	})
 
 	t.Run("empty folders returns empty view", func(t *testing.T) {
-		sb := NewSidebar(styles, nil, 30, 20)
+		sb := NewSidebar(styles, nil, config.DefaultUIConfig(), 30, 20)
 		if sb.View() != "" {
 			t.Error("expected empty view for nil folders")
 		}
 	})
+}
+
+func TestSidebarOrdering_DefaultGroups(t *testing.T) {
+	input := []mail.Folder{
+		{Name: "Trash", Role: "trash"},
+		{Name: "Inbox", Role: "inbox"},
+		{Name: "Lists/rust"},
+		{Name: "Archive", Role: "archive"},
+		{Name: "Lists/golang"},
+		{Name: "Drafts", Role: "drafts"},
+		{Name: "Sent", Role: "sent"},
+		{Name: "Spam", Role: "junk"},
+	}
+	sb := NewSidebar(NewStyles(theme.Nord), mail.Classify(input), config.DefaultUIConfig(), 30, 20)
+
+	got := displayNames(sb)
+	want := []string{"Inbox", "Drafts", "Sent", "Archive", "Spam", "Trash", "Lists/golang", "Lists/rust"}
+	assertNames(t, got, want)
+}
+
+func TestSidebarOrdering_ExplicitRank(t *testing.T) {
+	input := []mail.Folder{
+		{Name: "Inbox", Role: "inbox"},
+		{Name: "Lists/golang"},
+		{Name: "Lists/rust"},
+		{Name: "Notifications"},
+	}
+	uiCfg := config.DefaultUIConfig()
+	uiCfg.Folders["Lists/rust"] = config.FolderConfig{Rank: 1, RankSet: true}
+	uiCfg.Folders["Notifications"] = config.FolderConfig{Rank: 2, RankSet: true}
+
+	sb := NewSidebar(NewStyles(theme.Nord), mail.Classify(input), uiCfg, 30, 20)
+	got := displayNames(sb)
+	want := []string{"Inbox", "Lists/rust", "Notifications", "Lists/golang"}
+	assertNames(t, got, want)
+}
+
+func TestSidebarHide(t *testing.T) {
+	input := []mail.Folder{
+		{Name: "Inbox", Role: "inbox"},
+		{Name: "All Mail"},
+		{Name: "Lists/golang"},
+	}
+	uiCfg := config.DefaultUIConfig()
+	uiCfg.Folders["Archive"] = config.FolderConfig{Hide: true}
+
+	sb := NewSidebar(NewStyles(theme.Nord), mail.Classify(input), uiCfg, 30, 20)
+	got := displayNames(sb)
+	want := []string{"Inbox", "Lists/golang"}
+	assertNames(t, got, want)
+}
+
+func TestSidebarLabelOverride(t *testing.T) {
+	input := []mail.Folder{
+		{Name: "Inbox", Role: "inbox"},
+		{Name: "[Gmail]/Starred"},
+	}
+	uiCfg := config.DefaultUIConfig()
+	uiCfg.Folders["[Gmail]/Starred"] = config.FolderConfig{Label: "Starred"}
+
+	sb := NewSidebar(NewStyles(theme.Nord), mail.Classify(input), uiCfg, 30, 20)
+	got := displayNames(sb)
+	want := []string{"Inbox", "Starred"}
+	assertNames(t, got, want)
+}
+
+func TestSidebarNestedIndent(t *testing.T) {
+	cases := []struct {
+		name  string
+		depth int
+	}{
+		{"Lists/golang", 1},
+		{"Projects/Acme/Planning", 2},
+		{"Projects/Acme/Planning/Q2", 3},
+		{"Projects/Acme/Planning/Q2/Week1", 3},
+		{"Inbox", 0},
+	}
+	for _, tc := range cases {
+		if got := folderDepth(tc.name); got != tc.depth {
+			t.Errorf("folderDepth(%q) = %d, want %d", tc.name, got, tc.depth)
+		}
+	}
+}
+
+func TestSidebarDisplayNormalizesCanonicals(t *testing.T) {
+	input := []mail.Folder{
+		{Name: "[Gmail]/Sent Mail"},
+		{Name: "Deleted Items"},
+	}
+	sb := NewSidebar(NewStyles(theme.Nord), mail.Classify(input), config.DefaultUIConfig(), 30, 20)
+	got := displayNames(sb)
+	want := []string{"Sent", "Trash"}
+	assertNames(t, got, want)
+}
+
+func displayNames(sb Sidebar) []string {
+	out := make([]string, 0, len(sb.entries))
+	for _, e := range sb.entries {
+		out = append(out, e.cf.DisplayName)
+	}
+	return out
+}
+
+func assertNames(t *testing.T, got, want []string) {
+	t.Helper()
+	if strings.Join(got, "|") != strings.Join(want, "|") {
+		t.Fatalf("order mismatch\n got: %v\nwant: %v", got, want)
+	}
 }
 
 func mockFolders() []mail.Folder {

@@ -2,26 +2,20 @@ package ui
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 
 	"github.com/charmbracelet/lipgloss"
+	"github.com/glw907/beautiful-aerc/internal/config"
 	"github.com/glw907/beautiful-aerc/internal/mail"
 )
 
-// folderGroup classifies folders for visual grouping.
-type folderGroup int
-
-const (
-	primaryGroup  folderGroup = iota // inbox, drafts, sent, archive
-	disposalGroup                    // spam, trash
-	customGroup                      // everything else
-)
-
-// folderEntry holds a folder and its display metadata.
+// folderEntry holds a classified folder plus its rendered metadata.
+// depth is the nested-folder indent level, capped at 3.
 type folderEntry struct {
-	folder mail.Folder
-	icon   string
-	group  folderGroup
+	cf    mail.ClassifiedFolder
+	icon  string
+	depth int
 }
 
 // Sidebar renders the folder list with groups, selection, and unread badges.
@@ -33,18 +27,12 @@ type Sidebar struct {
 	height   int
 }
 
-// NewSidebar creates a Sidebar from a folder list.
-func NewSidebar(styles Styles, folders []mail.Folder, width, height int) Sidebar {
-	entries := make([]folderEntry, len(folders))
-	for i, f := range folders {
-		entries[i] = folderEntry{
-			folder: f,
-			icon:   sidebarIcon(f),
-			group:  classifyGroup(f),
-		}
-	}
+// NewSidebar creates a Sidebar from a pre-classified folder list and
+// a UIConfig. Ordering, hiding, labelling, and indent calculation
+// happen here. Hidden folders are dropped before indexing.
+func NewSidebar(styles Styles, classified []mail.ClassifiedFolder, uiCfg config.UIConfig, width, height int) Sidebar {
 	return Sidebar{
-		entries:  entries,
+		entries:  buildEntries(classified, uiCfg),
 		selected: 0,
 		styles:   styles,
 		width:    width,
@@ -52,21 +40,29 @@ func NewSidebar(styles Styles, folders []mail.Folder, width, height int) Sidebar
 	}
 }
 
+// newSidebarFromFolders adapts the legacy NewSidebar(folders) signature
+// for call sites not yet migrated to the ClassifiedFolder + UIConfig
+// model. Phase E removes this shim.
+func newSidebarFromFolders(styles Styles, folders []mail.Folder, width, height int) Sidebar {
+	return NewSidebar(styles, mail.Classify(folders), config.DefaultUIConfig(), width, height)
+}
+
 // Selected returns the index of the currently selected folder.
 func (s Sidebar) Selected() int { return s.selected }
 
-// SelectedFolder returns the name of the currently selected folder.
+// SelectedFolder returns the provider name of the currently selected folder.
+// Backends look up folders by provider name, not display name.
 func (s Sidebar) SelectedFolder() string {
 	if s.selected < len(s.entries) {
-		return s.entries[s.selected].folder.Name
+		return s.entries[s.selected].cf.Folder.Name
 	}
 	return ""
 }
 
-// SelectedFolderInfo returns the folder at the current selection.
+// SelectedFolderInfo returns the raw backend Folder at the current selection.
 func (s Sidebar) SelectedFolderInfo() (mail.Folder, bool) {
 	if s.selected < len(s.entries) {
-		return s.entries[s.selected].folder, true
+		return s.entries[s.selected].cf.Folder, true
 	}
 	return mail.Folder{}, false
 }
@@ -119,39 +115,36 @@ func (s Sidebar) View() string {
 	selectedBg := s.styles.SidebarSelected
 
 	var lines []string
-	prevGroup := s.entries[0].group
+	prevGroup := s.entries[0].cf.Group
 
 	for i, entry := range s.entries {
-		if i > 0 && entry.group != prevGroup {
+		if i > 0 && entry.cf.Group != prevGroup {
 			lines = append(lines, s.renderBlankLine())
-			prevGroup = entry.group
 		}
+		prevGroup = entry.cf.Group
 		bg := plainBg
 		if i == s.selected {
 			bg = selectedBg
 		}
 		lines = append(lines, s.renderRow(i, entry, bg))
-		prevGroup = entry.group
 	}
 
 	for len(lines) < s.height {
 		lines = append(lines, s.renderBlankLine())
 	}
-
 	if len(lines) > s.height {
 		lines = lines[:s.height]
 	}
-
 	return strings.Join(lines, "\n")
 }
 
 // renderRow renders a single folder row with proper background layering.
-// bgStyle carries the row's background color (selection or plain).
+// Nested folders (depth > 0) get one extra space per depth level before
+// the icon. The selection indicator ┃ always sits in column 0.
 func (s Sidebar) renderRow(idx int, entry folderEntry, bgStyle lipgloss.Style) string {
 	isSelected := idx == s.selected
-	hasUnread := entry.folder.Unseen > 0
+	hasUnread := entry.cf.Folder.Unseen > 0
 
-	// Indicator: ┃ when selected, space otherwise
 	var indicator string
 	if isSelected {
 		indicator = applyBg(s.styles.SidebarIndicator, bgStyle).Render("┃")
@@ -163,18 +156,20 @@ func (s Sidebar) renderRow(idx int, entry folderEntry, bgStyle lipgloss.Style) s
 	if hasUnread {
 		textStyle = s.styles.SidebarUnread
 	}
+
+	indent := bgStyle.Render(strings.Repeat(" ", entry.depth))
 	icon := applyBg(textStyle, bgStyle).Render(entry.icon)
-	name := applyBg(textStyle, bgStyle).Render(entry.folder.Name)
+	name := applyBg(textStyle, bgStyle).Render(entry.cf.DisplayName)
 
 	var countStr string
 	var countWidth int
 	if hasUnread {
-		countStr = applyBg(textStyle, bgStyle).Render(fmt.Sprintf("%d", entry.folder.Unseen))
+		countStr = applyBg(textStyle, bgStyle).Render(fmt.Sprintf("%d", entry.cf.Folder.Unseen))
 		countWidth = lipgloss.Width(countStr)
 	}
 
-	// Layout: indicator(1) + sp(1) + icon(~2) + sp(2) + name + gap + count + margin(1)
-	leftContent := indicator + bgStyle.Render(" ") + icon + bgStyle.Render("  ") + name
+	// Layout: indicator(1) + sp(1) + indent(depth) + icon + sp×2 + name + gap + count + margin(1)
+	leftContent := indicator + bgStyle.Render(" ") + indent + icon + bgStyle.Render("  ") + name
 	leftWidth := lipgloss.Width(leftContent)
 
 	rightMargin := 1
@@ -193,23 +188,133 @@ func (s Sidebar) renderBlankLine() string {
 	return s.styles.SidebarBg.Width(s.width).Render("")
 }
 
-// sidebarIcon returns the Nerd Font icon for a folder based on role and name.
-func sidebarIcon(f mail.Folder) string {
-	switch strings.ToLower(f.Role) {
-	case "inbox":
+// buildEntries applies UIConfig to the classified folders: drops hidden
+// folders, computes depth, resolves display labels, sorts each group
+// by rank then display name, and concatenates Primary + Disposal +
+// Custom in that order.
+func buildEntries(classified []mail.ClassifiedFolder, uiCfg config.UIConfig) []folderEntry {
+	var primary, disposal, custom []folderEntry
+	for _, cf := range classified {
+		fc := uiCfg.Folders[folderConfigKey(cf)]
+		if fc.Hide {
+			continue
+		}
+		entry := folderEntry{
+			cf:    cf,
+			icon:  sidebarIcon(cf),
+			depth: folderDepth(cf.Folder.Name),
+		}
+		if fc.Label != "" {
+			entry.cf.DisplayName = fc.Label
+		}
+		switch cf.Group {
+		case mail.GroupPrimary:
+			primary = append(primary, entry)
+		case mail.GroupDisposal:
+			disposal = append(disposal, entry)
+		default:
+			custom = append(custom, entry)
+		}
+	}
+	sortEntries(primary, uiCfg, primaryDefaultRank)
+	sortEntries(disposal, uiCfg, disposalDefaultRank)
+	sortEntries(custom, uiCfg, customDefaultRank)
+
+	out := make([]folderEntry, 0, len(primary)+len(disposal)+len(custom))
+	out = append(out, primary...)
+	out = append(out, disposal...)
+	out = append(out, custom...)
+	return out
+}
+
+// folderConfigKey returns the UIConfig.Folders lookup key for a
+// classified folder. Canonicals key on canonical name; custom folders
+// key on provider name.
+func folderConfigKey(cf mail.ClassifiedFolder) string {
+	if cf.Canonical != "" {
+		return cf.Canonical
+	}
+	return cf.Folder.Name
+}
+
+// folderDepth returns the nested-folder indent depth for a folder name.
+// Counts the number of '/' characters in the name, capped at 3.
+func folderDepth(name string) int {
+	d := strings.Count(name, "/")
+	if d > 3 {
+		d = 3
+	}
+	return d
+}
+
+func primaryDefaultRank(cf mail.ClassifiedFolder) int {
+	switch cf.Canonical {
+	case "Inbox":
+		return 100
+	case "Drafts":
+		return 200
+	case "Sent":
+		return 300
+	case "Archive":
+		return 400
+	}
+	return 500
+}
+
+func disposalDefaultRank(cf mail.ClassifiedFolder) int {
+	switch cf.Canonical {
+	case "Spam":
+		return 100
+	case "Trash":
+		return 200
+	}
+	return 300
+}
+
+func customDefaultRank(_ mail.ClassifiedFolder) int {
+	return 1000
+}
+
+// sortEntries orders a group by (rank, display name). Rank comes from
+// user config if set, otherwise from the group's default-rank function.
+func sortEntries(entries []folderEntry, uiCfg config.UIConfig, defaultRank func(mail.ClassifiedFolder) int) {
+	sort.SliceStable(entries, func(i, j int) bool {
+		ri := rankOf(entries[i], uiCfg, defaultRank)
+		rj := rankOf(entries[j], uiCfg, defaultRank)
+		if ri != rj {
+			return ri < rj
+		}
+		return entries[i].cf.DisplayName < entries[j].cf.DisplayName
+	})
+}
+
+func rankOf(e folderEntry, uiCfg config.UIConfig, defaultRank func(mail.ClassifiedFolder) int) int {
+	fc := uiCfg.Folders[folderConfigKey(e.cf)]
+	if fc.RankSet {
+		return fc.Rank
+	}
+	return defaultRank(e.cf)
+}
+
+// sidebarIcon returns the Nerd Font icon for a classified folder.
+// Canonicals use their canonical icon; custom folders fall back to the
+// heuristic name matcher.
+func sidebarIcon(cf mail.ClassifiedFolder) string {
+	switch cf.Canonical {
+	case "Inbox":
 		return "󰇰"
-	case "drafts":
+	case "Drafts":
 		return "󰏫"
-	case "sent":
+	case "Sent":
 		return "󰑚"
-	case "archive":
+	case "Archive":
 		return "󰀼"
-	case "junk":
+	case "Spam":
 		return "󰍷"
-	case "trash":
+	case "Trash":
 		return "󰩺"
 	}
-	lower := strings.ToLower(f.Name)
+	lower := strings.ToLower(cf.Folder.Name)
 	switch {
 	case strings.Contains(lower, "notification"):
 		return "󰂚"
@@ -217,17 +322,5 @@ func sidebarIcon(f mail.Folder) string {
 		return "󰑴"
 	default:
 		return "󰡡"
-	}
-}
-
-// classifyGroup assigns a folder to its visual group.
-func classifyGroup(f mail.Folder) folderGroup {
-	switch strings.ToLower(f.Role) {
-	case "inbox", "drafts", "sent", "archive":
-		return primaryGroup
-	case "junk", "trash":
-		return disposalGroup
-	default:
-		return customGroup
 	}
 }

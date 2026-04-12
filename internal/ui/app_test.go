@@ -110,7 +110,7 @@ func TestApp(t *testing.T) {
 		plain := stripANSI(view)
 		lines := strings.Split(plain, "\n")
 
-		for _, name := range []string{"Inbox", "Drafts", "Sent", "Archive", "Junk", "Trash"} {
+		for _, name := range []string{"Inbox", "Drafts", "Sent", "Archive", "Spam", "Trash"} {
 			found := false
 			for _, line := range lines {
 				runes := []rune(line)
