@@ -44,7 +44,7 @@ fi
 if [[ -n "$warnings" ]]; then
     echo "ELM ARCHITECTURE: $(basename "$file") has violations:" >&2
     echo -e "$warnings" >&2
-    echo "  See ~/.claude/docs/elm-conventions.md for correct patterns." >&2
+    echo "  Invoke the elm-conventions skill for correct patterns." >&2
 fi
 
 exit 0
