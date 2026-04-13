@@ -12,10 +12,21 @@ import (
 // sidebarWidth is the fixed width of the sidebar panel.
 const sidebarWidth = 30
 
+// sidebarHeaderRows is the account-name line plus the blank line
+// below it, reserved at the top of the sidebar before the folder
+// list. AccountTab.View and the sidebar's own sizing both depend on
+// this number matching.
+const sidebarHeaderRows = 2
+
 // AccountTab is the main account view. One pane (like pine): every
 // key is always live. J/K/G navigate folders, j/k navigate messages.
 type AccountTab struct {
-	styles  Styles
+	styles Styles
+	// backend is held as a read-only reference so Update can build
+	// tea.Cmd closures that call backend methods. It is never
+	// mutated and its results are never cached as owned state —
+	// they come back as Msg types through the normal Update flow.
+	// This is the elm-conventions Rule 5 exception.
 	backend mail.Backend
 	uiCfg   config.UIConfig
 	sidebar Sidebar
@@ -62,8 +73,8 @@ func (m AccountTab) updateTab(msg tea.Msg) (AccountTab, tea.Cmd) {
 		m.width = msg.Width
 		m.height = msg.Height
 		sw := min(sidebarWidth, m.width/2)
-		m.sidebar.SetSize(sw, m.height-2) // -2 for account name + blank line
-		mw := max(1, m.width-sw-1)        // -1 for divider
+		m.sidebar.SetSize(sw, m.height-sidebarHeaderRows)
+		mw := max(1, m.width-sw-1) // -1 for divider
 		m.msglist.SetSize(mw, m.height)
 		return m, nil
 

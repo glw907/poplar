@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/lipgloss"
+	"github.com/mattn/go-runewidth"
 )
 
 // ConnectionState represents the mail connection status.
@@ -86,7 +87,7 @@ func (sb StatusBar) View(width, dividerCol int) string {
 
 	// Measure right portion width using plain text (no ANSI).
 	rightPlain := " " + counts + " · " + connIcon + " " + connText + " ─╯"
-	rightWidth := lipgloss.Width(rightPlain)
+	rightWidth := runewidth.StringWidth(rightPlain)
 
 	fillWidth := max(0, width-rightWidth)
 	fillPart := sb.styles.TopLine.Render(buildFill(fillWidth, dividerCol))

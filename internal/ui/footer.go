@@ -116,7 +116,7 @@ func (f Footer) SetContext(ctx FooterContext) Footer {
 // Hints are progressively dropped (highest dropRank first) when the
 // full hint list would exceed width. Groups that become empty collapse
 // along with their preceding separator. dropRank 0 hints are always
-// kept — if they alone still exceed width, lipgloss will clip them.
+// kept — if they alone still exceed width, the line overflows.
 func (f Footer) View(width int) string {
 	var groups [][]footerHint
 	switch f.context {
@@ -145,7 +145,8 @@ func (f Footer) View(width int) string {
 	}
 
 	line := " " + strings.Join(parts, sep)
-	return lipgloss.NewStyle().Width(width).Render(line)
+	pad := max(0, width-lipgloss.Width(line))
+	return line + strings.Repeat(" ", pad)
 }
 
 // fitFooterHints returns a trimmed copy of groups that fits within

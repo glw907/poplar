@@ -1,8 +1,8 @@
 package ui
 
 import (
-	"fmt"
 	"sort"
+	"strconv"
 	"strings"
 
 	"github.com/charmbracelet/lipgloss"
@@ -177,7 +177,7 @@ func (s Sidebar) renderRow(idx int, entry folderEntry, bgStyle lipgloss.Style) s
 	var countStr string
 	var countWidth int
 	if hasUnread {
-		countStr = applyBg(textStyle, bgStyle).Render(fmt.Sprintf("%d", entry.cf.Folder.Unseen))
+		countStr = applyBg(textStyle, bgStyle).Render(strconv.Itoa(entry.cf.Folder.Unseen))
 		countWidth = lipgloss.Width(countStr)
 	}
 
