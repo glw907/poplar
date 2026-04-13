@@ -13,8 +13,8 @@ func TestStatusBarView(t *testing.T) {
 
 	t.Run("renders counts and connection", func(t *testing.T) {
 		sb := NewStatusBar(styles)
-		sb.SetCounts(10, 3)
-		sb.SetConnectionState(Connected)
+		sb = sb.SetCounts(10, 3)
+		sb = sb.SetConnectionState(Connected)
 		result := stripANSI(sb.View(80, 30))
 		if !strings.Contains(result, "10 messages") {
 			t.Error("missing message count")
@@ -29,8 +29,8 @@ func TestStatusBarView(t *testing.T) {
 
 	t.Run("no folder name", func(t *testing.T) {
 		sb := NewStatusBar(styles)
-		sb.SetCounts(10, 3)
-		sb.SetConnectionState(Connected)
+		sb = sb.SetCounts(10, 3)
+		sb = sb.SetConnectionState(Connected)
 		result := stripANSI(sb.View(80, 30))
 		if strings.Contains(result, "Inbox") {
 			t.Error("status bar should not show folder name")
@@ -39,8 +39,8 @@ func TestStatusBarView(t *testing.T) {
 
 	t.Run("ends with ─╯", func(t *testing.T) {
 		sb := NewStatusBar(styles)
-		sb.SetCounts(10, 3)
-		sb.SetConnectionState(Connected)
+		sb = sb.SetCounts(10, 3)
+		sb = sb.SetConnectionState(Connected)
 		result := stripANSI(sb.View(80, 30))
 		trimmed := strings.TrimRight(result, " ")
 		if !strings.HasSuffix(trimmed, "─╯") {
@@ -50,8 +50,8 @@ func TestStatusBarView(t *testing.T) {
 
 	t.Run("has ┴ at divider position", func(t *testing.T) {
 		sb := NewStatusBar(styles)
-		sb.SetCounts(10, 3)
-		sb.SetConnectionState(Connected)
+		sb = sb.SetCounts(10, 3)
+		sb = sb.SetConnectionState(Connected)
 		result := stripANSI(sb.View(80, 30))
 		runes := []rune(result)
 		if len(runes) > 30 && runes[30] != '┴' {
@@ -61,8 +61,8 @@ func TestStatusBarView(t *testing.T) {
 
 	t.Run("offline state", func(t *testing.T) {
 		sb := NewStatusBar(styles)
-		sb.SetCounts(10, 3)
-		sb.SetConnectionState(Offline)
+		sb = sb.SetCounts(10, 3)
+		sb = sb.SetConnectionState(Offline)
 		result := stripANSI(sb.View(80, 30))
 		if !strings.Contains(result, "○ offline") {
 			t.Error("missing offline indicator")
@@ -71,8 +71,8 @@ func TestStatusBarView(t *testing.T) {
 
 	t.Run("no divider when dividerCol is 0", func(t *testing.T) {
 		sb := NewStatusBar(styles)
-		sb.SetCounts(10, 3)
-		sb.SetConnectionState(Connected)
+		sb = sb.SetCounts(10, 3)
+		sb = sb.SetConnectionState(Connected)
 		result := stripANSI(sb.View(80, 0))
 		if strings.Contains(result, "┴") {
 			t.Error("should not have ┴ when dividerCol is 0")
@@ -81,8 +81,8 @@ func TestStatusBarView(t *testing.T) {
 
 	t.Run("width matches terminal", func(t *testing.T) {
 		sb := NewStatusBar(styles)
-		sb.SetCounts(10, 3)
-		sb.SetConnectionState(Connected)
+		sb = sb.SetCounts(10, 3)
+		sb = sb.SetConnectionState(Connected)
 		result := sb.View(80, 30)
 		if lipgloss.Width(result) != 80 {
 			t.Errorf("width = %d, want 80", lipgloss.Width(result))

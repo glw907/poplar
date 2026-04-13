@@ -17,14 +17,16 @@ func NewTopLine(styles Styles) TopLine {
 	return TopLine{styles: styles}
 }
 
-// SetToast sets a toast message to overlay on the right side.
-func (tl *TopLine) SetToast(msg string) {
+// SetToast returns a copy of tl with a toast message set on the right side.
+func (tl TopLine) SetToast(msg string) TopLine {
 	tl.toast = msg
+	return tl
 }
 
-// ClearToast removes the toast message.
-func (tl *TopLine) ClearToast() {
+// ClearToast returns a copy of tl with the toast message removed.
+func (tl TopLine) ClearToast() TopLine {
 	tl.toast = ""
+	return tl
 }
 
 // View renders the top line at the given width. dividerCol is the

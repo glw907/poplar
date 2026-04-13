@@ -49,7 +49,7 @@ func TestTopLineView(t *testing.T) {
 
 	t.Run("toast overlays right side", func(t *testing.T) {
 		tl := NewTopLine(styles)
-		tl.SetToast("✓ 3 archived")
+		tl = tl.SetToast("✓ 3 archived")
 		result := stripANSI(tl.View(80, 30))
 		if !strings.Contains(result, "✓ 3 archived") {
 			t.Errorf("toast not visible: %q", result)
@@ -61,8 +61,8 @@ func TestTopLineView(t *testing.T) {
 
 	t.Run("toast clears", func(t *testing.T) {
 		tl := NewTopLine(styles)
-		tl.SetToast("✓ done")
-		tl.ClearToast()
+		tl = tl.SetToast("✓ done")
+		tl = tl.ClearToast()
 		result := stripANSI(tl.View(80, 30))
 		if strings.Contains(result, "done") {
 			t.Error("toast should be cleared")

@@ -27,7 +27,7 @@ type App struct {
 func NewApp(t *theme.CompiledTheme, backend mail.Backend, uiCfg config.UIConfig) App {
 	styles := NewStyles(t)
 	sb := NewStatusBar(styles)
-	sb.SetConnectionState(Connected)
+	sb = sb.SetConnectionState(Connected)
 
 	return App{
 		acct:      NewAccountTab(styles, backend, uiCfg),
@@ -58,7 +58,7 @@ func (m App) Update(msg tea.Msg) (App, tea.Cmd) {
 		return m, cmd
 
 	case FolderChangedMsg:
-		m.statusBar.SetCounts(msg.Exists, msg.Unseen)
+		m.statusBar = m.statusBar.SetCounts(msg.Exists, msg.Unseen)
 		return m, nil
 
 	case tea.KeyMsg:

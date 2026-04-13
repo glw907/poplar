@@ -105,9 +105,10 @@ func NewFooter(styles Styles) Footer {
 	}
 }
 
-// SetContext switches the displayed keybinding set.
-func (f *Footer) SetContext(ctx FooterContext) {
+// SetContext returns a copy of f with the displayed keybinding set switched.
+func (f Footer) SetContext(ctx FooterContext) Footer {
 	f.context = ctx
+	return f
 }
 
 // View renders the footer at the given width.

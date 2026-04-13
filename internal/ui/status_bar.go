@@ -32,15 +32,17 @@ func NewStatusBar(styles Styles) StatusBar {
 	}
 }
 
-// SetCounts updates the message and unread counts.
-func (sb *StatusBar) SetCounts(total, unread int) {
+// SetCounts returns a copy of sb with the message and unread counts updated.
+func (sb StatusBar) SetCounts(total, unread int) StatusBar {
 	sb.total = total
 	sb.unread = unread
+	return sb
 }
 
-// SetConnectionState sets the connection state directly.
-func (sb *StatusBar) SetConnectionState(state ConnectionState) {
+// SetConnectionState returns a copy of sb with the connection state set.
+func (sb StatusBar) SetConnectionState(state ConnectionState) StatusBar {
 	sb.connState = state
+	return sb
 }
 
 // buildFill creates a horizontal line of width chars with ┴ at dividerCol.
