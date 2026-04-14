@@ -333,44 +333,61 @@ func (m *MessageList) FilterResultCount() int
 
 ### New Msg types
 
-All in `internal/ui/cmds.go`:
+One Msg type in `internal/ui/cmds.go`:
 
 ```go
-type SearchActivateMsg struct{}                            // / pressed in Idle
-type SearchUpdatedMsg struct{ Query string; Mode SearchMode } // each keystroke in Typing
-type SearchCommittedMsg struct{ Query string; Mode SearchMode } // Enter in Typing
-type SearchClearedMsg struct{}                             // Esc in Typing or Active
-type SearchResultsMsg struct{ Count int }                  // MessageList → SidebarSearch
+type SearchUpdatedMsg struct{ Query string; Mode SearchMode } // keystroke or mode cycle
 ```
+
+`SidebarSearch.Update` emits `SearchUpdatedMsg` as a Cmd whenever
+the query value or mode changes during Typing state. No other
+search-related Msg types exist — state transitions (Activate,
+Commit, Clear) are driven by direct method calls from `AccountTab`,
+which holds both children and is the natural place to sequence
+them.
 
 ### Data flow
 
 ```
-AccountTab receives tea.KeyMsg "/"
-  → AccountTab: if sidebarSearch.State() == SearchIdle, call sidebarSearch.Activate()
+/ pressed (Idle)
+  → AccountTab.handleKey: m.sidebarSearch.Activate()
   → SidebarSearch: state = Typing, input.Focus()
 
-AccountTab receives tea.KeyMsg during Typing
-  → AccountTab: route to sidebarSearch.Update(msg)
-  → SidebarSearch: appends rune, emits SearchUpdatedMsg
-  → AccountTab: on SearchUpdatedMsg, call msglist.SetFilter(query, mode)
-  → MessageList: rebuild pipeline, emit SearchResultsMsg
-  → AccountTab: on SearchResultsMsg, call sidebarSearch.SetResultCount(n)
+printable rune pressed (Typing)
+  → AccountTab.handleKey: m.sidebarSearch, cmd = m.sidebarSearch.Update(msg)
+  → SidebarSearch.Update: textinput appends, emits SearchUpdatedMsg as Cmd
+  → cmd bubbles up to bubbletea runtime, SearchUpdatedMsg returns to Update
+  → AccountTab.updateTab on SearchUpdatedMsg:
+      m.msglist.SetFilter(query, mode)
+      m.sidebarSearch.SetResultCount(m.msglist.FilterResultCount())
 
-AccountTab receives tea.KeyMsg Enter during Typing
-  → AccountTab: route to sidebarSearch.Update(msg)
-  → SidebarSearch: state = Active, input.Blur(), emits SearchCommittedMsg
-  → (no-op in AccountTab — filter is already live from SearchUpdatedMsg)
+Tab pressed (Typing)
+  → AccountTab.handleKey: route to SidebarSearch.Update
+  → SidebarSearch.Update: intercepts Tab, cycles mode, emits SearchUpdatedMsg
+  → (same downstream path as printable runes)
 
-AccountTab receives tea.KeyMsg Esc during Typing or Active
-  → AccountTab: route to sidebarSearch.Update(msg)
-  → SidebarSearch: state = Idle, input.Reset(), emits SearchClearedMsg
-  → AccountTab: on SearchClearedMsg, call msglist.ClearFilter()
+Enter pressed (Typing)
+  → AccountTab.handleKey: m.sidebarSearch.Commit()
+  → SidebarSearch: state = Active, input.Blur()
+  → filter is unchanged — stays live from the last SearchUpdatedMsg
+
+Esc pressed (Typing or Active)
+  → AccountTab.handleKey: m.sidebarSearch.Clear(); m.msglist.ClearFilter()
+  → SidebarSearch: state = Idle, input.Reset(), mode reset
+  → MessageList: filter cleared, pre-search cursor restored
+
+Folder jump (J/K/I/D/S/A/X/T) during Active
+  → AccountTab.handleKey: clearSearchIfActive(), then run the jump
 ```
 
-State ownership at `AccountTab`: it holds the `SidebarSearch` and
-the `MessageList`, and bridges them through Msg types. Neither
-child reaches into the other. Elm-conventions Rule 4 preserved.
+State ownership at `AccountTab`: it holds both children and
+sequences them via direct method calls for state transitions, plus
+one Msg (`SearchUpdatedMsg`) for the textinput-driven query-change
+feedback loop. This is a deliberate trade-off against "pure Msg
+flow only" — `AccountTab` is the single natural coordination point
+and adding two more Msg types per state transition would be
+ceremony without added isolation. Elm-conventions Rule 4 still
+holds: neither child reaches into the other.
 
 ### Files touched
 
