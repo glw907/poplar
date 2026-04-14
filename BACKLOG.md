@@ -17,7 +17,7 @@
 ## Medium
 
 - [ ] **#9** Viewer `n/N` walks filtered row set `#feature` `#poplar` *(2026-04-14)*
-  While a search filter is committed and the viewer is open, `n/N` should advance to the next/previous message in the filtered row set and fetch its body into the current viewer. Deferred from Pass 2.5b-4 brainstorm (option c). Requires viewer↔msglist cursor coupling, body prefetch semantics, and filter-boundary behavior. Out of scope for the viewer prototype pass.
+  While a search filter is committed and the viewer is open, `n/N` should advance to the next/previous message in the filtered row set and fetch its body into the current viewer. Deferred from Pass 2.5b-4 brainstorm (option c). Requires viewer↔msglist cursor coupling, body prefetch semantics, and filter-boundary behavior. **Bundle with Pass 3 (wire to live backend)** — prefetch semantics only become meaningful with real IMAP/JMAP latency.
 
 - [ ] **#8** Design folder jump keybindings without multi-key sequences `#feature` `#poplar` *(2026-04-10)*
   Need single-key alternatives to g-prefix chords (gi/gd/gs/ga/gx/gt) for jumping to Inbox, Drafts, Sent, Archive, Spam, Trash. Bubbletea sends one KeyMsg per keypress — multi-key chords require a custom state machine. Options: single-key mnemonics, command mode `:go inbox`, numeric folder indices, or other approaches. Important for daily triage workflow. Deserves its own pass.
