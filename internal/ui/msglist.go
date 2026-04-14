@@ -29,6 +29,16 @@ const (
 	mlIconFlagged  = "󰈻"
 )
 
+// Box-drawing tokens for thread prefixes. Each string is exactly 3
+// display cells; buildPrefix relies on that to keep column math
+// stable. Edit them as a set.
+const (
+	mlThreadVert  = "│  " // ancestor that still has more siblings below
+	mlThreadGap   = "   " // ancestor that was the last sibling
+	mlThreadTee   = "├─ " // current row, more siblings below
+	mlThreadElbow = "└─ " // current row, last sibling
+)
+
 // SortOrder is the thread-level sort direction. Children inside a
 // thread always sort chronologically ascending; SortOrder controls
 // only the order of thread roots (and of unthreaded messages, which
@@ -100,38 +110,26 @@ func (m *MessageList) SetMessages(msgs []mail.MessageInfo) {
 // and applies fold state, producing m.rows. Called from SetMessages
 // and from any fold-mutating method.
 //
-// Pipeline (this task implements steps 1-2 only; later tasks add the
-// rest):
+// Pipeline:
 //
 //  1. Bucket by ThreadID.
 //  2. Pick a root per bucket (empty InReplyTo, fallback earliest by date).
-//  3. Sort children chronologically ascending.            (Task 6)
-//  4. Compute thread latest-activity sort key.            (Task 7)
-//  5. Sort threads by latest-activity in m.sort direction. (Task 8)
-//  6. Walk threads, emit displayRows root-then-children,
-//     computing depth and box-drawing prefix.              (Task 9)
-//  7. Apply fold state.                                    (Task 10)
+//  3. Sort threads by latest-activity in m.sort direction.
+//  4. Walk each thread, emit displayRows root-then-children,
+//     computing depth and box-drawing prefix.
+//  5. Apply fold state.
 func (m *MessageList) rebuild() {
 	buckets := bucketByThreadID(m.source)
-
-	type sortedBucket struct {
-		bucket []mail.MessageInfo
-		latest string
-	}
-	wrapped := make([]sortedBucket, len(buckets))
-	for i, b := range buckets {
-		wrapped[i] = sortedBucket{bucket: b, latest: latestActivity(b)}
-	}
-	sort.SliceStable(wrapped, func(i, j int) bool {
+	sort.SliceStable(buckets, func(i, j int) bool {
 		if m.sort == SortDateAsc {
-			return wrapped[i].latest < wrapped[j].latest
+			return latestActivity(buckets[i]) < latestActivity(buckets[j])
 		}
-		return wrapped[i].latest > wrapped[j].latest
+		return latestActivity(buckets[i]) > latestActivity(buckets[j])
 	})
 
 	rows := make([]displayRow, 0, len(m.source))
-	for _, w := range wrapped {
-		rows = appendThreadRows(rows, w.bucket)
+	for _, bucket := range buckets {
+		rows = appendThreadRows(rows, bucket)
 	}
 	applyFoldState(rows, m.folded)
 	m.rows = rows
@@ -284,27 +282,23 @@ func appendThreadRows(rows []displayRow, bucket []mail.MessageInfo) []displayRow
 	return rows
 }
 
-// buildPrefix constructs the box-drawing prefix string for a row at
-// the given depth. ancestorLastFlags has one entry per ancestor level
-// above this row, indicating whether that ancestor was the last
-// sibling at its own level. isLast reports whether the current row is
-// the last sibling at its own level.
-//
-// For each ancestor: "   " if it was the last sibling, "│  " otherwise.
-// Then the current node's connector: "└─ " if last, "├─ " otherwise.
+// buildPrefix constructs the box-drawing prefix string for a row.
+// ancestorLastFlags has one entry per ancestor level above this row,
+// indicating whether that ancestor was the last sibling at its own
+// level. isLast reports whether the current row is the last sibling.
 func buildPrefix(ancestorLastFlags []bool, isLast bool) string {
 	var b strings.Builder
 	for _, last := range ancestorLastFlags {
 		if last {
-			b.WriteString("   ")
+			b.WriteString(mlThreadGap)
 		} else {
-			b.WriteString("│  ")
+			b.WriteString(mlThreadVert)
 		}
 	}
 	if isLast {
-		b.WriteString("└─ ")
+		b.WriteString(mlThreadElbow)
 	} else {
-		b.WriteString("├─ ")
+		b.WriteString(mlThreadTee)
 	}
 	return b.String()
 }
@@ -341,7 +335,7 @@ func (m *MessageList) SetSort(order SortOrder) {
 // ToggleFold flips the fold state of the thread the cursor is
 // currently inside. If the cursor is on a child row, the toggle still
 // operates on that child's thread root. After folding, the cursor
-// snaps to the root index so it doesn't land on a now-hidden row.
+// snaps to the nearest visible row so it doesn't land on a hidden one.
 func (m *MessageList) ToggleFold() {
 	if len(m.rows) == 0 {
 		return
@@ -353,10 +347,7 @@ func (m *MessageList) ToggleFold() {
 	rootUID := m.rows[rootIdx].msg.UID
 	m.folded[rootUID] = !m.folded[rootUID]
 	m.rebuild()
-	if m.selected >= len(m.rows) || m.rows[m.selected].hidden {
-		m.selected = m.indexOfUID(rootUID)
-	}
-	m.clampOffset()
+	m.snapToVisible()
 }
 
 // FoldAll collapses every thread root.
@@ -367,21 +358,31 @@ func (m *MessageList) FoldAll() {
 		}
 	}
 	m.rebuild()
-	if m.selected >= len(m.rows) || m.rows[m.selected].hidden {
-		for i := m.selected; i >= 0; i-- {
-			if !m.rows[i].hidden {
-				m.selected = i
-				break
-			}
-		}
-	}
-	m.clampOffset()
+	m.snapToVisible()
 }
 
 // UnfoldAll clears all fold state.
 func (m *MessageList) UnfoldAll() {
 	m.folded = map[mail.UID]bool{}
 	m.rebuild()
+	m.clampOffset()
+}
+
+// snapToVisible walks the cursor backwards to the nearest visible row
+// after a rebuild. Children always sit below their thread root in the
+// slice, so walking back from a hidden child lands on the root that
+// owns it. Re-clamps the viewport.
+func (m *MessageList) snapToVisible() {
+	if m.selected < len(m.rows) && !m.rows[m.selected].hidden {
+		m.clampOffset()
+		return
+	}
+	for i := m.selected; i >= 0; i-- {
+		if i < len(m.rows) && !m.rows[i].hidden {
+			m.selected = i
+			break
+		}
+	}
 	m.clampOffset()
 }
 
@@ -394,17 +395,6 @@ func (m MessageList) threadRootIndex(idx int) int {
 	}
 	for i := idx; i >= 0; i-- {
 		if m.rows[i].isThreadRoot {
-			return i
-		}
-	}
-	return -1
-}
-
-// indexOfUID returns the displayRow index of the message with the
-// given UID, or -1 if not found.
-func (m MessageList) indexOfUID(uid mail.UID) int {
-	for i, r := range m.rows {
-		if r.msg.UID == uid {
 			return i
 		}
 	}
@@ -431,8 +421,6 @@ func (m MessageList) SelectedMessage() (mail.MessageInfo, bool) {
 }
 
 // Count returns the number of source messages in the list.
-// (Use len(m.rows) when you need the displayRow count — the two
-// diverge once the build pipeline produces hidden rows.)
 func (m MessageList) Count() int { return len(m.source) }
 
 // moveBy shifts the cursor by delta visible rows, walking past any
