@@ -274,24 +274,6 @@ func TestSidebarLabelOverride(t *testing.T) {
 	assertNames(t, got, want)
 }
 
-func TestSidebarNestedIndent(t *testing.T) {
-	cases := []struct {
-		name  string
-		depth int
-	}{
-		{"Lists/golang", 1},
-		{"Projects/Acme/Planning", 2},
-		{"Projects/Acme/Planning/Q2", 3},
-		{"Projects/Acme/Planning/Q2/Week1", 3},
-		{"Inbox", 0},
-	}
-	for _, tc := range cases {
-		if got := folderDepth(tc.name); got != tc.depth {
-			t.Errorf("folderDepth(%q) = %d, want %d", tc.name, got, tc.depth)
-		}
-	}
-}
-
 func TestSidebarDisplayNormalizesCanonicals(t *testing.T) {
 	input := []mail.Folder{
 		{Name: "[Gmail]/Sent Mail"},

@@ -11,11 +11,9 @@ import (
 )
 
 // folderEntry holds a classified folder plus its rendered metadata.
-// depth is the nested-folder indent level, capped at 3.
 type folderEntry struct {
-	cf    mail.ClassifiedFolder
-	icon  string
-	depth int
+	cf   mail.ClassifiedFolder
+	icon string
 }
 
 // Sidebar renders the folder list with groups, selection, and unread badges.
@@ -152,8 +150,8 @@ func (s Sidebar) View() string {
 }
 
 // renderRow renders a single folder row with proper background layering.
-// Nested folders (depth > 0) get one extra space per depth level before
-// the icon. The selection indicator ┃ always sits in column 0.
+// The selection indicator ┃ always sits in column 0. All folders render
+// at the same indent regardless of nesting.
 func (s Sidebar) renderRow(idx int, entry folderEntry, bgStyle lipgloss.Style) string {
 	isSelected := idx == s.selected
 	hasUnread := entry.cf.Folder.Unseen > 0
@@ -170,7 +168,6 @@ func (s Sidebar) renderRow(idx int, entry folderEntry, bgStyle lipgloss.Style) s
 		textStyle = s.styles.SidebarUnread
 	}
 
-	indent := bgStyle.Render(strings.Repeat(" ", entry.depth))
 	icon := applyBg(textStyle, bgStyle).Render(entry.icon)
 	name := applyBg(textStyle, bgStyle).Render(entry.cf.DisplayName)
 
@@ -181,8 +178,8 @@ func (s Sidebar) renderRow(idx int, entry folderEntry, bgStyle lipgloss.Style) s
 		countWidth = lipgloss.Width(countStr)
 	}
 
-	// Layout: indicator(1) + sp(1) + indent(depth) + icon + sp×2 + name + gap + count + margin(1)
-	leftContent := indicator + bgStyle.Render(" ") + indent + icon + bgStyle.Render("  ") + name
+	// Layout: indicator(1) + sp(1) + icon + sp×2 + name + gap + count + margin(1)
+	leftContent := indicator + bgStyle.Render(" ") + icon + bgStyle.Render("  ") + name
 	leftWidth := lipgloss.Width(leftContent)
 
 	rightMargin := 1
@@ -202,9 +199,8 @@ func (s Sidebar) renderBlankLine() string {
 }
 
 // buildEntries applies UIConfig to the classified folders: drops hidden
-// folders, computes depth, resolves display labels, sorts each group
-// by rank then display name, and concatenates Primary + Disposal +
-// Custom in that order.
+// folders, resolves display labels, sorts each group by rank then display
+// name, and concatenates Primary + Disposal + Custom in that order.
 func buildEntries(classified []mail.ClassifiedFolder, uiCfg config.UIConfig) []folderEntry {
 	var primary, disposal, custom []folderEntry
 	for _, cf := range classified {
@@ -213,9 +209,8 @@ func buildEntries(classified []mail.ClassifiedFolder, uiCfg config.UIConfig) []f
 			continue
 		}
 		entry := folderEntry{
-			cf:    cf,
-			icon:  sidebarIcon(cf),
-			depth: folderDepth(cf.Folder.Name),
+			cf:   cf,
+			icon: sidebarIcon(cf),
 		}
 		if fc.Label != "" {
 			entry.cf.DisplayName = fc.Label
@@ -238,16 +233,6 @@ func buildEntries(classified []mail.ClassifiedFolder, uiCfg config.UIConfig) []f
 	out = append(out, disposal...)
 	out = append(out, custom...)
 	return out
-}
-
-// folderDepth returns the nested-folder indent depth for a folder name.
-// Counts the number of '/' characters in the name, capped at 3.
-func folderDepth(name string) int {
-	d := strings.Count(name, "/")
-	if d > 3 {
-		d = 3
-	}
-	return d
 }
 
 // canonicalDefaultRank is the implicit in-group sort key for each

@@ -16,9 +16,9 @@ import (
 // "2-cell" labels describe visual width, not lipgloss math.
 const (
 	mlSenderWidth = 22
-	mlDateWidth   = 12
-	// cursor + flag + sp + sender + sp×2 + subject-pad + sp×2 + date + sp
-	mlFixedWidth = 1 + 1 + 1 + mlSenderWidth + 2 + 2 + mlDateWidth + 1
+	mlDateWidth   = 18
+	// cursor + sp + flag + sp + sender + sp×2 + subject-pad + sp×2 + date + sp
+	mlFixedWidth = 1 + 1 + 1 + 1 + mlSenderWidth + 2 + 2 + mlDateWidth + 1
 )
 
 // Nerd Font glyphs used in the message list.
@@ -688,6 +688,7 @@ func (m MessageList) renderRow(idx int, bgStyle lipgloss.Style) string {
 	subject := prefixStyled + subjectStyled
 
 	line := cursor +
+		bgStyle.Render(" ") +
 		flag +
 		bgStyle.Render(" ") +
 		sender +

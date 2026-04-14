@@ -150,7 +150,7 @@ func (s SidebarSearch) renderPromptRow() string {
 	if s.state == SearchIdle {
 		icon := applyBg(s.styles.SearchIcon, s.styles.SidebarBg).Render("󰍉")
 		hint := applyBg(s.styles.SearchHint, s.styles.SidebarBg).Render(" / to search")
-		content := s.styles.SidebarBg.Render(" ") + icon + hint
+		content := s.styles.SidebarBg.Render("  ") + icon + hint
 		return fillRowToWidth(content, s.width, s.styles.SidebarBg)
 	}
 
@@ -168,7 +168,7 @@ func (s SidebarSearch) renderPromptRow() string {
 		prompt = applyBg(s.styles.SidebarAccount, s.styles.SidebarBg).Render(text)
 	}
 
-	content := s.styles.SidebarBg.Render(" ") + icon + s.styles.SidebarBg.Render(" ") + prompt
+	content := s.styles.SidebarBg.Render("  ") + icon + s.styles.SidebarBg.Render(" ") + prompt
 	return fillRowToWidth(content, s.width, s.styles.SidebarBg)
 }
 

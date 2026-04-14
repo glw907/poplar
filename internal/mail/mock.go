@@ -34,16 +34,16 @@ func NewMockBackend() *MockBackend {
 		},
 		msgs: []MessageInfo{
 			// Flat single-message threads: ThreadID == UID, no InReplyTo.
-			{UID: "1", ThreadID: "1", Subject: "Re: Project update for Q2 launch", From: "Alice Johnson", Date: "10:23 AM", Flags: 0},
-			{UID: "2", ThreadID: "2", Subject: "Quick question about the API", From: "Bob Smith", Date: "9:45 AM", Flags: 0},
-			{UID: "3", ThreadID: "3", Subject: "Lunch tomorrow?", From: "Carol White", Date: "9:12 AM", Flags: 0},
-			{UID: "4", ThreadID: "4", Subject: "Meeting notes from yesterday", From: "David Chen", Date: "Yesterday", Flags: FlagSeen},
-			{UID: "5", ThreadID: "5", Subject: "Invoice #2847 attached", From: "Billing Dept", Date: "Yesterday", Flags: FlagSeen | FlagFlagged},
-			{UID: "6", ThreadID: "6", Subject: "Re: Weekend hiking trip", From: "Emma Wilson", Date: "Yesterday", Flags: FlagSeen | FlagAnswered},
-			{UID: "7", ThreadID: "7", Subject: "Your subscription renewal", From: "Acme Cloud", Date: "Apr 8", Flags: FlagSeen},
-			{UID: "8", ThreadID: "8", Subject: "Code review: auth refactor PR #42", From: "GitHub", Date: "Apr 8", Flags: FlagSeen},
-			{UID: "9", ThreadID: "9", Subject: "New comment on your post", From: "Dev Community", Date: "Apr 7", Flags: FlagSeen},
-			{UID: "10", ThreadID: "10", Subject: "Flight confirmation: SFO → SEA", From: "Alaska Airlines", Date: "Apr 7", Flags: FlagSeen | FlagFlagged},
+			{UID: "1", ThreadID: "1", Subject: "Re: Project update for Q2 launch", From: "Alice Johnson", Date: "Today 10:23 AM", Flags: 0},
+			{UID: "2", ThreadID: "2", Subject: "Quick question about the API", From: "Bob Smith", Date: "Today 9:45 AM", Flags: 0},
+			{UID: "3", ThreadID: "3", Subject: "Lunch tomorrow?", From: "Carol White", Date: "Today 9:12 AM", Flags: 0},
+			{UID: "4", ThreadID: "4", Subject: "Meeting notes from yesterday", From: "David Chen", Date: "Yesterday 3:47 PM", Flags: FlagSeen},
+			{UID: "5", ThreadID: "5", Subject: "Invoice #2847 attached", From: "Billing Dept", Date: "Yesterday 11:32 AM", Flags: FlagSeen | FlagFlagged},
+			{UID: "6", ThreadID: "6", Subject: "Re: Weekend hiking trip", From: "Emma Wilson", Date: "Yesterday 8:15 AM", Flags: FlagSeen | FlagAnswered},
+			{UID: "7", ThreadID: "7", Subject: "Your subscription renewal", From: "Acme Cloud", Date: "Wed 4:22 PM", Flags: FlagSeen},
+			{UID: "8", ThreadID: "8", Subject: "Code review: auth refactor PR #42", From: "GitHub", Date: "Wed 9:30 AM", Flags: FlagSeen},
+			{UID: "9", ThreadID: "9", Subject: "New comment on your post", From: "Dev Community", Date: "Tue 3:45 PM", Flags: FlagSeen},
+			{UID: "10", ThreadID: "10", Subject: "Flight confirmation: SFO → SEA", From: "Alaska Airlines", Date: "Tue 10:15 AM", Flags: FlagSeen | FlagFlagged},
 
 			// Threaded conversation T1: branching shape (root + linear chain + sibling).
 			// Exercises the full ├─ │ └─ prefix vocabulary. First child unread so a

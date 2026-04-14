@@ -1,8 +1,17 @@
 ---
-title: Nested folders render flat with one-space indent
-status: accepted
+title: Nested folders render flat (reversed — see Superseded)
+status: superseded
 date: 2026-04-12  # Pass 2.5b-3.5 brainstorm
 ---
+
+## Superseded
+
+Reversed on 2026-04-13 after live verification. The one-space indent
+read as a misalignment bug rather than as a hierarchy hint. All
+folders now render at the same column; the `/` in the display name
+is the only affordance that a folder is nested. The context and
+decision below are retained for history.
+
 
 ## Context
 

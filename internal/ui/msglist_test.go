@@ -168,9 +168,9 @@ func TestMessageList(t *testing.T) {
 		if len(lines) == 0 {
 			t.Fatal("empty view")
 		}
-		// The date column is 12 cells wide; "2026-04-12 10:23" (16 chars)
-		// truncates to "2026-04-12 …". Verify the date prefix appears at the
-		// tail of the row (right-aligned, not in the middle).
+		// The date column is 18 cells wide; the fixture's 23-char date
+		// "2026-04-12 10:23:47 UTC" truncates. Verify the date prefix appears
+		// at the tail of the row (right-aligned, not in the middle).
 		first := strings.TrimRight(lines[0], " ")
 		if !strings.HasSuffix(first, "…") || !strings.Contains(first, "2026-04-12") {
 			t.Errorf("expected first row to end with truncated date, got tail: %q", first)
@@ -216,7 +216,7 @@ func TestMessageList(t *testing.T) {
 
 func mockMessages() []mail.MessageInfo {
 	return []mail.MessageInfo{
-		{UID: "1", ThreadID: "1", Subject: "Re: Project update for Q2 launch", From: "Alice Johnson", Date: "2026-04-12 10:23", Flags: 0},
+		{UID: "1", ThreadID: "1", Subject: "Re: Project update for Q2 launch", From: "Alice Johnson", Date: "2026-04-12 10:23:47 UTC", Flags: 0},
 		{UID: "2", ThreadID: "2", Subject: "Quick question about the API", From: "Bob Smith", Date: "2026-04-12 09:45", Flags: 0},
 		{UID: "3", ThreadID: "3", Subject: "Lunch tomorrow?", From: "Carol White", Date: "2026-04-12 09:12", Flags: 0},
 		{UID: "4", ThreadID: "4", Subject: "Meeting notes from yesterday", From: "David Chen", Date: "2026-04-11", Flags: mail.FlagSeen},

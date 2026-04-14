@@ -64,9 +64,9 @@ the ADR(s) that justify them.
   Disposal, Custom. Separated by blank lines. No group headers.
   Groups are permanent — user config only ranks folders within
   their group.
-- Nested folder names (containing `/`) get one extra leading space
-  of indent in the sidebar. Max depth 3. No tree, no
-  expand/collapse.
+- Nested folder names (containing `/`) render flat — no extra
+  indent vs. top-level folders. The `/` in the display name is
+  the only affordance. No tree, no expand/collapse.
 - Compose editor is pluggable behind an `Editor` interface. v1
   ships Catkin (native bubbletea editor, `catkin/` package, no
   poplar dependencies); v1.1 adds neovim via `--embed` RPC.
