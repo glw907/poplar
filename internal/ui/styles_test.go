@@ -41,3 +41,22 @@ func TestNewStyles(t *testing.T) {
 		})
 	}
 }
+
+func TestSearchStyles(t *testing.T) {
+	styles := NewStyles(theme.Nord)
+
+	checks := map[string]lipgloss.Style{
+		"SearchIcon":         styles.SearchIcon,
+		"SearchHint":         styles.SearchHint,
+		"SearchPrompt":       styles.SearchPrompt,
+		"SearchModeBadge":    styles.SearchModeBadge,
+		"SearchResultCount":  styles.SearchResultCount,
+		"SearchNoResults":    styles.SearchNoResults,
+		"MsgListPlaceholder": styles.MsgListPlaceholder,
+	}
+	for name, s := range checks {
+		if s.GetForeground() == nil {
+			t.Errorf("%s has no foreground color", name)
+		}
+	}
+}

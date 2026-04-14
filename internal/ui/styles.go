@@ -65,6 +65,15 @@ type Styles struct {
 	// Placeholder text
 	Dim lipgloss.Style
 
+	// Search shelf and search-related placeholder
+	SearchIcon         lipgloss.Style
+	SearchHint         lipgloss.Style
+	SearchPrompt       lipgloss.Style
+	SearchModeBadge    lipgloss.Style
+	SearchResultCount  lipgloss.Style
+	SearchNoResults    lipgloss.Style
+	MsgListPlaceholder lipgloss.Style
+
 	// Top line frame edge
 	TopLine   lipgloss.Style
 	ToastText lipgloss.Style
@@ -173,6 +182,21 @@ func NewStyles(t *theme.CompiledTheme) Styles {
 			Foreground(t.FgDim),
 
 		Dim: lipgloss.NewStyle().
+			Foreground(t.FgDim),
+
+		SearchIcon: lipgloss.NewStyle().
+			Foreground(t.FgDim),
+		SearchHint: lipgloss.NewStyle().
+			Foreground(t.FgDim),
+		SearchPrompt: lipgloss.NewStyle().
+			Foreground(t.FgBase),
+		SearchModeBadge: lipgloss.NewStyle().
+			Foreground(t.FgDim),
+		SearchResultCount: lipgloss.NewStyle().
+			Foreground(t.AccentTertiary),
+		SearchNoResults: lipgloss.NewStyle().
+			Foreground(t.ColorWarning),
+		MsgListPlaceholder: lipgloss.NewStyle().
 			Foreground(t.FgDim),
 
 		TopLine: lipgloss.NewStyle().
