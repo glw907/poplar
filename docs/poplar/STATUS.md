@@ -20,6 +20,7 @@ single-binary `poplar` repo landed 2026-04-12 (ADR 0058).
 | 2.5b-3.5 | Prototype: UI config + sidebar polish | done |
 | 2.5b-3.6 | Prototype: threading + fold | pending |
 | 2.5b-3.7 | Prototype: sidebar filter UI | pending |
+| 2.5b-train | Tooling: mailrender training capture system | pending |
 | 2.5b-4 | Prototype: message viewer | pending |
 | 2.5b-5 | Prototype: help popover | pending |
 | 2.5b-6 | Prototype: status/toast system | pending |
@@ -68,25 +69,22 @@ single-binary `poplar` repo landed 2026-04-12 (ADR 0058).
 > `docs/superpowers/plans/2026-04-12-poplar-threading.md`, then
 > implement. Pass-end ritual: invoke the `poplar-pass` skill.
 
-## Tooling queue (out-of-band)
+## Pass 2.5b-train details
 
-Cross-cutting subsystems built outside the pass sequence. These do
-not block any pass; build them when the queue position makes sense.
+Tooling pass — not a UX prototype. Slotted before 2.5b-4 because
+the viewer's `b` capture key reuses `internal/train.Save`, so
+building training first means zero rework when the viewer lands,
+and the fix-corpus loop is already triaging the 45 pre-migrated
+audit-output captures by the time viewer development starts
+surfacing new rendering bugs.
 
-- **Mailrender training capture system** — queued, not started.
-  - **Spec:** `docs/superpowers/specs/2026-04-12-mailrender-training-design.md`
-  - **Plan:** `docs/superpowers/plans/2026-04-13-mailrender-training.md`
-  - **Builds:** `internal/train/`, `internal/content/markdown.go`,
-    `cmd/poplar/train.go`, `.claude/skills/fix-corpus/` (directory
-    skill with normative reference), `docs/poplar/training.md`,
-    ADR 0059, plus updates to invariants/system-map/CLAUDE.md.
-  - **Logical slot:** between Pass 2.5b-3.7 (sidebar filter UI)
-    and Pass 2.5b-4 (message viewer). Building before the viewer
-    means the viewer's `b` key reuses `internal/train.Save` from
-    day one and the fix-corpus loop is already triaging the 45
-    pre-migrated audit-output captures by the time viewer
-    development starts surfacing new rendering bugs.
-  - **Dependencies:** `internal/filter`, `internal/content`,
-    `internal/mailworker/xdg` — all already shipped.
-  - **Build approach:** subagent-driven-development on the plan
-    above, ~26 tasks across 8 phases, fresh subagent per task.
+- **Spec:** `docs/superpowers/specs/2026-04-12-mailrender-training-design.md`
+- **Plan:** `docs/superpowers/plans/2026-04-13-mailrender-training.md`
+- **Builds:** `internal/train/`, `internal/content/markdown.go`,
+  `cmd/poplar/train.go`, `.claude/skills/fix-corpus/` (directory
+  skill with normative reference), `docs/poplar/training.md`,
+  ADR 0059, plus updates to invariants/system-map/CLAUDE.md.
+- **Dependencies:** `internal/filter`, `internal/content`,
+  `internal/mailworker/xdg` — all already shipped.
+- **Build approach:** subagent-driven-development on the plan
+  above, 26 tasks across 8 phases, fresh subagent per task.
