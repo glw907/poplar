@@ -169,8 +169,5 @@ func TestFooterThreadsGroup(t *testing.T) {
 		if !strings.Contains(out, "F fold all") {
 			t.Error("expected F fold all hint")
 		}
-		if !strings.Contains(out, "U unfold all") {
-			t.Error("expected U unfold all hint")
-		}
 	})
 }

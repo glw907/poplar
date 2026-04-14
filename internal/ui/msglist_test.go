@@ -383,7 +383,7 @@ func TestMessageListThreading(t *testing.T) {
 		}
 	})
 
-	t.Run("FoldAll and UnfoldAll", func(t *testing.T) {
+	t.Run("ToggleFoldAll flips between folded and unfolded", func(t *testing.T) {
 		msgs := []mail.MessageInfo{
 			{UID: "10", ThreadID: "T1", InReplyTo: "", From: "RootA", Date: "2026-04-05 10:00", Flags: mail.FlagSeen},
 			{UID: "11", ThreadID: "T1", InReplyTo: "10", From: "ReplyA", Date: "2026-04-05 11:00", Flags: mail.FlagSeen},
@@ -395,13 +395,33 @@ func TestMessageListThreading(t *testing.T) {
 		if got, want := visibleRowCount(ml), 5; got != want {
 			t.Fatalf("initial visible = %d, want %d", got, want)
 		}
-		ml.FoldAll()
+		ml.ToggleFoldAll() // any unfolded → fold all
 		if got, want := visibleRowCount(ml), 3; got != want {
-			t.Errorf("after FoldAll visible = %d, want %d", got, want)
+			t.Errorf("after first toggle visible = %d, want %d", got, want)
 		}
-		ml.UnfoldAll()
+		ml.ToggleFoldAll() // all folded → unfold all
 		if got, want := visibleRowCount(ml), 5; got != want {
-			t.Errorf("after UnfoldAll visible = %d, want %d", got, want)
+			t.Errorf("after second toggle visible = %d, want %d", got, want)
+		}
+	})
+
+	t.Run("ToggleFoldAll from mixed state folds everything first", func(t *testing.T) {
+		msgs := []mail.MessageInfo{
+			{UID: "10", ThreadID: "T1", InReplyTo: "", From: "RootA", Date: "2026-04-05 10:00", Flags: mail.FlagSeen},
+			{UID: "11", ThreadID: "T1", InReplyTo: "10", From: "ReplyA", Date: "2026-04-05 11:00", Flags: mail.FlagSeen},
+			{UID: "20", ThreadID: "T2", InReplyTo: "", From: "RootB", Date: "2026-04-06 10:00", Flags: mail.FlagSeen},
+			{UID: "21", ThreadID: "T2", InReplyTo: "20", From: "ReplyB", Date: "2026-04-06 11:00", Flags: mail.FlagSeen},
+		}
+		ml := NewMessageList(styles, msgs, 90, 20)
+		// Fold only T1 so the list is in a mixed state.
+		ml.ToggleFold()
+		if got, want := visibleRowCount(ml), 3; got != want {
+			t.Fatalf("after folding T1 visible = %d, want %d", got, want)
+		}
+		// Mixed state → toggle collapses everything.
+		ml.ToggleFoldAll()
+		if got, want := visibleRowCount(ml), 2; got != want {
+			t.Errorf("mixed → ToggleFoldAll visible = %d, want %d", got, want)
 		}
 	})
 
@@ -574,13 +594,13 @@ func TestMessageListWithMockBackend(t *testing.T) {
 		}
 	})
 
-	t.Run("FoldAll collapses the threaded conversation", func(t *testing.T) {
+	t.Run("ToggleFoldAll collapses the threaded conversation", func(t *testing.T) {
 		ml := NewMessageList(styles, msgs, 120, 30)
-		ml.FoldAll()
+		ml.ToggleFoldAll()
 		visible := visibleRowCount(ml)
 		// 10 single-message threads (unaffected) + 1 visible folded root = 11.
 		if visible != 11 {
-			t.Errorf("visible after FoldAll = %d, want 11", visible)
+			t.Errorf("visible after ToggleFoldAll = %d, want 11", visible)
 		}
 		var foundBadge bool
 		for _, r := range ml.rows {
@@ -592,7 +612,7 @@ func TestMessageListWithMockBackend(t *testing.T) {
 			}
 		}
 		if !foundBadge {
-			t.Error("never found T1 thread root after FoldAll")
+			t.Error("never found T1 thread root after ToggleFoldAll")
 		}
 	})
 }
@@ -785,7 +805,7 @@ func TestMessageListFilterFoldShadow(t *testing.T) {
 
 	t.Run("filter expands folded thread when any message matches", func(t *testing.T) {
 		ml := NewMessageList(styles, msgs, 90, 20)
-		ml.FoldAll()
+		ml.ToggleFoldAll()
 		visibleBefore := 0
 		for _, r := range ml.rows {
 			if !r.hidden {
@@ -810,7 +830,7 @@ func TestMessageListFilterFoldShadow(t *testing.T) {
 
 	t.Run("clear filter restores saved fold state", func(t *testing.T) {
 		ml := NewMessageList(styles, msgs, 90, 20)
-		ml.FoldAll()
+		ml.ToggleFoldAll()
 		ml.SetFilter("server", SearchModeName)
 		ml.ClearFilter()
 

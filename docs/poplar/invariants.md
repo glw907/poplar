@@ -133,8 +133,11 @@ the ADR(s) that justify them.
 - `Space` toggles fold on the thread under the cursor (operates
   on the thread root if the cursor is on a child; cursor snaps
   to the nearest visible row after fold). Inside visual-select
-  mode (Pass 6) `Space` toggles row selection instead. `F` folds
-  every multi-message thread; `U` unfolds all.
+  mode (Pass 6) `Space` toggles row selection instead. `F` is
+  the bulk counterpart: it folds every multi-message thread if
+  any is currently unfolded, otherwise unfolds everything. Mixed
+  state collapses on first press — reach fully-unfolded with a
+  second press.
 - Message list encodes read state by brightness (`FgBright` bold
   for unread, `FgDim` for read). Hue is reserved for the cursor
   (`AccentPrimary`) and for the unread+flagged case

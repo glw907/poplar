@@ -182,12 +182,7 @@ func (m AccountTab) handleKey(msg tea.KeyMsg) (AccountTab, tea.Cmd) {
 		if m.sidebarSearch.State() == SearchActive {
 			return m, nil
 		}
-		m.msglist.FoldAll()
-	case "U":
-		if m.sidebarSearch.State() == SearchActive {
-			return m, nil
-		}
-		m.msglist.UnfoldAll()
+		m.msglist.ToggleFoldAll()
 	}
 	return m, nil
 }

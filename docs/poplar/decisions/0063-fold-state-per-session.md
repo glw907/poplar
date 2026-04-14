@@ -24,11 +24,14 @@ expects to see the conversation contents.
 `MessageList` holds `folded map[mail.UID]bool` keyed by thread
 root UID. `SetMessages` resets the map (alongside cursor and
 viewport). Default state is expanded — only roots explicitly
-toggled by `Space`, `F`, or `U` appear in the map.
+toggled by `Space` or `F` appear in the map.
 
-`F` (fold all) sets every multi-message-thread root to
-`folded[UID] = true`. `U` (unfold all) replaces the map with an
-empty one. `Space` toggles a single root.
+`Space` toggles a single thread root. `F` (`ToggleFoldAll`) is
+the bulk counterpart: if any multi-message thread is currently
+unfolded it sets every root to `folded[UID] = true`, otherwise
+it replaces the map with an empty one. Mixed state collapses
+first — matches the common "reset the noise, then open what I'm
+reading" flow.
 
 `AccountTab.folderLoadedMsg` calls `m.msglist.SetMessages(...)`
 for every folder load, so the reset is automatic — no special
@@ -41,8 +44,9 @@ case in the AccountTab.
   This is a deliberate trade for simplicity; if it becomes
   annoying we revisit with per-folder state.
 - The `folded` map can grow to at most `T` entries (one per
-  thread root in the current folder). `UnfoldAll` releases the
-  whole map; switching folders does the same via `SetMessages`.
+  thread root in the current folder). The unfold branch of
+  `ToggleFoldAll` releases the whole map; switching folders does
+  the same via `SetMessages`.
 - No serialization layer for fold state to maintain. No
   migration path to worry about when `UID` semantics change
   across backends.

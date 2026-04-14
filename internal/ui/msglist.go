@@ -490,22 +490,30 @@ func (m *MessageList) ToggleFold() {
 	m.snapToVisible()
 }
 
-// FoldAll collapses every thread root.
-func (m *MessageList) FoldAll() {
+// ToggleFoldAll is the bulk toggle counterpart to ToggleFold: if any
+// multi-message thread is currently unfolded it folds every thread,
+// otherwise it unfolds everything. The "mixed state → fold" direction
+// matches what users usually want from a bulk reset (collapse the
+// noise, then open the specific thread you're reading).
+func (m *MessageList) ToggleFoldAll() {
+	anyUnfolded := false
 	for _, r := range m.rows {
-		if r.isThreadRoot && r.threadSize > 1 {
-			m.folded[r.msg.UID] = true
+		if r.isThreadRoot && r.threadSize > 1 && !m.folded[r.msg.UID] {
+			anyUnfolded = true
+			break
 		}
+	}
+	if anyUnfolded {
+		for _, r := range m.rows {
+			if r.isThreadRoot && r.threadSize > 1 {
+				m.folded[r.msg.UID] = true
+			}
+		}
+	} else {
+		m.folded = map[mail.UID]bool{}
 	}
 	m.rebuild()
 	m.snapToVisible()
-}
-
-// UnfoldAll clears all fold state.
-func (m *MessageList) UnfoldAll() {
-	m.folded = map[mail.UID]bool{}
-	m.rebuild()
-	m.clampOffset()
 }
 
 // snapToVisible walks the cursor backwards to the nearest visible row
