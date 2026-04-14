@@ -77,11 +77,22 @@ the ADR(s) that justify them.
   prefix walk. A non-threaded message is a thread of size 1 with
   `ThreadID == UID` and `InReplyTo == ""`.
 - `mail.MessageInfo` carries both `Date string` and
-  `SentAt time.Time`. `Date` is the pre-rendered display string the
-  UI shows verbatim; `SentAt` is the authoritative instant used for
-  every sort comparison. Backends populate both. The UI sort helper
-  `lessMessage` falls back to `Date` lex comparison only for legacy
-  fixtures with a zero `SentAt`.
+  `SentAt time.Time`. `SentAt` is the authoritative instant — used
+  for every sort comparison and for rendering the date column.
+  `Date` is a legacy wire field kept only as a display fallback for
+  test fixtures that predate `SentAt`; real workers must populate
+  `SentAt`. The UI sort helper `lessMessage` falls back to `Date`
+  lex comparison only when `SentAt` is zero on both operands.
+- Message list date column formatting lives in
+  `internal/ui/date_format.go` as `formatRelativeDate(t, now)`.
+  Same calendar day as `now` → 12-hour time (e.g. `10:23 AM`).
+  Any other day → `Mon 2006-01-02` (3-letter weekday + ISO date).
+  Zero time → empty string. Both the same-day check and the
+  returned string are in `now`'s location. `MessageList` captures
+  a clock snapshot into its `now` field at construction and on
+  every `SetMessages`, and `rebuild` precomputes the display
+  string into each `displayRow.dateText` so the render path does
+  no I/O and no per-frame formatting.
 - `MessageList` owns thread grouping and fold state. It holds
   `source []MessageInfo` (the raw backend payload) alongside a
   derived `rows []displayRow` rebuilt by a group→sort→flatten

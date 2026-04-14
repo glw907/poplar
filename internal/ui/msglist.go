@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"sort"
 	"strings"
+	"time"
 
 	"github.com/charmbracelet/lipgloss"
 	"github.com/glw907/poplar/internal/mail"
@@ -16,7 +17,7 @@ import (
 // "2-cell" labels describe visual width, not lipgloss math.
 const (
 	mlSenderWidth = 22
-	mlDateWidth   = 18
+	mlDateWidth   = 14
 	// cursor + sp + flag + sp×2 + sender + sp×2 + subject-pad + sp×2 + date + sp
 	mlFixedWidth = 1 + 1 + 1 + 2 + mlSenderWidth + 2 + 2 + mlDateWidth + 1
 )
@@ -58,6 +59,7 @@ const (
 type displayRow struct {
 	msg          mail.MessageInfo
 	prefix       string // "", "├─ ", "└─ ", "│  └─ ", or "[N] " for a folded root
+	dateText     string // pre-rendered date column; computed in rebuild
 	isThreadRoot bool
 	threadSize   int   // set on roots only; 1 for unthreaded
 	hidden       bool  // true when collapsed under a folded root
@@ -81,6 +83,11 @@ type MessageList struct {
 	styles          Styles
 	width           int
 	height          int
+	// now is the clock snapshot fed into displayDate during rebuild.
+	// Captured at construction and refreshed on SetMessages so View
+	// never has to call time.Now() itself (keeps I/O out of the
+	// render path). Tests assign directly to freeze the clock.
+	now             time.Time
 	filter          searchFilter
 	preSearchCursor int
 	savedByFilter   bool
@@ -102,6 +109,7 @@ func NewMessageList(styles Styles, msgs []mail.MessageInfo, width, height int) M
 		height: height,
 		folded: map[mail.UID]bool{},
 		sort:   SortDateDesc,
+		now:    time.Now(),
 	}
 	m.SetMessages(msgs)
 	return m
@@ -109,6 +117,8 @@ func NewMessageList(styles Styles, msgs []mail.MessageInfo, width, height int) M
 
 // SetMessages replaces the source slice and rebuilds the displayRow
 // list. Resets fold state, cursor, viewport, and any active filter.
+// Also refreshes the clock snapshot so newly-delivered messages get
+// the same-day relative formatting.
 func (m *MessageList) SetMessages(msgs []mail.MessageInfo) {
 	m.source = msgs
 	m.folded = map[mail.UID]bool{}
@@ -117,6 +127,7 @@ func (m *MessageList) SetMessages(msgs []mail.MessageInfo) {
 	m.filter = searchFilter{}
 	m.savedByFilter = false
 	m.preSearchCursor = 0
+	m.now = time.Now()
 	m.rebuild()
 }
 
@@ -167,6 +178,9 @@ func (m *MessageList) rebuild() {
 	}
 	if m.filter.query == "" {
 		applyFoldState(rows, m.folded)
+	}
+	for i := range rows {
+		rows[i].dateText = displayDate(rows[i].msg, m.now)
 	}
 	m.rows = rows
 }
@@ -700,7 +714,7 @@ func (m MessageList) renderRow(idx int, bgStyle lipgloss.Style) string {
 	senderText := padRight(truncateCells(msg.From, mlSenderWidth), mlSenderWidth)
 	sender := applyBg(senderStyle, bgStyle).Render(senderText)
 
-	dateText := padLeft(truncateCells(msg.Date, mlDateWidth), mlDateWidth)
+	dateText := padLeft(truncateCells(row.dateText, mlDateWidth), mlDateWidth)
 	date := applyBg(m.styles.MsgListDate, bgStyle).Render(dateText)
 
 	// Subject column: prefix (in MsgListThreadPrefix style) followed by
