@@ -22,7 +22,8 @@ func TestFooterView(t *testing.T) {
 	t.Run("account context has compressed nav group", func(t *testing.T) {
 		f := NewFooter(styles)
 		f = f.SetContext(AccountContext)
-		result := stripANSI(f.View(160))
+		// Full account footer is ~183 chars wide; use 190 to ensure nav survives.
+		result := stripANSI(f.View(190))
 		if !strings.Contains(result, "j/k/J/K nav") {
 			t.Error("missing j/k/J/K nav")
 		}
@@ -152,6 +153,24 @@ func TestFooterView(t *testing.T) {
 		}
 		if !strings.Contains(result, "Tab links") {
 			t.Error("viewer affordances should survive at width 60")
+		}
+	})
+}
+
+func TestFooterThreadsGroup(t *testing.T) {
+	styles := NewStyles(theme.Nord)
+	f := NewFooter(styles)
+
+	t.Run("renders Threads group at full width", func(t *testing.T) {
+		out := stripANSI(f.View(200))
+		if !strings.Contains(out, "␣ fold") {
+			t.Error("expected ␣ fold hint")
+		}
+		if !strings.Contains(out, "F fold all") {
+			t.Error("expected F fold all hint")
+		}
+		if !strings.Contains(out, "U unfold all") {
+			t.Error("expected U unfold all hint")
 		}
 	})
 }

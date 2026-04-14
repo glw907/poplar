@@ -52,7 +52,8 @@ var (
 // Drop order (highest rank first):
 //   - nav entries (10, 9) — vim/arrow users don't need the hint
 //   - v select (8), n/N results (7) — niche modes, discoverable via help
-//   - . read (5), s star (4), f fwd (3), / find (3) — secondary actions
+//   - F/U fold-all (5), . read (5), s star (4), ␣ fold (4),
+//     f fwd (3), / find (3) — secondary actions
 //   - r/R reply (2), c compose (2) — primary compose actions
 //   - d del (1), a archive (1) — primary triage
 //   - ? help (0), q quit (0) — always kept
@@ -68,6 +69,11 @@ func accountFooterGroups() [][]footerHint {
 			hint("/", "find", 3),
 			hint("n/N", "results", 7),
 			hint("v", "select", 8),
+		},
+		{
+			hint("␣", "fold", 4),
+			hint("F", "fold all", 5),
+			hint("U", "unfold all", 5),
 		},
 		{
 			hint("?", "help", 0),
