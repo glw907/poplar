@@ -17,8 +17,8 @@ import (
 const (
 	mlSenderWidth = 22
 	mlDateWidth   = 18
-	// cursor + sp + flag + sp + sender + sp×2 + subject-pad + sp×2 + date + sp
-	mlFixedWidth = 1 + 1 + 1 + 1 + mlSenderWidth + 2 + 2 + mlDateWidth + 1
+	// cursor + sp + flag + sp×2 + sender + sp×2 + subject-pad + sp×2 + date + sp
+	mlFixedWidth = 1 + 1 + 1 + 2 + mlSenderWidth + 2 + 2 + mlDateWidth + 1
 )
 
 // Nerd Font glyphs used in the message list.
@@ -140,12 +140,26 @@ func (m *MessageList) rebuild() {
 	} else {
 		m.filterResults = 0
 	}
-	sort.SliceStable(buckets, func(i, j int) bool {
+	// Precompute each bucket's latest-activity message so the
+	// comparator runs in O(1); pairing with the bucket keeps the
+	// memoized value aligned across the in-place sort's swaps.
+	type bucketSort struct {
+		bucket []mail.MessageInfo
+		latest mail.MessageInfo
+	}
+	pairs := make([]bucketSort, len(buckets))
+	for i, b := range buckets {
+		pairs[i] = bucketSort{bucket: b, latest: latestActivity(b)}
+	}
+	sort.SliceStable(pairs, func(i, j int) bool {
 		if m.sort == SortDateAsc {
-			return latestActivity(buckets[i]) < latestActivity(buckets[j])
+			return lessMessage(pairs[i].latest, pairs[j].latest)
 		}
-		return latestActivity(buckets[i]) > latestActivity(buckets[j])
+		return lessMessage(pairs[j].latest, pairs[i].latest)
 	})
+	for i, p := range pairs {
+		buckets[i] = p.bucket
+	}
 
 	rows := make([]displayRow, 0, len(m.source))
 	for _, bucket := range buckets {
@@ -219,16 +233,11 @@ func matchMessage(msg mail.MessageInfo, lowerQuery string, mode SearchMode) bool
 
 // pickRoot returns the index within bucket of the message that should
 // be treated as the thread root. Preference: the message with empty
-// InReplyTo. Fallback: the earliest message by date string. The
-// fallback handles broken parent chains (message references a parent
-// that wasn't fetched) without crashing — the synthetic root and any
-// other top-level orphans become depth-1 children in the renderer.
-//
-// Date comparison uses lexicographic order on the wire-string format,
-// which is wrong in general — Pass 3 introduces real time.Time on
-// MessageInfo, at which point this becomes a proper time comparison.
-// Until then, mock data uses identical date strings so the fallback
-// is deterministic-by-input-order, which is fine for prototype.
+// InReplyTo. Fallback: the earliest message by Sent time (or Date lex
+// for legacy fixtures without a Sent time). The fallback handles
+// broken parent chains (message references a parent that wasn't
+// fetched) without crashing — the synthetic root and any other
+// top-level orphans become depth-1 children in the renderer.
 func pickRoot(bucket []mail.MessageInfo) int {
 	for i, m := range bucket {
 		if m.InReplyTo == "" {
@@ -237,26 +246,45 @@ func pickRoot(bucket []mail.MessageInfo) int {
 	}
 	earliest := 0
 	for i, m := range bucket {
-		if m.Date < bucket[earliest].Date {
+		if lessMessage(m, bucket[earliest]) {
 			earliest = i
 		}
 	}
 	return earliest
 }
 
-// latestActivity returns the maximum Date string across all messages
-// in a thread bucket. Used as the inter-thread sort key in step 5 of
-// the build pipeline. Empty bucket returns "" — caller should not
-// invoke on an empty bucket but the safe answer keeps the function
-// total.
-func latestActivity(bucket []mail.MessageInfo) string {
-	latest := ""
+// latestActivity returns the message representing the thread's most
+// recent activity. Used as the inter-thread sort key in step 5 of the
+// build pipeline. Empty bucket returns a zero-value MessageInfo — a
+// caller should not invoke on an empty bucket but the total-function
+// return keeps downstream comparisons safe.
+func latestActivity(bucket []mail.MessageInfo) mail.MessageInfo {
+	var latest mail.MessageInfo
 	for _, m := range bucket {
-		if m.Date > latest {
-			latest = m.Date
+		if lessMessage(latest, m) {
+			latest = m
 		}
 	}
 	return latest
+}
+
+// lessMessage returns true if a is older than b. Uses SentAt when
+// both messages carry a non-zero SentAt; falls back to lexicographic
+// comparison of the display Date for legacy fixtures that leave
+// SentAt unset. Mixed cases (one has SentAt, one doesn't) sort the
+// zero-SentAt message as the older of the pair — arbitrary but
+// deterministic; real workers always populate SentAt so this branch
+// only fires for older unit-test fixtures.
+func lessMessage(a, b mail.MessageInfo) bool {
+	aZero := a.SentAt.IsZero()
+	bZero := b.SentAt.IsZero()
+	if !aZero && !bZero {
+		return a.SentAt.Before(b.SentAt)
+	}
+	if aZero && bZero {
+		return a.Date < b.Date
+	}
+	return aZero
 }
 
 // threadNode is a transient tree node used during prefix computation.
@@ -304,7 +332,7 @@ func appendThreadRows(rows []displayRow, bucket []mail.MessageInfo) []displayRow
 	var sortChildren func(n *threadNode)
 	sortChildren = func(n *threadNode) {
 		sort.SliceStable(n.children, func(i, j int) bool {
-			return n.children[i].msg.Date < n.children[j].msg.Date
+			return lessMessage(n.children[i].msg, n.children[j].msg)
 		})
 		for _, c := range n.children {
 			sortChildren(c)
@@ -690,7 +718,7 @@ func (m MessageList) renderRow(idx int, bgStyle lipgloss.Style) string {
 	line := cursor +
 		bgStyle.Render(" ") +
 		flag +
-		bgStyle.Render(" ") +
+		bgStyle.Render("  ") +
 		sender +
 		bgStyle.Render("  ") +
 		subject +

@@ -291,7 +291,7 @@ func TestMessageListThreading(t *testing.T) {
 			{UID: "11", ThreadID: "T1", Date: "Apr 5"},
 			{UID: "12", ThreadID: "T1", Date: "Apr 3"},
 		}
-		if got, want := latestActivity(bucket), "Apr 5"; got != want {
+		if got, want := latestActivity(bucket).Date, "Apr 5"; got != want {
 			t.Errorf("latestActivity = %q, want %q", got, want)
 		}
 	})

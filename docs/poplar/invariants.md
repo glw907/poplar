@@ -76,6 +76,12 @@ the ADR(s) that justify them.
   wire. Depth is not a wire field — the UI derives it during the
   prefix walk. A non-threaded message is a thread of size 1 with
   `ThreadID == UID` and `InReplyTo == ""`.
+- `mail.MessageInfo` carries both `Date string` and
+  `SentAt time.Time`. `Date` is the pre-rendered display string the
+  UI shows verbatim; `SentAt` is the authoritative instant used for
+  every sort comparison. Backends populate both. The UI sort helper
+  `lessMessage` falls back to `Date` lex comparison only for legacy
+  fixtures with a zero `SentAt`.
 - `MessageList` owns thread grouping and fold state. It holds
   `source []MessageInfo` (the raw backend payload) alongside a
   derived `rows []displayRow` rebuilt by a group→sort→flatten

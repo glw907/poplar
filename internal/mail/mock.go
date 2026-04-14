@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"strings"
+	"time"
 )
 
 // MockBackend implements Backend with hardcoded data.
@@ -18,6 +19,9 @@ type MockBackend struct {
 
 // NewMockBackend creates a MockBackend with realistic sample data.
 func NewMockBackend() *MockBackend {
+	at := func(month time.Month, day, hour, min int) time.Time {
+		return time.Date(2026, month, day, hour, min, 0, 0, time.UTC)
+	}
 	return &MockBackend{
 		name: "geoff@907.life",
 		folders: []Folder{
@@ -34,24 +38,24 @@ func NewMockBackend() *MockBackend {
 		},
 		msgs: []MessageInfo{
 			// Flat single-message threads: ThreadID == UID, no InReplyTo.
-			{UID: "1", ThreadID: "1", Subject: "Re: Project update for Q2 launch", From: "Alice Johnson", Date: "Today 10:23 AM", Flags: 0},
-			{UID: "2", ThreadID: "2", Subject: "Quick question about the API", From: "Bob Smith", Date: "Today 9:45 AM", Flags: 0},
-			{UID: "3", ThreadID: "3", Subject: "Lunch tomorrow?", From: "Carol White", Date: "Today 9:12 AM", Flags: 0},
-			{UID: "4", ThreadID: "4", Subject: "Meeting notes from yesterday", From: "David Chen", Date: "Yesterday 3:47 PM", Flags: FlagSeen},
-			{UID: "5", ThreadID: "5", Subject: "Invoice #2847 attached", From: "Billing Dept", Date: "Yesterday 11:32 AM", Flags: FlagSeen | FlagFlagged},
-			{UID: "6", ThreadID: "6", Subject: "Re: Weekend hiking trip", From: "Emma Wilson", Date: "Yesterday 8:15 AM", Flags: FlagSeen | FlagAnswered},
-			{UID: "7", ThreadID: "7", Subject: "Your subscription renewal", From: "Acme Cloud", Date: "Wed 4:22 PM", Flags: FlagSeen},
-			{UID: "8", ThreadID: "8", Subject: "Code review: auth refactor PR #42", From: "GitHub", Date: "Wed 9:30 AM", Flags: FlagSeen},
-			{UID: "9", ThreadID: "9", Subject: "New comment on your post", From: "Dev Community", Date: "Tue 3:45 PM", Flags: FlagSeen},
-			{UID: "10", ThreadID: "10", Subject: "Flight confirmation: SFO → SEA", From: "Alaska Airlines", Date: "Tue 10:15 AM", Flags: FlagSeen | FlagFlagged},
+			{UID: "1", ThreadID: "1", Subject: "Re: Project update for Q2 launch", From: "Alice Johnson", Date: "10:23 AM", SentAt: at(time.April, 13, 10, 23), Flags: 0},
+			{UID: "2", ThreadID: "2", Subject: "Quick question about the API", From: "Bob Smith", Date: "9:45 AM", SentAt: at(time.April, 13, 9, 45), Flags: 0},
+			{UID: "3", ThreadID: "3", Subject: "Lunch tomorrow?", From: "Carol White", Date: "9:12 AM", SentAt: at(time.April, 13, 9, 12), Flags: 0},
+			{UID: "4", ThreadID: "4", Subject: "Meeting notes from yesterday", From: "David Chen", Date: "Yesterday", SentAt: at(time.April, 12, 15, 47), Flags: FlagSeen},
+			{UID: "5", ThreadID: "5", Subject: "Invoice #2847 attached", From: "Billing Dept", Date: "Yesterday", SentAt: at(time.April, 12, 11, 32), Flags: FlagSeen | FlagFlagged},
+			{UID: "6", ThreadID: "6", Subject: "Re: Weekend hiking trip", From: "Emma Wilson", Date: "Yesterday", SentAt: at(time.April, 12, 8, 15), Flags: FlagSeen | FlagAnswered},
+			{UID: "7", ThreadID: "7", Subject: "Your subscription renewal", From: "Acme Cloud", Date: "Wednesday", SentAt: at(time.April, 8, 16, 22), Flags: FlagSeen},
+			{UID: "8", ThreadID: "8", Subject: "Code review: auth refactor PR #42", From: "GitHub", Date: "Wednesday", SentAt: at(time.April, 8, 9, 30), Flags: FlagSeen},
+			{UID: "9", ThreadID: "9", Subject: "New comment on your post", From: "Dev Community", Date: "Tuesday", SentAt: at(time.April, 7, 15, 45), Flags: FlagSeen},
+			{UID: "10", ThreadID: "10", Subject: "Flight confirmation: SFO → SEA", From: "Alaska Airlines", Date: "Tuesday", SentAt: at(time.April, 7, 10, 15), Flags: FlagSeen | FlagFlagged},
 
 			// Threaded conversation T1: branching shape (root + linear chain + sibling).
 			// Exercises the full ├─ │ └─ prefix vocabulary. First child unread so a
 			// folded thread can still carry "contains unread" status.
-			{UID: "20", ThreadID: "T1", InReplyTo: "", Subject: "Server migration plan", From: "Frank Lee", Date: "Apr 5", Flags: FlagSeen | FlagAnswered},
-			{UID: "21", ThreadID: "T1", InReplyTo: "20", Subject: "Re: Server migration plan", From: "Grace Kim", Date: "Apr 5", Flags: 0},
-			{UID: "22", ThreadID: "T1", InReplyTo: "21", Subject: "Re: Server migration plan", From: "Frank Lee", Date: "Apr 5", Flags: FlagSeen},
-			{UID: "23", ThreadID: "T1", InReplyTo: "20", Subject: "Re: Server migration plan", From: "Henry Park", Date: "Apr 5", Flags: FlagSeen},
+			{UID: "20", ThreadID: "T1", InReplyTo: "", Subject: "Server migration plan", From: "Frank Lee", Date: "April  5", SentAt: at(time.April, 5, 9, 0), Flags: FlagSeen | FlagAnswered},
+			{UID: "21", ThreadID: "T1", InReplyTo: "20", Subject: "Re: Server migration plan", From: "Grace Kim", Date: "April  5", SentAt: at(time.April, 5, 11, 30), Flags: 0},
+			{UID: "22", ThreadID: "T1", InReplyTo: "21", Subject: "Re: Server migration plan", From: "Frank Lee", Date: "April  5", SentAt: at(time.April, 5, 14, 15), Flags: FlagSeen},
+			{UID: "23", ThreadID: "T1", InReplyTo: "20", Subject: "Re: Server migration plan", From: "Henry Park", Date: "April  5", SentAt: at(time.April, 5, 16, 45), Flags: FlagSeen},
 		},
 		updates: make(chan Update),
 	}

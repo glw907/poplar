@@ -3,6 +3,7 @@ package mail
 import (
 	"context"
 	"io"
+	"time"
 )
 
 // SearchCriteria defines message search parameters.
@@ -55,9 +56,14 @@ type MessageInfo struct {
 	UID     UID
 	Subject string
 	From    string
-	Date    string
-	Flags   Flag
-	Size    uint32
+	// Date is the pre-rendered display string the UI shows verbatim.
+	// SentAt is the authoritative instant for sorting; workers fill
+	// both, and UI sort comparisons use SentAt (falling back to Date
+	// lex when SentAt is zero, for legacy fixtures).
+	Date   string
+	SentAt time.Time
+	Flags  Flag
+	Size   uint32
 
 	ThreadID  UID
 	InReplyTo UID
