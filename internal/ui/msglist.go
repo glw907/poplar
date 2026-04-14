@@ -72,15 +72,26 @@ type displayRow struct {
 // The source slice is preserved alongside a derived []displayRow so
 // fold mutations re-flatten without a backend refetch.
 type MessageList struct {
-	source   []mail.MessageInfo
-	rows     []displayRow
-	folded   map[mail.UID]bool
-	sort     SortOrder
-	selected int
-	offset   int
-	styles   Styles
-	width    int
-	height   int
+	source          []mail.MessageInfo
+	rows            []displayRow
+	folded          map[mail.UID]bool
+	sort            SortOrder
+	selected        int
+	offset          int
+	styles          Styles
+	width           int
+	height          int
+	filter          searchFilter
+	preSearchCursor int
+	savedByFilter   bool
+	filterResults   int
+}
+
+// searchFilter holds the active filter's query and mode. The zero
+// value (empty query, SearchModeName) means "no filter."
+type searchFilter struct {
+	query string
+	mode  SearchMode
 }
 
 // NewMessageList creates a MessageList with the given messages and size.
@@ -97,12 +108,15 @@ func NewMessageList(styles Styles, msgs []mail.MessageInfo, width, height int) M
 }
 
 // SetMessages replaces the source slice and rebuilds the displayRow
-// list. Resets fold state, cursor, and viewport.
+// list. Resets fold state, cursor, viewport, and any active filter.
 func (m *MessageList) SetMessages(msgs []mail.MessageInfo) {
 	m.source = msgs
 	m.folded = map[mail.UID]bool{}
 	m.selected = 0
 	m.offset = 0
+	m.filter = searchFilter{}
+	m.savedByFilter = false
+	m.preSearchCursor = 0
 	m.rebuild()
 }
 
@@ -120,6 +134,12 @@ func (m *MessageList) SetMessages(msgs []mail.MessageInfo) {
 //  5. Apply fold state.
 func (m *MessageList) rebuild() {
 	buckets := bucketByThreadID(m.source)
+	buckets = m.filterBuckets(buckets)
+	if m.filter.query != "" {
+		m.filterResults = len(buckets)
+	} else {
+		m.filterResults = 0
+	}
 	sort.SliceStable(buckets, func(i, j int) bool {
 		if m.sort == SortDateAsc {
 			return latestActivity(buckets[i]) < latestActivity(buckets[j])
@@ -131,7 +151,9 @@ func (m *MessageList) rebuild() {
 	for _, bucket := range buckets {
 		rows = appendThreadRows(rows, bucket)
 	}
-	applyFoldState(rows, m.folded)
+	if m.filter.query == "" {
+		applyFoldState(rows, m.folded)
+	}
 	m.rows = rows
 }
 
@@ -156,6 +178,49 @@ func bucketByThreadID(msgs []mail.MessageInfo) [][]mail.MessageInfo {
 		buckets[idx] = append(buckets[idx], m)
 	}
 	return buckets
+}
+
+// filterBuckets is the filter step of the build pipeline. When the
+// filter query is empty, it returns buckets unchanged. When non-empty,
+// it keeps any bucket containing at least one matching message — the
+// thread-level predicate from ADR 0064.
+func (m *MessageList) filterBuckets(buckets [][]mail.MessageInfo) [][]mail.MessageInfo {
+	if m.filter.query == "" {
+		return buckets
+	}
+	q := strings.ToLower(m.filter.query)
+	out := buckets[:0]
+	for _, bucket := range buckets {
+		for _, msg := range bucket {
+			if matchMessage(msg, q, m.filter.mode) {
+				out = append(out, bucket)
+				break
+			}
+		}
+	}
+	return out
+}
+
+// matchMessage tests one message against a pre-lowercased query under
+// the given mode. [name] matches subject + sender; [all] additionally
+// matches the date text.
+func matchMessage(msg mail.MessageInfo, lowerQuery string, mode SearchMode) bool {
+	if containsFold(msg.Subject, lowerQuery) {
+		return true
+	}
+	if containsFold(msg.From, lowerQuery) {
+		return true
+	}
+	if mode == SearchModeAll && containsFold(msg.Date, lowerQuery) {
+		return true
+	}
+	return false
+}
+
+// containsFold tests whether s (any case) contains lowerNeedle
+// (already lowercased by the caller).
+func containsFold(s, lowerNeedle string) bool {
+	return strings.Contains(strings.ToLower(s), lowerNeedle)
 }
 
 // pickRoot returns the index within bucket of the message that should
@@ -322,6 +387,45 @@ func applyFoldState(rows []displayRow, folded map[mail.UID]bool) {
 			rows[j].hidden = true
 		}
 	}
+}
+
+// SetFilter applies a search filter to the message list, rebuilding
+// the display rows through the filterBuckets pipeline step. On the
+// first transition from unfiltered to filtered, saves the pre-search
+// cursor row so ClearFilter can restore it. Subsequent keystrokes do
+// not overwrite the saved row — the save gate stays armed until clear.
+func (m *MessageList) SetFilter(q string, mode SearchMode) {
+	if !m.savedByFilter && q != "" {
+		m.preSearchCursor = m.selected
+		m.savedByFilter = true
+	}
+	m.filter = searchFilter{query: q, mode: mode}
+	m.rebuild()
+	m.clampOffset()
+}
+
+// ClearFilter removes any active filter, rebuilds rows, and restores
+// the pre-search cursor row if one was saved. A cursor that points
+// past the new end of rows clamps to 0.
+func (m *MessageList) ClearFilter() {
+	m.filter = searchFilter{}
+	m.rebuild()
+	if m.savedByFilter {
+		m.selected = m.preSearchCursor
+		if m.selected >= len(m.rows) {
+			m.selected = 0
+		}
+		m.savedByFilter = false
+	}
+	m.clampOffset()
+}
+
+// FilterResultCount returns the number of threads matching the
+// active filter, or 0 if no filter is active. Thread count — not
+// message count — because the filter predicate runs per bucket and
+// keeps whole threads as units.
+func (m MessageList) FilterResultCount() int {
+	return m.filterResults
 }
 
 // SetSort changes the thread-level sort direction and re-runs the
@@ -635,11 +739,17 @@ func (m MessageList) renderBlankLine() string {
 	return m.styles.MsgListBg.Width(m.width).Render("")
 }
 
-// renderEmpty renders the centered "No messages" placeholder.
+// renderEmpty renders the centered placeholder. Wording depends on
+// why the list is empty: "No messages" when the source has no
+// messages at all, "No matches" when a filter is active and matched
+// nothing.
 func (m MessageList) renderEmpty() string {
 	label := "No messages"
+	if m.filter.query != "" {
+		label = "No matches"
+	}
 	labelLine := m.styles.MsgListBg.Width(m.width).
-		Foreground(m.styles.Dim.GetForeground()).
+		Foreground(m.styles.MsgListPlaceholder.GetForeground()).
 		Align(lipgloss.Center).
 		Render(label)
 
