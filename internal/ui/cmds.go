@@ -102,11 +102,9 @@ const (
 	SearchActive
 )
 
-// SearchUpdatedMsg is emitted by SidebarSearch.Update on each
-// keystroke or mode change in Typing state, carrying the current
-// query and mode. AccountTab handles it by calling
-// MessageList.SetFilter and then pushing the thread count into
-// SidebarSearch.SetResultCount.
+// SearchUpdatedMsg carries the live search query and mode from
+// SidebarSearch up to AccountTab whenever either changes in Typing
+// state.
 type SearchUpdatedMsg struct {
 	Query string
 	Mode  SearchMode

@@ -193,15 +193,13 @@ func (m AccountTab) handleKey(msg tea.KeyMsg) (AccountTab, tea.Cmd) {
 }
 
 // clearSearchIfActive clears the shelf and the filter if the shelf
-// is in any non-Idle state. Returns true if anything was cleared —
-// callers use this to decide whether to run follow-up logic.
-func (m *AccountTab) clearSearchIfActive() bool {
+// is in any non-Idle state. No-op when already idle.
+func (m *AccountTab) clearSearchIfActive() {
 	if m.sidebarSearch.State() == SearchIdle {
-		return false
+		return
 	}
 	m.sidebarSearch.Clear()
 	m.msglist.ClearFilter()
-	return true
 }
 
 // selectionChangedCmds returns the batch of Cmds that run every time

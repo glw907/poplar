@@ -203,24 +203,18 @@ func (m *MessageList) filterBuckets(buckets [][]mail.MessageInfo) [][]mail.Messa
 
 // matchMessage tests one message against a pre-lowercased query under
 // the given mode. [name] matches subject + sender; [all] additionally
-// matches the date text.
+// matches the date text. Each field is lowercased once per call.
 func matchMessage(msg mail.MessageInfo, lowerQuery string, mode SearchMode) bool {
-	if containsFold(msg.Subject, lowerQuery) {
+	if strings.Contains(strings.ToLower(msg.Subject), lowerQuery) {
 		return true
 	}
-	if containsFold(msg.From, lowerQuery) {
+	if strings.Contains(strings.ToLower(msg.From), lowerQuery) {
 		return true
 	}
-	if mode == SearchModeAll && containsFold(msg.Date, lowerQuery) {
+	if mode == SearchModeAll && strings.Contains(strings.ToLower(msg.Date), lowerQuery) {
 		return true
 	}
 	return false
-}
-
-// containsFold tests whether s (any case) contains lowerNeedle
-// (already lowercased by the caller).
-func containsFold(s, lowerNeedle string) bool {
-	return strings.Contains(strings.ToLower(s), lowerNeedle)
 }
 
 // pickRoot returns the index within bucket of the message that should

@@ -93,7 +93,9 @@ the ADR(s) that justify them.
 - No `:` command mode. Every action is a single-key binding or a
   modal picker launched by a key.
 - `q` exits the viewer when the viewer is open, quits poplar when
-  on the account view. `?` opens the help popover.
+  on the account view. While the sidebar search shelf is non-idle,
+  `q` is stolen and clears the search instead of quitting. `?`
+  opens the help popover.
 - Folder jumps use uppercase single keys:
   `I` Inbox, `D` Drafts, `S` Sent, `A` Archive, `X` Spam, `T`
   Trash. Shared with lowercase triage keys (`d` delete vs
@@ -131,6 +133,19 @@ the ADR(s) that justify them.
 - Connection state renders as shape + color + text for colorblind
   accessibility: `●` green connected, `◐` orange reconnecting,
   `○` red hollow offline.
+- Search is activated by `/` from the account view. The search
+  shelf is a 3-row region pinned to the bottom of the sidebar
+  column. Filter-and-hide: non-matching threads disappear; matching
+  threads render fully expanded (root + all children) regardless of
+  saved fold state, which is preserved unmutated and restored on
+  `Esc`. `Esc` clears the query and restores the pre-search cursor
+  row.
+- Search modes cycle between `[name]` (subject + sender) and
+  `[all]` (subject + sender + date text) via `Tab` while the prompt
+  is focused. Case-insensitive substring match. Scope is the
+  current folder only — folder jumps (`I/D/S/A/X/T`, `J/K`) clear
+  the active search. Fold keys (`Space/F/U`) are no-ops while a
+  filter is committed.
 
 ## Build & verification
 
@@ -170,3 +185,4 @@ invariant. ADR numbering is chronological.
 | Vim-first keybindings, no command mode, no multi-key | 0015, 0024, 0051 |
 | Compose, Catkin, editor interface | 0031, 0032, 0033 |
 | Per-screen prototype passes | 0022 |
+| Sidebar search shelf, filter-and-hide, thread-level | 0064 |

@@ -1,6 +1,7 @@
 package ui
 
 import (
+	"strconv"
 	"strings"
 
 	"github.com/charmbracelet/bubbles/textinput"
@@ -39,16 +40,11 @@ func NewSidebarSearch(styles Styles, width int) SidebarSearch {
 	}
 }
 
-// State returns the current search state.
 func (s SidebarSearch) State() SearchState { return s.state }
+func (s SidebarSearch) Query() string      { return s.input.Value() }
+func (s SidebarSearch) Mode() SearchMode   { return s.mode }
 
-// Query returns the current textinput value. Empty when idle.
-func (s SidebarSearch) Query() string { return s.input.Value() }
-
-// Mode returns the current match mode.
-func (s SidebarSearch) Mode() SearchMode { return s.mode }
-
-// SetSize updates the shelf's width. Height is fixed at 3 rows.
+// SetSize updates the shelf's width. Height is fixed at searchShelfRows.
 func (s *SidebarSearch) SetSize(width int) {
 	s.width = width
 }
@@ -79,8 +75,7 @@ func (s *SidebarSearch) Commit() {
 }
 
 // SetResultCount stores the most recent filter result count (thread
-// count) for display in the info row. Called by AccountTab when it
-// receives a SearchResultsMsg.
+// count) for display in the info row.
 func (s *SidebarSearch) SetResultCount(n int) {
 	s.results = n
 }
@@ -213,21 +208,5 @@ func formatResultCount(n int) string {
 	if n == 1 {
 		return "1 result"
 	}
-	return itoa(n) + " results"
-}
-
-// itoa stringifies a non-negative int without allocation beyond the
-// returned string. Used in render paths that fire on every keystroke.
-func itoa(n int) string {
-	if n == 0 {
-		return "0"
-	}
-	var buf [10]byte
-	i := len(buf)
-	for n > 0 {
-		i--
-		buf[i] = byte('0' + n%10)
-		n /= 10
-	}
-	return string(buf[i:])
+	return strconv.Itoa(n) + " results"
 }

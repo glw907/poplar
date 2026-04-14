@@ -64,9 +64,12 @@ Moves the sidebar selection and switches the message list.
 
 | Key | Action | Context |
 |-----|--------|---------|
-| `/` | Start search | A |
-| `n` | Next result | A |
-| `N` | Previous result | A |
+| `/` | Start or re-focus sidebar search shelf | A |
+| `n` | Next match (alias for `j` under filter) | A |
+| `N` | Previous match (alias for `k` under filter) | A |
+| `Tab` | Cycle match mode `[name]` ↔ `[all]` (while typing) | A |
+| `Enter` | Commit query (Typing → Active) | A |
+| `Esc` | Clear query, restore pre-search cursor | A |
 
 ## Select (deferred — Pass 6)
 
@@ -237,3 +240,14 @@ is always live. The eventual multi-select feature (Pass 6) is
 the one narrow exception: `v` enters a vim-style visual mode
 where `Space` toggles row selection and `Esc` exits. That
 feature is deferred and currently unbound.
+
+**Search is the second narrow modal state.** After visual-select
+(Pass 6), sidebar search is the only other place poplar accepts a
+narrow modal keyboard routing. In Typing state, every printable
+rune — letters, digits, punctuation, space, `q`, `F`, `U`, `?`,
+`j`, `k`, arrows — is appended to the query. Only `Tab`, `Enter`,
+`Esc`, `Backspace`, and `Left/Right` arrows have special meaning.
+Once the query is committed with `Enter`, the shelf enters Active
+state and all normal account-view keys (including `j/k`, folder
+jumps, triage) route normally again. `q` is stolen while the shelf
+is non-idle to prevent accidental quit. See ADR 0064.

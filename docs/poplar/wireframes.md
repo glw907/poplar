@@ -58,6 +58,12 @@ No tab bar — sidebar provides folder context. Inbox selected.
   Selected row has `┃` thick left border in `accent_primary` +
   `bg_selection` full-width fill. Unread counts right-aligned in
   `accent_tertiary`, shown only when > 0.
+- **Sidebar search shelf**: The bottom 3 rows of the sidebar
+  column are the persistent search shelf (see §2.1). When idle,
+  they show the hint `󰍉 / to search`; when active, they host the
+  query input and result count. The sidebar column composition
+  top-to-bottom is: account header (2 rows) + folder region
+  (flex, scrollable) + search shelf (3 rows, pinned).
 - **Message list** (right, remaining width): Columns — flags (2),
   sender (22), subject (fill), date (12). Double-space separator.
   Unread rows in `accent_tertiary` with bold sender. Read rows in
@@ -126,6 +132,85 @@ No tab bar — sidebar provides folder context. Inbox selected.
   and Custom groups. No group headers rendered.
 - **Scrolling:** If folders exceed panel height, viewport clips
   with J/K scrolling. No scrollbar.
+
+---
+
+## 2.1 Sidebar Search (Shelf)
+
+The search shelf is a 3-row region pinned to the bottom of the
+sidebar column. It is always visible, and hosts the query input,
+match mode badge, and result count. See ADR 0064 for rationale.
+
+### Idle
+
+```
+│   󰡡  Lists/golang        │
+│   󰡡  Lists/rust          │
+│                          │    <- unused space (folders don't fill)
+│                          │
+│                          │    <- shelf row 1 (blank separator)
+│  󰍉 / to search           │    <- shelf row 2 (hint)
+│                          │    <- shelf row 3 (reserved for mode/count)
+```
+
+### Typing (/ pressed, "proj" typed)
+
+```
+│                          │
+│                          │
+│                          │
+│  󰍉 /proj▏                │
+│  [name]       3 results  │
+```
+
+### Committed (Enter pressed)
+
+```
+│                          │
+│                          │
+│                          │
+│  󰍉 /proj                 │
+│  [name]       3 results  │
+```
+
+### No results
+
+```
+│                          │
+│                          │
+│                          │
+│  󰍉 /asdf▏                │
+│  [name]      no results  │
+```
+
+And the message list simultaneously shows a centered placeholder
+distinct from the empty-folder state:
+
+```
+│                         │                                                                               │
+│                         │                                                                               │
+│                         │                       No matches                                               │
+│                         │                                                                               │
+```
+
+**Annotations:**
+
+- **Activation.** `/` in Idle state. `/` in Active re-focuses the
+  prompt with the existing query preserved. `Tab` cycles the mode
+  badge between `[name]` and `[all]`. `Enter` commits (Typing →
+  Active). `Esc` clears (any state → Idle).
+- **Colors.** Icon `󰍉` in `fg_dim` (idle) or `accent_tertiary`
+  (typing). Query text in `fg_base` (typing) or `fg_bright`
+  (committed). Mode badge in `fg_dim`. Result count in
+  `accent_tertiary`. "no results" in `color_warning`.
+- **Layout.** 30-col sidebar. Prompt row has 25 cells for query
+  text (1 indent + 2-cell icon + 1 space + 1 "/" = 5 cells chrome).
+  Mode/count row right-aligns the count with a flex gap of at
+  least 1 cell between the mode badge and the count text.
+- **Pinned.** The 3-row shelf is always at the bottom of the
+  sidebar column. Folders flow from the top; any empty space sits
+  between folders and the shelf. The folder region's height is
+  `accountTabHeight − sidebarHeaderRows − searchShelfRows`.
 
 ---
 
@@ -483,16 +568,42 @@ A mid-thread node folded, root still expanded.
      ├─ Grace Kim           [2] └─ Re: Server migration plan               Apr 05
 ```
 
-### Search results (#15)
+### Search filter applied (#15)
 
-Search query and result count shown in status bar. Message list
-filters to matching messages only.
+Search is hosted in the sidebar shelf (§2.1), not the status bar.
+When a filter is active, the message list displays only matching
+threads (root + all children when any message in the thread
+matches). The status bar retains its normal contents — message
+counts, connection status — and is not used as a search indicator.
 
 ```
- ──────────────────────────┴───────────────── 󰍉  search: "project update" · 3 results · ● connected ─╯
+│ geoff@907.life           │                                                                               │
+│                          │  󰇮  Alice Johnson            Re: Project update for Q2 launch         10:32 AM │
+│   󰇰  Inbox           3  │  󰑚  Carol White              Re: Project budget review              Yesterday │
+│   󰏫  Drafts              │                                                                               │
+│   󰑚  Sent                │                                                                               │
+│   󰀼  Archive             │                                                                               │
+│                          │                                                                               │
+│   󰍷  Spam           12   │                                                                               │
+│                          │                                                                               │
+│  󰍉 /proj                 │                                                                               │
+│  [name]       2 results  │                                                                               │
+ ──────────────────────────┴──────────────────────────────── 10 messages · 3 unread · ● connected ─╯
 ```
 
-`n/N` jump between results. `Esc` restores the full list.
+When no messages match, the list shows a centered placeholder
+distinct from the empty-folder state of #13:
+
+```
+│                         │                                                                               │
+│                         │                                                                               │
+│                         │                       No matches                                               │
+│                         │                                                                               │
+```
+
+`n/N` walk the filtered row set (aliases for `j/k`). `Esc` clears
+the filter and restores the full list plus the pre-search cursor
+row.
 
 ### Multi-select (#16)
 
