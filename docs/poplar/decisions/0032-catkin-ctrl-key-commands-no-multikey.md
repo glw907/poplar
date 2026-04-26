@@ -20,4 +20,11 @@ letter commands, no multi-key sequences. One `tea.KeyMsg` = one action.
 
 ## Consequences
 
-No follow-on notes recorded.
+**Cross-reference 2026-04-25 (ADR-0076):** ADR-0068 (modifier-
+free keybindings) post-dates this ADR and contradicts its
+Ctrl+key requirement as written. The conflict is resolved by
+ADR-0076's carve-out: the modifier-free rule applies to
+poplar's reading/navigation surfaces only; Catkin's compose
+buffer is exempt because the always-insert-mode shape forces
+modifier keys. ADR-0032's Ctrl+key requirement remains the
+binding rule for Catkin.

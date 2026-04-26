@@ -36,3 +36,12 @@ on the Quit binding (the keybinding library lists it second after
   they were updated in this pass to drop every `C-` row.
 - Future passes that add chords (e.g. for visual-select multi-row
   triage) must use single-key bindings only.
+
+**Carve-out 2026-04-25 (ADR-0076):** This rule applies to
+poplar's reading and navigation surfaces. Text-entry surfaces
+(Catkin compose editor in v1, neovim `--embed` in v1.1) are
+exempt — Catkin is non-modal per ADR-0032, so bare letters must
+remain text input and commands necessarily use Ctrl+key. The
+exemption is bounded: it applies inside the compose buffer only;
+poplar chrome (sidebar, headers, footer hints) around compose
+follows the modifier-free rule.

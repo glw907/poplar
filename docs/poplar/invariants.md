@@ -280,8 +280,8 @@ invariant. ADR numbering is chronological.
 | Frame, chrome, status, footer | 0025, 0026, 0027, 0028, 0029, 0030, 0038 |
 | Sidebar groups, nested indent, classification | 0018, 0019, 0034, 0049, 0050 |
 | Message list, threading, fold | 0041, 0045, 0047, 0048, 0055, 0059, 0060, 0061, 0062, 0063 |
-| Vim-first keybindings, no command mode, no multi-key, no modifiers | 0015, 0024, 0051, 0068 |
-| Compose, Catkin, editor interface | 0031, 0032, 0033 |
+| Vim-first keybindings, no command mode, no multi-key, no modifiers (reading/nav surfaces; text-entry exempt per 0076) | 0015, 0024, 0051, 0068, 0076 |
+| Compose, Catkin, editor interface, library foundation | 0031, 0032, 0033, 0076 |
 | Per-screen prototype passes | 0022 (superseded by 0070), 0070 |
 | Sidebar search shelf, filter-and-hide, thread-level | 0064 |
 | Viewer prototype, footnote harvesting, optimistic mark-read | 0065, 0066, 0067, 0069 |
