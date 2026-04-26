@@ -21,6 +21,7 @@ type App struct {
 	viewerOpen bool
 	helpOpen   bool
 	help       HelpPopover
+	lastErr    ErrorMsg
 	width      int
 	height     int
 }
@@ -79,6 +80,26 @@ func (m App) Update(msg tea.Msg) (App, tea.Cmd) {
 	case ViewerScrollMsg:
 		m.statusBar = m.statusBar.SetScrollPct(msg.Pct)
 		return m, nil
+
+	case ErrorMsg:
+		// Banner state is App-owned. nil ↔ set transitions toggle the
+		// chrome row count, so resize the child when the banner appears
+		// or disappears. Last-write-wins between two non-nil errors
+		// does not change height, so the resize is skipped.
+		hadErr := m.lastErr.Err != nil
+		m.lastErr = msg
+		hasErr := m.lastErr.Err != nil
+		cmds := make([]tea.Cmd, 0, 2)
+		if hadErr != hasErr && m.width > 0 && m.height > 0 {
+			contentMsg := tea.WindowSizeMsg{Width: m.width - 1, Height: m.contentHeight()}
+			rcmd := tea.Cmd(nil)
+			m.acct, rcmd = m.acct.Update(contentMsg)
+			cmds = append(cmds, rcmd)
+		}
+		fcmd := tea.Cmd(nil)
+		m.acct, fcmd = m.acct.Update(msg)
+		cmds = append(cmds, fcmd)
+		return m, tea.Batch(cmds...)
 
 	case tea.KeyMsg:
 		if m.helpOpen {
@@ -148,17 +169,21 @@ func (m App) View() string {
 	status := m.statusBar.View(m.width, sidebarWidth)
 	foot := m.footer.View(m.width)
 
-	return lipgloss.JoinVertical(lipgloss.Left,
-		topLine,
-		content,
-		status,
-		foot,
-	)
+	parts := []string{topLine, content}
+	if banner := renderErrorBanner(m.lastErr, m.width, m.styles); banner != "" {
+		parts = append(parts, banner)
+	}
+	parts = append(parts, status, foot)
+	return lipgloss.JoinVertical(lipgloss.Left, parts...)
 }
 
 // contentHeight returns the height available for the content area.
+// The error banner takes one extra chrome row when present.
 func (m App) contentHeight() int {
 	chrome := 3 // top line + status bar + footer
+	if m.lastErr.Err != nil {
+		chrome++
+	}
 	h := m.height - chrome
 	if h < 1 {
 		return 1

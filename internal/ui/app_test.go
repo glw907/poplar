@@ -1,6 +1,7 @@
 package ui
 
 import (
+	"errors"
 	"regexp"
 	"strings"
 	"testing"
@@ -362,5 +363,70 @@ func TestApp_HelpContextSwitchesWithViewer(t *testing.T) {
 	view = stripANSI(app.View())
 	if !strings.Contains(view, "Message Viewer") {
 		t.Errorf("viewer-context help should title 'Message Viewer':\n%s", view)
+	}
+}
+
+func TestApp_CapturesErrorMsg(t *testing.T) {
+	app := newLoadedApp(t, 100, 30)
+	app, _ = app.Update(ErrorMsg{Op: "mark read", Err: errors.New("timeout")})
+
+	if app.lastErr.Err == nil {
+		t.Fatal("App.lastErr.Err is nil after ErrorMsg")
+	}
+	if app.lastErr.Op != "mark read" {
+		t.Errorf("Op: got %q, want %q", app.lastErr.Op, "mark read")
+	}
+}
+
+func TestApp_BannerRendersAboveStatus(t *testing.T) {
+	app := newLoadedApp(t, 100, 30)
+	app, _ = app.Update(ErrorMsg{Op: "fetch body", Err: errors.New("EOF")})
+
+	view := stripANSI(app.View())
+	if !strings.Contains(view, "⚠") {
+		t.Error("View missing warning glyph")
+	}
+	if !strings.Contains(view, "fetch body") {
+		t.Error("View missing op")
+	}
+}
+
+func TestApp_BannerLastWriteWins(t *testing.T) {
+	app := newLoadedApp(t, 100, 30)
+	app, _ = app.Update(ErrorMsg{Op: "first", Err: errors.New("a")})
+	app, _ = app.Update(ErrorMsg{Op: "second", Err: errors.New("b")})
+
+	if app.lastErr.Op != "second" {
+		t.Errorf("Op: got %q, want %q (last-write-wins)", app.lastErr.Op, "second")
+	}
+	view := stripANSI(app.View())
+	if strings.Contains(view, "first") {
+		t.Errorf("View still contains the first error after replacement: %q", view)
+	}
+	if !strings.Contains(view, "second") {
+		t.Errorf("View missing the second (current) error: %q", view)
+	}
+}
+
+func TestApp_BannerHiddenWhileHelpOpen(t *testing.T) {
+	app := newLoadedApp(t, 100, 30)
+	app, _ = app.Update(ErrorMsg{Op: "fetch body", Err: errors.New("EOF")})
+	app, _ = app.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'?'}})
+
+	view := stripANSI(app.View())
+	if strings.Contains(view, "fetch body") {
+		t.Errorf("banner rendered while help popover open: %q", view)
+	}
+}
+
+func TestApp_BannerShrinksContentByOneRow(t *testing.T) {
+	app := newLoadedApp(t, 100, 30)
+	without := strings.Count(app.View(), "\n")
+
+	app, _ = app.Update(ErrorMsg{Op: "x", Err: errors.New("y")})
+	with := strings.Count(app.View(), "\n")
+
+	if with != without {
+		t.Errorf("total view height changed: without=%d, with=%d", without, with)
 	}
 }
