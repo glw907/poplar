@@ -17,6 +17,10 @@ writing code.
 - **`elm-conventions`** — mandatory before touching `internal/ui/`.
   Elm architecture rules: state in models, mutations in Update, I/O
   in tea.Cmd, Msg-driven communication, state ownership at the root.
+  Pairs with `docs/poplar/bubbletea-conventions.md` (idiomatic
+  bubbletea: size contract, self-guarded `View()`, JoinHorizontal
+  trust). UI/UX work tries the bubbles/glamour analogue first;
+  deviations are named in the plan and confirmed in review.
 - **`poplar-pass`** — pass-end consolidation ritual (ADRs, invariants
   update, plan archival, commit + push + install) and the starter-
   prompt format for the next pass.
@@ -27,6 +31,15 @@ writing code.
   skill inventory. Load when you need to find where something lives.
 - `docs/poplar/styling.md` — palette-to-surface map. **Load before
   touching any color.**
+- `docs/poplar/bubbletea-conventions.md` — idiomatic bubbletea
+  reference (size contract, wordwrap+hardwrap, planning + review
+  checklists). **Load before any UI planning or review.**
+- `docs/poplar/research/2026-04-26-bubbletea-norms.md` and
+  `docs/poplar/research/2026-04-26-reference-apps.md` — the
+  authority-of-last-resort for bubbletea conventions. If the
+  conventions doc and the source code (or a reference app) appear
+  to disagree, the research docs cite the primary source — they
+  win. Load when chasing a conflict, not on every UI pass.
 - `docs/poplar/wireframes.md` — reference wireframes for every screen.
 - `docs/poplar/keybindings.md` — authoritative key map.
 - `docs/poplar/STATUS.md` — current pass + next starter prompt.

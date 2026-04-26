@@ -42,6 +42,15 @@ the ADR(s) that justify them.
   state lives in tea.Model structs; mutations happen only in
   Update; I/O only in tea.Cmd; children signal parents via Msg
   types; shared state is hoisted to the root.
+- Idiomatic bubbletea is the default. UI uses `bubbles` components
+  as primary analogues; deviations are ADR'd. `View()`
+  self-enforces size via `clipPane`; renderers honor `width` via
+  wordwrap + hardwrap; width math uses `lipgloss.Width` or
+  `displayCells` (never `len()`); keys declared as `key.Binding`,
+  dispatched via `key.Matches`; `WindowSizeMsg` handlers both
+  `SetSize` children and forward the msg. Full contract in
+  `docs/poplar/bubbletea-conventions.md`, grounded in
+  `docs/poplar/research/2026-04-26-{bubbletea-norms,reference-apps}.md`.
 - `App` constructs the model tree and threads `mail.Backend` and
   `*theme.CompiledTheme` into the components that need them.
   `AccountTab` holds the backend reference for building tea.Cmd
