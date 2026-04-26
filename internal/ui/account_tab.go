@@ -1,6 +1,7 @@
 package ui
 
 import (
+	"fmt"
 	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -321,6 +322,22 @@ func (m AccountTab) currentFolderName() string {
 		return ""
 	}
 	return folder.Name
+}
+
+// WindowCounter returns a "loaded/total" string when the current folder
+// has more messages available than are loaded, e.g. "500/2347". Returns
+// "" when all messages are loaded, the folder is empty, or no page state
+// exists for the current folder.
+func (m AccountTab) WindowCounter() string {
+	name := m.currentFolderName()
+	if name == "" {
+		return ""
+	}
+	page, ok := m.pages[name]
+	if !ok || page == nil || page.total <= 0 || page.loaded >= page.total {
+		return ""
+	}
+	return fmt.Sprintf("%d/%d", page.loaded, page.total)
 }
 
 // pageFor returns (creating if absent) the folderPage for name.

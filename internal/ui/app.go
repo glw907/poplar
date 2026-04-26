@@ -178,7 +178,7 @@ func (m App) View() string {
 	dividerCol := sidebarWidth
 	topLine := m.topLine.View(m.width, dividerCol)
 	status := m.statusBar.View(m.width, sidebarWidth)
-	foot := m.footer.View(m.width)
+	foot := m.footer.SetCounter(m.acct.WindowCounter()).View(m.width)
 
 	parts := []string{topLine, content}
 	if banner := renderErrorBanner(m.lastErr, m.width, m.styles); banner != "" {

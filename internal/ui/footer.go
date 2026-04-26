@@ -100,6 +100,7 @@ func viewerFooterGroups() [][]footerHint {
 type Footer struct {
 	styles  Styles
 	context FooterContext
+	counter string
 }
 
 // NewFooter creates a Footer with the given styles.
@@ -116,6 +117,15 @@ func (f Footer) SetContext(ctx FooterContext) Footer {
 	return f
 }
 
+// SetCounter returns a copy of f with a dynamic window counter string.
+// When non-empty and context is AccountContext, the counter is injected
+// as a rank-8 hint group between the fold group and the help/quit group.
+// Pass "" to remove the counter hint.
+func (f Footer) SetCounter(counter string) Footer {
+	f.counter = counter
+	return f
+}
+
 // View renders the footer at the given width.
 //
 // Hints are progressively dropped (highest dropRank first) when the
@@ -128,7 +138,20 @@ func (f Footer) View(width int) string {
 	case ViewerContext:
 		groups = viewerFooterGroups()
 	default:
-		groups = accountFooterGroups()
+		base := accountFooterGroups()
+		if f.counter != "" {
+			// Inject the window counter as a one-element group between
+			// the fold group (second-to-last) and the help/quit group
+			// (last). dropRank 8 keeps it peer to "v select".
+			counterGroup := []footerHint{hint("", f.counter, 8)}
+			n := len(base)
+			groups = make([][]footerHint, 0, n+1)
+			groups = append(groups, base[:n-1]...)
+			groups = append(groups, counterGroup)
+			groups = append(groups, base[n-1])
+		} else {
+			groups = base
+		}
 	}
 
 	visible := fitFooterHints(groups, width)

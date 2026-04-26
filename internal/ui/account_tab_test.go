@@ -870,3 +870,46 @@ func TestAccountTab_MaybeLoadMore_LoadedEqualsTotal(t *testing.T) {
 		t.Errorf("at bottom with loaded == total, must not emit a Cmd; got %T", cmd)
 	}
 }
+
+func TestAccountTab_WindowCounter(t *testing.T) {
+	t.Run("returns empty when no page loaded", func(t *testing.T) {
+		styles := NewStyles(theme.Nord)
+		backend := mail.NewMockBackend()
+		tab := NewAccountTab(styles, theme.Nord, backend, config.DefaultUIConfig())
+		got := tab.WindowCounter()
+		if got != "" {
+			t.Errorf("WindowCounter() = %q, want empty", got)
+		}
+	})
+
+	t.Run("returns empty when loaded equals total", func(t *testing.T) {
+		tab := newLoadedTab(t, 120, 30)
+		// Overwrite the page to a loaded==total state.
+		name := tab.currentFolderName()
+		tab.pages[name] = &folderPage{loaded: 100, total: 100}
+		got := tab.WindowCounter()
+		if got != "" {
+			t.Errorf("WindowCounter() = %q, want empty when loaded==total", got)
+		}
+	})
+
+	t.Run("returns empty when total is zero", func(t *testing.T) {
+		tab := newLoadedTab(t, 120, 30)
+		name := tab.currentFolderName()
+		tab.pages[name] = &folderPage{loaded: 0, total: 0}
+		got := tab.WindowCounter()
+		if got != "" {
+			t.Errorf("WindowCounter() = %q, want empty when total==0", got)
+		}
+	})
+
+	t.Run("returns counter string on partial load", func(t *testing.T) {
+		tab := newLoadedTab(t, 120, 30)
+		name := tab.currentFolderName()
+		tab.pages[name] = &folderPage{loaded: 500, total: 2347}
+		got := tab.WindowCounter()
+		if got != "500/2347" {
+			t.Errorf("WindowCounter() = %q, want 500/2347", got)
+		}
+	})
+}

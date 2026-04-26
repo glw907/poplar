@@ -157,6 +157,52 @@ func TestFooterView(t *testing.T) {
 	})
 }
 
+func TestFooterWindowCounter(t *testing.T) {
+	styles := NewStyles(theme.Nord)
+
+	t.Run("counter appears in account context at wide width", func(t *testing.T) {
+		f := NewFooter(styles).SetCounter("500/2347")
+		result := stripANSI(f.View(200))
+		if !strings.Contains(result, "500/2347") {
+			t.Error("expected counter 500/2347 in footer output")
+		}
+	})
+
+	t.Run("empty counter does not appear", func(t *testing.T) {
+		f := NewFooter(styles).SetCounter("")
+		result := stripANSI(f.View(200))
+		// The counter format is "N/M"; without a counter there should be
+		// no digit/digit pattern beyond the existing static hints.
+		if strings.Contains(result, "500/2347") {
+			t.Error("counter 500/2347 should not appear when counter is empty")
+		}
+	})
+
+	t.Run("counter does not appear in viewer context", func(t *testing.T) {
+		f := NewFooter(styles).SetContext(ViewerContext).SetCounter("500/2347")
+		result := stripANSI(f.View(200))
+		if strings.Contains(result, "500/2347") {
+			t.Error("counter should not appear in viewer context")
+		}
+	})
+
+	t.Run("counter drops at narrow width like other rank-8 hints", func(t *testing.T) {
+		f := NewFooter(styles).SetCounter("500/2347")
+		// Width 130 drops rank-8+ hints (nav, v select, n/N results, counter).
+		result := stripANSI(f.View(130))
+		if strings.Contains(result, "500/2347") {
+			t.Error("counter should be dropped at narrow width 130 (rank 8)")
+		}
+		// Core hints should still be present.
+		if !strings.Contains(result, "d del") {
+			t.Error("d del should still be present at width 130")
+		}
+		if !strings.Contains(result, "? help") {
+			t.Error("? help should still be present at width 130")
+		}
+	})
+}
+
 func TestFooterThreadsGroup(t *testing.T) {
 	styles := NewStyles(theme.Nord)
 	f := NewFooter(styles)
