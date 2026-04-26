@@ -15,6 +15,7 @@ require (
 	github.com/emersion/go-imap-sortthread v1.2.0
 	github.com/emersion/go-message v0.18.2
 	github.com/emersion/go-sasl v0.0.0-20241020182733-b788ff22d5a6
+	github.com/hashicorp/golang-lru/v2 v2.0.7
 	github.com/mattn/go-runewidth v0.0.23
 	github.com/muesli/termenv v0.16.0
 	github.com/pkg/errors v0.9.1
