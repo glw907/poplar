@@ -2,6 +2,7 @@ package mailjmap
 
 import (
 	"testing"
+	"time"
 
 	"git.sr.ht/~rockorager/go-jmap"
 	jmapmail "git.sr.ht/~rockorager/go-jmap/mail"
@@ -227,5 +228,189 @@ func TestQueryFolder_RequestShape(t *testing.T) {
 	}
 	if !q.CalculateTotal {
 		t.Error("CalculateTotal should be true")
+	}
+}
+
+// --- FetchHeaders ---
+
+func TestFetchHeaders_EmptySlice(t *testing.T) {
+	fake := &fakeClient{}
+	b := newTestBackend(fake, "acct-1", nil)
+
+	got, err := b.FetchHeaders(nil)
+	if err != nil {
+		t.Fatalf("FetchHeaders(nil): %v", err)
+	}
+	if got != nil {
+		t.Errorf("got %v, want nil", got)
+	}
+	if len(fake.sent) != 0 {
+		t.Errorf("expected no RPC calls, got %d", len(fake.sent))
+	}
+
+	got, err = b.FetchHeaders([]mail.UID{})
+	if err != nil {
+		t.Fatalf("FetchHeaders([]): %v", err)
+	}
+	if got != nil {
+		t.Errorf("got %v, want nil", got)
+	}
+	if len(fake.sent) != 0 {
+		t.Errorf("expected no RPC calls, got %d", len(fake.sent))
+	}
+}
+
+func TestFetchHeaders_TranslatesEmails(t *testing.T) {
+	receivedAt1 := time.Date(2024, 3, 15, 10, 0, 0, 0, time.UTC)
+	receivedAt2 := time.Date(2024, 3, 14, 8, 30, 0, 0, time.UTC)
+
+	emails := []*email.Email{
+		{
+			// Email 1: seen + answered, with display name in From.
+			ID:         "e-100",
+			BlobID:     "blob-100",
+			ThreadID:   "t-5",
+			Subject:    "Hello world",
+			From:       []*jmapmail.Address{{Name: "Alice Smith", Email: "alice@example.com"}},
+			ReceivedAt: &receivedAt1,
+			Keywords:   map[string]bool{"$seen": true, "$answered": true},
+			Size:       2048,
+			InReplyTo:  []string{"<parent-msg-id@example.com>"},
+		},
+		{
+			// Email 2: unread + flagged, no display name in From.
+			ID:         "e-101",
+			BlobID:     "blob-101",
+			ThreadID:   "t-5",
+			Subject:    "Re: Hello world",
+			From:       []*jmapmail.Address{{Email: "bob@example.com"}},
+			ReceivedAt: &receivedAt2,
+			Keywords:   map[string]bool{"$flagged": true},
+			Size:       512,
+			InReplyTo:  nil,
+		},
+	}
+
+	fake := &fakeClient{
+		respond: func(_ *jmap.Request) (*jmap.Response, error) {
+			return fakeResponse(&jmap.Invocation{
+				Name: "Email/get",
+				Args: &email.GetResponse{List: emails},
+			}), nil
+		},
+	}
+	b := newTestBackend(fake, "acct-1", nil)
+
+	uids := []mail.UID{"e-100", "e-101"}
+	got, err := b.FetchHeaders(uids)
+	if err != nil {
+		t.Fatalf("FetchHeaders: %v", err)
+	}
+	if len(got) != 2 {
+		t.Fatalf("len(got) = %d, want 2", len(got))
+	}
+
+	// Email 1 assertions.
+	m1 := got[0]
+	if m1.UID != "e-100" {
+		t.Errorf("m1.UID = %q, want %q", m1.UID, "e-100")
+	}
+	if m1.Subject != "Hello world" {
+		t.Errorf("m1.Subject = %q, want %q", m1.Subject, "Hello world")
+	}
+	if m1.From != "Alice Smith" {
+		t.Errorf("m1.From = %q, want %q", m1.From, "Alice Smith")
+	}
+	if !m1.SentAt.Equal(receivedAt1) {
+		t.Errorf("m1.SentAt = %v, want %v", m1.SentAt, receivedAt1)
+	}
+	wantFlags1 := mail.FlagSeen | mail.FlagAnswered
+	if m1.Flags != wantFlags1 {
+		t.Errorf("m1.Flags = %b, want %b", m1.Flags, wantFlags1)
+	}
+	if m1.Size != 2048 {
+		t.Errorf("m1.Size = %d, want 2048", m1.Size)
+	}
+	if m1.ThreadID != "t-5" {
+		t.Errorf("m1.ThreadID = %q, want %q", m1.ThreadID, "t-5")
+	}
+	if m1.InReplyTo != "<parent-msg-id@example.com>" {
+		t.Errorf("m1.InReplyTo = %q, want %q", m1.InReplyTo, "<parent-msg-id@example.com>")
+	}
+
+	// Email 2 assertions.
+	m2 := got[1]
+	if m2.UID != "e-101" {
+		t.Errorf("m2.UID = %q, want %q", m2.UID, "e-101")
+	}
+	if m2.From != "bob@example.com" {
+		t.Errorf("m2.From = %q, want %q (no display name fallback)", m2.From, "bob@example.com")
+	}
+	wantFlags2 := mail.FlagFlagged
+	if m2.Flags != wantFlags2 {
+		t.Errorf("m2.Flags = %b, want %b", m2.Flags, wantFlags2)
+	}
+	if m2.InReplyTo != "" {
+		t.Errorf("m2.InReplyTo = %q, want empty", m2.InReplyTo)
+	}
+
+	// BlobIDs must be cached.
+	b.mu.Lock()
+	blob1 := b.blobIDs["e-100"]
+	blob2 := b.blobIDs["e-101"]
+	b.mu.Unlock()
+	if blob1 != "blob-100" {
+		t.Errorf("blobIDs[e-100] = %q, want %q", blob1, "blob-100")
+	}
+	if blob2 != "blob-101" {
+		t.Errorf("blobIDs[e-101] = %q, want %q", blob2, "blob-101")
+	}
+}
+
+func TestFetchHeaders_RequestShape(t *testing.T) {
+	var capturedReq *jmap.Request
+	fake := &fakeClient{
+		respond: func(req *jmap.Request) (*jmap.Response, error) {
+			capturedReq = req
+			return fakeResponse(&jmap.Invocation{
+				Name: "Email/get",
+				Args: &email.GetResponse{
+					List: []*email.Email{{ID: "e-1", BlobID: "blob-1"}},
+				},
+			}), nil
+		},
+	}
+	b := newTestBackend(fake, "acct-42", nil)
+
+	if _, err := b.FetchHeaders([]mail.UID{"e-1"}); err != nil {
+		t.Fatalf("FetchHeaders: %v", err)
+	}
+
+	if capturedReq == nil {
+		t.Fatal("no request was sent")
+	}
+	if len(capturedReq.Calls) != 1 {
+		t.Fatalf("calls count = %d, want 1", len(capturedReq.Calls))
+	}
+	inv := capturedReq.Calls[0]
+	g, ok := inv.Args.(*email.Get)
+	if !ok {
+		t.Fatalf("invocation args type = %T, want *email.Get", inv.Args)
+	}
+	if g.Account != "acct-42" {
+		t.Errorf("account = %q, want %q", g.Account, "acct-42")
+	}
+	if len(g.IDs) != 1 || g.IDs[0] != "e-1" {
+		t.Errorf("IDs = %v, want [e-1]", g.IDs)
+	}
+	// Verify all required header properties are present.
+	propSet := make(map[string]bool, len(g.Properties))
+	for _, p := range g.Properties {
+		propSet[p] = true
+	}
+	for _, want := range headerProperties {
+		if !propSet[want] {
+			t.Errorf("missing required property %q", want)
+		}
 	}
 }

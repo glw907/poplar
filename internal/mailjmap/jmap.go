@@ -10,6 +10,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"strings"
 	"sync"
 
 	"git.sr.ht/~rockorager/go-jmap"
@@ -277,9 +278,129 @@ func (b *Backend) QueryFolder(name string, offset, limit int) ([]mail.UID, int, 
 	return nil, 0, fmt.Errorf("query folder: no Email/query response")
 }
 
-// FetchHeaders satisfies mail.Backend.
-func (b *Backend) FetchHeaders(_ []mail.UID) ([]mail.MessageInfo, error) {
-	return nil, errors.New("not implemented")
+// headerProperties is the minimal Email/get property set for list display.
+var headerProperties = []string{
+	"id", "blobId", "subject", "from", "receivedAt",
+	"keywords", "size", "inReplyTo", "threadId",
+}
+
+// FetchHeaders satisfies mail.Backend. It issues a single Email/get
+// request for the supplied UIDs and translates each response email
+// into mail.MessageInfo. BlobIDs are cached in b.blobIDs for Task 12.
+func (b *Backend) FetchHeaders(uids []mail.UID) ([]mail.MessageInfo, error) {
+	if len(uids) == 0 {
+		return nil, nil
+	}
+
+	b.mu.Lock()
+	accountID := b.session.PrimaryAccounts[jmapmail.URI]
+	b.mu.Unlock()
+
+	ids := make([]jmap.ID, 0, len(uids))
+	for _, u := range uids {
+		ids = append(ids, jmap.ID(u))
+	}
+
+	req := &jmap.Request{Using: []jmap.URI{jmapmail.URI}}
+	req.Invoke(&email.Get{
+		Account:    accountID,
+		IDs:        ids,
+		Properties: headerProperties,
+	})
+
+	resp, err := b.client.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("fetch headers: %w", err)
+	}
+
+	var out []mail.MessageInfo
+	for _, inv := range resp.Responses {
+		gr, ok := inv.Args.(*email.GetResponse)
+		if !ok {
+			continue
+		}
+		out = make([]mail.MessageInfo, 0, len(gr.List))
+		for _, e := range gr.List {
+			uid := mail.UID(e.ID)
+			b.mu.Lock()
+			b.blobIDs[uid] = string(e.BlobID)
+			b.mu.Unlock()
+			out = append(out, translateEmail(e))
+		}
+		break
+	}
+	if out == nil {
+		return nil, fmt.Errorf("fetch headers: no Email/get response")
+	}
+	return out, nil
+}
+
+// translateEmail converts a JMAP *email.Email into mail.MessageInfo.
+func translateEmail(e *email.Email) mail.MessageInfo {
+	info := mail.MessageInfo{
+		UID:       mail.UID(e.ID),
+		Subject:   e.Subject,
+		From:      formatFromList(e.From),
+		Flags:     translateKeywords(e.Keywords),
+		Size:      uint32(e.Size),
+		ThreadID:  mail.UID(e.ThreadID),
+		InReplyTo: mail.UID(firstInReplyTo(e.InReplyTo)),
+	}
+	if e.ReceivedAt != nil {
+		info.SentAt = *e.ReceivedAt
+	}
+	return info
+}
+
+// formatFromList formats a list of JMAP addresses into a display string.
+// Multiple senders are joined with ", ". Each address uses the display
+// name if present, otherwise falls back to the email address.
+func formatFromList(addrs []*jmapmail.Address) string {
+	if len(addrs) == 0 {
+		return ""
+	}
+	parts := make([]string, 0, len(addrs))
+	for _, a := range addrs {
+		if a == nil {
+			continue
+		}
+		if a.Name != "" {
+			parts = append(parts, a.Name)
+		} else {
+			parts = append(parts, a.Email)
+		}
+	}
+	return strings.Join(parts, ", ")
+}
+
+// translateKeywords maps JMAP keyword strings to mail.Flag bits.
+func translateKeywords(kw map[string]bool) mail.Flag {
+	var f mail.Flag
+	if kw["$seen"] {
+		f |= mail.FlagSeen
+	}
+	if kw["$flagged"] {
+		f |= mail.FlagFlagged
+	}
+	if kw["$answered"] {
+		f |= mail.FlagAnswered
+	}
+	if kw["$draft"] {
+		f |= mail.FlagDraft
+	}
+	if kw["$forwarded"] {
+		f |= mail.FlagForwarded
+	}
+	return f
+}
+
+// firstInReplyTo returns the first value from the InReplyTo header list,
+// or empty string if there are none.
+func firstInReplyTo(ids []string) string {
+	if len(ids) == 0 {
+		return ""
+	}
+	return ids[0]
 }
 
 // FetchBody satisfies mail.Backend.
