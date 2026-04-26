@@ -1,6 +1,6 @@
 ---
 title: Per-screen prototype sub-passes
-status: accepted
+status: superseded by 0070
 date: 2026-04-10
 ---
 
@@ -18,4 +18,8 @@ status/toast, command mode.
 
 ## Consequences
 
-No follow-on notes recorded.
+The per-screen-prototype intent held; the specific seven-sub-pass
+plan did not. Command mode dropped (ADR-0024); threading and
+sidebar search were added as their own sub-passes when the screens
+revealed them as distinct concerns. Superseded by ADR-0070, which
+documents the realized sub-pass set.
