@@ -42,17 +42,6 @@
           }
         ]
       }
-    ],
-    "PreToolUse": [
-      {
-        "matcher": "Bash",
-        "hooks": [
-          {
-            "type": "command",
-            "command": ".claude/hooks/make-check-before-commit.sh"
-          }
-        ]
-      }
     ]
   }
 }

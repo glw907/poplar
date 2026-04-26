@@ -1,15 +1,28 @@
 #!/usr/bin/env bash
-# Hook: block if CLAUDE.md exceeds 200 lines after edit
-# PostToolUse on Edit/Write targeting CLAUDE.md
+# Hook: cap auto-loaded context docs.
+# CLAUDE.md (200 lines) and docs/poplar/invariants.md (300 lines) are both
+# pulled into every conversation; growth here is a context-budget tax.
 
 input=$(cat)
 file=$(echo "$input" | jq -r '.tool_input.file_path // empty')
 
-if [[ "$file" == *"/CLAUDE.md" ]]; then
-    lines=$(wc -l < "$file" 2>/dev/null || echo 0)
-    if (( lines > 200 )); then
-        echo "CLAUDE.md is $lines lines (limit: 200). Refactor into .claude/rules/ files." >&2
+check() {
+    local path=$1 limit=$2 label=$3
+    local lines
+    lines=$(wc -l < "$path" 2>/dev/null || echo 0)
+    if (( lines > limit )); then
+        echo "$label is $lines lines (limit: $limit). Prune before continuing." >&2
         exit 2
     fi
-fi
+}
+
+case "$file" in
+    */CLAUDE.md)
+        check "$file" 200 "CLAUDE.md"
+        ;;
+    */docs/poplar/invariants.md)
+        check "$file" 300 "invariants.md"
+        ;;
+esac
+
 exit 0
