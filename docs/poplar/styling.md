@@ -54,6 +54,14 @@ Every field in `Styles` with its semantic role and palette assignment.
 | `StatusConnected` | `ColorSuccess` | `BgBorder` | `●` connected indicator |
 | `StatusReconnect` | `ColorWarning` | `BgBorder` | `◐` reconnecting indicator |
 | `StatusOffline` | `ColorError` | `BgBorder` | `○` offline indicator |
+| `ErrorBanner` | `ColorError` | — | One-line banner above the status bar (`⚠ <op>: <err>`) |
+
+The `ErrorBanner` is the only chrome surface that conditionally takes
+a row: when `App.lastErr.Err != nil` the banner renders between the
+content area and the status bar, and the account region shrinks by
+one cell so total view height is unchanged. Foreground only — no
+background fill — so the banner sits visually on the same plane as
+the content rather than chrome.
 
 ### Footer (command hints)
 
