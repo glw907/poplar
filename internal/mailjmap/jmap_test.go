@@ -1,6 +1,9 @@
 package mailjmap
 
 import (
+	"io"
+	"sync"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -412,5 +415,119 @@ func TestFetchHeaders_RequestShape(t *testing.T) {
 		if !propSet[want] {
 			t.Errorf("missing required property %q", want)
 		}
+	}
+}
+
+// --- FetchBody ---
+
+// newBodyTestBackend returns a Backend with a pre-seeded blobID for uid
+// and a fake downloader that records call count.
+func newBodyTestBackend(uid mail.UID, blobID string, dl func(string) ([]byte, error)) *Backend {
+	b := newTestBackend(&fakeClient{}, "acct-1", nil)
+	b.blobIDs[uid] = blobID
+	b.downloadBlob = dl
+	return b
+}
+
+func TestFetchBody_CacheMissAndHit(t *testing.T) {
+	const uid mail.UID = "e-1"
+	const blobID = "blob-1"
+	body := []byte("hello world")
+
+	var calls atomic.Int32
+	dl := func(id string) ([]byte, error) {
+		if id != blobID {
+			t.Errorf("unexpected blobID %q", id)
+		}
+		calls.Add(1)
+		return body, nil
+	}
+
+	b := newBodyTestBackend(uid, blobID, dl)
+
+	// First call: cache miss → download.
+	r1, err := b.FetchBody(uid)
+	if err != nil {
+		t.Fatalf("FetchBody first call: %v", err)
+	}
+	got1, _ := io.ReadAll(r1)
+	if string(got1) != string(body) {
+		t.Errorf("first read = %q, want %q", got1, body)
+	}
+
+	// Second call: cache hit → no download.
+	r2, err := b.FetchBody(uid)
+	if err != nil {
+		t.Fatalf("FetchBody second call: %v", err)
+	}
+	got2, _ := io.ReadAll(r2)
+	if string(got2) != string(body) {
+		t.Errorf("second read = %q, want %q", got2, body)
+	}
+
+	if n := calls.Load(); n != 1 {
+		t.Errorf("downloader called %d times, want 1", n)
+	}
+}
+
+func TestFetchBody_SingleflightCollapse(t *testing.T) {
+	const uid mail.UID = "e-2"
+	const blobID = "blob-2"
+	body := []byte("singleflight body")
+
+	var calls atomic.Int32
+	ready := make(chan struct{})
+	dl := func(id string) ([]byte, error) {
+		<-ready // block until all goroutines have called FetchBody
+		calls.Add(1)
+		return body, nil
+	}
+
+	b := newBodyTestBackend(uid, blobID, dl)
+
+	const n = 10
+	var wg sync.WaitGroup
+	errs := make([]error, n)
+	readers := make([]io.Reader, n)
+	wg.Add(n)
+	for i := range n {
+		go func(i int) {
+			defer wg.Done()
+			readers[i], errs[i] = b.FetchBody(uid)
+		}(i)
+	}
+
+	// Give goroutines time to enqueue in singleflight.
+	time.Sleep(10 * time.Millisecond)
+	close(ready)
+	wg.Wait()
+
+	for i, err := range errs {
+		if err != nil {
+			t.Errorf("goroutine %d: %v", i, err)
+		}
+	}
+	for i, r := range readers {
+		got, _ := io.ReadAll(r)
+		if string(got) != string(body) {
+			t.Errorf("goroutine %d: read = %q, want %q", i, got, body)
+		}
+	}
+
+	if n := calls.Load(); n != 1 {
+		t.Errorf("downloader called %d times, want 1", n)
+	}
+}
+
+func TestFetchBody_UnknownUID(t *testing.T) {
+	b := newTestBackend(&fakeClient{}, "acct-1", nil)
+	b.downloadBlob = func(_ string) ([]byte, error) {
+		t.Fatal("downloader should not be called for unknown uid")
+		return nil, nil
+	}
+
+	_, err := b.FetchBody("nonexistent")
+	if err == nil {
+		t.Fatal("expected error for unknown uid")
 	}
 }

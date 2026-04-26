@@ -6,10 +6,12 @@
 package mailjmap
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"strings"
 	"sync"
 
@@ -18,6 +20,7 @@ import (
 	"git.sr.ht/~rockorager/go-jmap/mail/email"
 	"git.sr.ht/~rockorager/go-jmap/mail/mailbox"
 	lru "github.com/hashicorp/golang-lru/v2"
+	"golang.org/x/sync/singleflight"
 
 	"github.com/glw907/poplar/internal/config"
 	"github.com/glw907/poplar/internal/mail"
@@ -42,8 +45,10 @@ type Backend struct {
 	blobIDs map[mail.UID]string
 	states  map[string]string
 
-	bodies  *lru.Cache[string, []byte]
-	updates chan mail.Update
+	bodies      *lru.Cache[string, []byte]
+	bodyGroup   singleflight.Group
+	downloadBlob func(blobID string) ([]byte, error) // nil ⇒ set by Connect; tests swap it
+	updates     chan mail.Update
 
 	pushCancel context.CancelFunc
 	pushDone   chan struct{}
@@ -121,6 +126,16 @@ func (b *Backend) Connect(_ context.Context) error {
 	}
 	b.bodies = cache
 	b.updates = make(chan mail.Update, updatesBuffer)
+
+	accountID := b.session.PrimaryAccounts[jmapmail.URI]
+	b.downloadBlob = func(blobID string) ([]byte, error) {
+		rc, err := cli.Download(accountID, jmap.ID(blobID))
+		if err != nil {
+			return nil, err
+		}
+		defer rc.Close()
+		return ioutil.ReadAll(rc)
+	}
 
 	// Push loop wired in Task 13.
 
@@ -403,9 +418,39 @@ func firstInReplyTo(ids []string) string {
 	return ids[0]
 }
 
-// FetchBody satisfies mail.Backend.
-func (b *Backend) FetchBody(_ mail.UID) (io.Reader, error) {
-	return nil, errors.New("not implemented")
+// FetchBody satisfies mail.Backend. It returns the raw message blob for
+// uid, using an LRU cache to avoid redundant downloads. Concurrent callers
+// for the same blobID are collapsed via singleflight so only one download
+// runs. FetchHeaders must be called first to populate the blobID map.
+func (b *Backend) FetchBody(uid mail.UID) (io.Reader, error) {
+	b.mu.Lock()
+	blobID, ok := b.blobIDs[uid]
+	cache := b.bodies
+	dl := b.downloadBlob
+	b.mu.Unlock()
+	if !ok {
+		return nil, fmt.Errorf("fetch body: unknown uid %q (call FetchHeaders first)", uid)
+	}
+
+	if buf, hit := cache.Get(blobID); hit {
+		return bytes.NewReader(buf), nil
+	}
+
+	v, err, _ := b.bodyGroup.Do(blobID, func() (any, error) {
+		if buf, hit := cache.Get(blobID); hit {
+			return buf, nil
+		}
+		buf, err := dl(blobID)
+		if err != nil {
+			return nil, err
+		}
+		cache.Add(blobID, buf)
+		return buf, nil
+	})
+	if err != nil {
+		return nil, fmt.Errorf("fetch body: %w", err)
+	}
+	return bytes.NewReader(v.([]byte)), nil
 }
 
 // Search satisfies mail.Backend.
