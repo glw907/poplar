@@ -20,10 +20,12 @@ type folderLoadedMsg struct {
 	msgs []mail.MessageInfo
 }
 
-// backendErrMsg wraps a backend error. Pass 2.5b-6 (status/toast) will
-// surface this to the user; for now Update logs and moves on.
-type backendErrMsg struct {
-	err error
+// ErrorMsg carries a failure from any tea.Cmd. App captures the most
+// recent ErrorMsg into lastErr; the banner renders "⚠ <Op>: <Err>".
+// Last-write-wins: a subsequent ErrorMsg replaces the prior one.
+type ErrorMsg struct {
+	Op  string
+	Err error
 }
 
 // FolderChangedMsg is emitted by AccountTab whenever the selected folder
@@ -36,20 +38,20 @@ type FolderChangedMsg struct {
 }
 
 // loadFoldersCmd returns a Cmd that fetches the folder list from the
-// backend. The result is delivered as a foldersLoadedMsg, or a
-// backendErrMsg on failure.
+// backend. The result is delivered as a foldersLoadedMsg, or an
+// ErrorMsg on failure.
 func loadFoldersCmd(b mail.Backend) tea.Cmd {
 	return func() tea.Msg {
 		folders, err := b.ListFolders()
 		if err != nil {
-			return backendErrMsg{err: err}
+			return ErrorMsg{Op: "list folders", Err: err}
 		}
 		return foldersLoadedMsg{folders: folders}
 	}
 }
 
 // loadFolderCmd returns a Cmd that opens a folder and fetches its
-// header list. The result is a folderLoadedMsg, or a backendErrMsg.
+// header list. The result is a folderLoadedMsg, or an ErrorMsg.
 // Returns nil when name is empty — bubbletea treats a nil Cmd as "no
 // work," so the Update loop skips an otherwise-wasted dispatch.
 func loadFolderCmd(b mail.Backend, name string) tea.Cmd {
@@ -58,11 +60,11 @@ func loadFolderCmd(b mail.Backend, name string) tea.Cmd {
 	}
 	return func() tea.Msg {
 		if err := b.OpenFolder(name); err != nil {
-			return backendErrMsg{err: err}
+			return ErrorMsg{Op: "open folder", Err: err}
 		}
 		msgs, err := b.FetchHeaders(nil)
 		if err != nil {
-			return backendErrMsg{err: err}
+			return ErrorMsg{Op: "fetch headers", Err: err}
 		}
 		return folderLoadedMsg{name: name, msgs: msgs}
 	}
@@ -136,29 +138,28 @@ type ViewerScrollMsg struct {
 }
 
 // loadBodyCmd fetches a message body, parses it into blocks, and
-// delivers a bodyLoadedMsg. Errors fall through as backendErrMsg.
+// delivers a bodyLoadedMsg. Errors fall through as ErrorMsg.
 func loadBodyCmd(b mail.Backend, uid mail.UID) tea.Cmd {
 	return func() tea.Msg {
 		r, err := b.FetchBody(uid)
 		if err != nil {
-			return backendErrMsg{err: err}
+			return ErrorMsg{Op: "fetch body", Err: err}
 		}
 		buf, err := io.ReadAll(r)
 		if err != nil {
-			return backendErrMsg{err: err}
+			return ErrorMsg{Op: "read body", Err: err}
 		}
 		return bodyLoadedMsg{uid: uid, blocks: content.ParseBlocks(string(buf))}
 	}
 }
 
 // markReadCmd flips the seen flag on the backend. Errors flow back
-// as backendErrMsg so the eventual toast surface can pick them up;
-// callers that don't yet have a toast surface drop the message in
-// their default handler.
+// as ErrorMsg; App captures the most recent into lastErr and renders
+// it in the banner above the status bar.
 func markReadCmd(b mail.Backend, uid mail.UID) tea.Cmd {
 	return func() tea.Msg {
 		if err := b.MarkRead([]mail.UID{uid}); err != nil {
-			return backendErrMsg{err: err}
+			return ErrorMsg{Op: "mark read", Err: err}
 		}
 		return nil
 	}

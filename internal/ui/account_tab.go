@@ -115,8 +115,9 @@ func (m AccountTab) updateTab(msg tea.Msg) (AccountTab, tea.Cmd) {
 		}
 		return m, nil
 
-	case backendErrMsg:
-		// Surfacing waits on the toast/status overlay.
+	case ErrorMsg:
+		// App owns the banner; AccountTab ignores. App.Update runs
+		// before delegation, so the App layer captures the message.
 		return m, nil
 
 	case SearchUpdatedMsg:
