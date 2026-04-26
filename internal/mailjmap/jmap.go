@@ -171,6 +171,7 @@ func (b *Backend) Disconnect() error {
 	}
 	b.client = nil
 	b.session = nil
+	b.current = ""
 	b.folders = make(map[string]folderEntry)
 	b.blobIDs = make(map[mail.UID]string)
 	b.states = make(map[string]string)
