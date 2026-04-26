@@ -8,10 +8,13 @@ package mailjmap
 import (
 	"context"
 	"errors"
+	"fmt"
 	"io"
 	"sync"
 
 	"git.sr.ht/~rockorager/go-jmap"
+	jmapmail "git.sr.ht/~rockorager/go-jmap/mail"
+	"git.sr.ht/~rockorager/go-jmap/mail/mailbox"
 	lru "github.com/hashicorp/golang-lru/v2"
 
 	"github.com/glw907/poplar/internal/config"
@@ -62,14 +65,117 @@ func (b *Backend) AccountName() string { return b.cfg.Name }
 // Connect succeeds.
 func (b *Backend) Updates() <-chan mail.Update { return b.updates }
 
-// Connect satisfies mail.Backend.
+const (
+	bodyCacheSize = 64
+	updatesBuffer = 64
+)
+
+// Connect satisfies mail.Backend. It authenticates against the JMAP
+// session endpoint, populates the folder map, and initialises the
+// body cache and updates channel.
 func (b *Backend) Connect(_ context.Context) error {
-	return errors.New("not implemented")
+	b.mu.Lock()
+	defer b.mu.Unlock()
+
+	cli := &jmap.Client{
+		SessionEndpoint: b.cfg.Source,
+	}
+	cli.WithAccessToken(b.cfg.Password)
+	if err := cli.Authenticate(); err != nil {
+		return fmt.Errorf("connect: authenticate: %w", err)
+	}
+	b.client = cli
+	b.session = cli.Session
+
+	if err := b.refreshFoldersLocked(); err != nil {
+		return fmt.Errorf("connect: list folders: %w", err)
+	}
+
+	cache, err := lru.New[string, []byte](bodyCacheSize)
+	if err != nil {
+		return fmt.Errorf("connect: init body cache: %w", err)
+	}
+	b.bodies = cache
+	b.updates = make(chan mail.Update, updatesBuffer)
+
+	// Push loop wired in Task 13.
+
+	return nil
 }
 
-// Disconnect satisfies mail.Backend.
+// refreshFoldersLocked issues Mailbox/get, populates b.folders keyed
+// by canonical poplar name, and captures the state string into
+// b.states["Mailbox"]. Caller must hold b.mu.
+func (b *Backend) refreshFoldersLocked() error {
+	accountID := b.session.PrimaryAccounts[jmapmail.URI]
+
+	req := &jmap.Request{}
+	req.Invoke(&mailbox.Get{Account: accountID})
+
+	resp, err := b.client.Do(req)
+	if err != nil {
+		return fmt.Errorf("mailbox/get: %w", err)
+	}
+
+	for _, inv := range resp.Responses {
+		gr, ok := inv.Args.(*mailbox.GetResponse)
+		if !ok {
+			continue
+		}
+		b.states["Mailbox"] = gr.State
+
+		// Build raw mail.Folder slice to run through the classifier.
+		raw := make([]mail.Folder, 0, len(gr.List))
+		for _, mbox := range gr.List {
+			raw = append(raw, mail.Folder{
+				Name:   mbox.Name,
+				Exists: int(mbox.TotalEmails),
+				Unseen: int(mbox.UnreadEmails),
+				Role:   string(mbox.Role),
+			})
+		}
+
+		classified := mail.Classify(raw)
+		for i, cf := range classified {
+			key := cf.DisplayName
+			b.folders[key] = folderEntry{
+				id:     string(gr.List[i].ID),
+				folder: cf.Folder,
+			}
+		}
+		break
+	}
+	return nil
+}
+
+// Disconnect satisfies mail.Backend. It cancels the push loop (Task
+// 13) and tears down all session state.
 func (b *Backend) Disconnect() error {
-	return errors.New("not implemented")
+	b.mu.Lock()
+	cancel := b.pushCancel
+	done := b.pushDone
+	b.mu.Unlock()
+
+	if cancel != nil {
+		cancel()
+	}
+	if done != nil {
+		<-done
+	}
+
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	if b.updates != nil {
+		close(b.updates)
+		b.updates = nil
+	}
+	b.client = nil
+	b.session = nil
+	b.folders = make(map[string]folderEntry)
+	b.blobIDs = make(map[mail.UID]string)
+	b.states = make(map[string]string)
+	b.bodies = nil
+	return nil
 }
 
 // ListFolders satisfies mail.Backend.
