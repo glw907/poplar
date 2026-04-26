@@ -126,3 +126,41 @@ func TestHelpPopover_AccountViewContent(t *testing.T) {
 		}
 	}
 }
+
+func TestHelpPopover_ViewerViewContent(t *testing.T) {
+	styles := NewStyles(theme.Nord)
+	h := NewHelpPopover(styles, HelpViewer)
+
+	view := stripANSI(h.View(80, 24))
+
+	// Title.
+	if !strings.Contains(view, "Message Viewer") {
+		t.Error("viewer popover: missing title 'Message Viewer'")
+	}
+
+	// Viewer-only rows.
+	for _, want := range []string{
+		"j/k", "scroll",
+		"␣/b", "page d/u",
+		"1-9", "open link",
+		"Tab", "link picker",
+	} {
+		if !strings.Contains(view, want) {
+			t.Errorf("viewer popover: missing %q", want)
+		}
+	}
+
+	// Account-only groups must NOT appear.
+	for _, missing := range []string{"Search", "Select", "Threads", "Go To"} {
+		if strings.Contains(view, missing) {
+			t.Errorf("viewer popover: should not contain %q", missing)
+		}
+	}
+
+	// Border corners.
+	for _, want := range []string{"╭", "╮", "╰", "╯"} {
+		if !strings.Contains(view, want) {
+			t.Errorf("viewer popover: missing border char %q", want)
+		}
+	}
+}
