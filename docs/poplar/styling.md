@@ -53,7 +53,7 @@ Every field in `Styles` with its semantic role and palette assignment.
 | `StatusBar` | `FgBright` | `BgBorder` | Bottom status bar base text |
 | `StatusConnected` | `ColorSuccess` | `BgBorder` | `●` connected indicator |
 | `StatusReconnect` | `ColorWarning` | `BgBorder` | `◐` reconnecting indicator |
-| `StatusOffline` | `FgDim` | `BgBorder` | `○` offline indicator |
+| `StatusOffline` | `ColorError` | `BgBorder` | `○` offline indicator |
 
 ### Footer (command hints)
 

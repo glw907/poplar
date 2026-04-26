@@ -1,9 +1,11 @@
 # Poplar Status
 
-**Current pass:** Pass 2.5b-4 shipped 2026-04-25 (ADRs 0065–0069).
-All three queued audits ran the same day; their findings drive
-Pass 2.5b-4.5's mechanical follow-up and reshaped the upcoming
-prototype/research lineup (see plan-shape findings below).
+**Current pass:** Pass 2.5b-4.5 shipped 2026-04-25. Audit-1+2
+mechanical fixes landed: folder jumps wired, per-folder threading
+override consumed, offline color realigned to ADR-0028, filter
+package trimmed. No new ADRs — code realigned to existing
+invariants. Next is Pass 2.5b-5 (help popover) with a brainstorm
+gate on future-binding policy.
 
 ## Passes
 
@@ -12,8 +14,8 @@ prototype/research lineup (see plan-shape findings below).
 | 1, 2, 2.5-render, 2.5a | Scaffold, backend, lipgloss, wireframes | done |
 | 2.5b-1..3.6, 2.5b-7 | Chrome / sidebar / msglist / threading / search | done |
 | 2.5b-4 | Prototype: message viewer | done |
-| 2.5b-4.5 | Audit-1+2 mechanical fixes | next |
-| 2.5b-5 | Prototype: help popover (open: future-binding policy) | pending |
+| 2.5b-4.5 | Audit-1+2 mechanical fixes | done |
+| 2.5b-5 | Prototype: help popover (open: future-binding policy) | next |
 | 2.5b-6 | Prototype: error banner + spinner consolidation | pending |
 | 2.5b-train | Tooling: mailrender training capture | pending (after Pass 3) |
 | 2.9 | Research: emersion vs aerc fork (BACKLOG #10) | pending |
@@ -24,41 +26,37 @@ prototype/research lineup (see plan-shape findings below).
 | 10, 11 | Config, polish | pending |
 | 1.1 | Neovim --embed RPC | pending |
 
-## Next starter prompt (Pass 2.5b-4.5)
+## Next starter prompt (Pass 2.5b-5)
 
-> **Goal.** Land the mechanical follow-up from Audits 1 and 2:
-> wire dead folder-jump bindings, consume dead threading config,
-> drop the dead `:` binding, settle the offline color, bump
-> `go.mod`, drop the orphaned filter reflow family + empty header
-> stubs, fix the stale package doc.
+> **Goal.** Ship the help popover — modal overlay over the account
+> view and the viewer, advertising the keybindings users need to
+> remember. Bound to `?`.
 >
-> **Scope (Audit-1, full detail in
-> [`audits/2026-04-25-invariants-findings.md`](audits/2026-04-25-invariants-findings.md)):**
-> U3 (delete `Cmd` from `GlobalKeys`), U5 (dispatch `I/D/S/A/X/T`
-> in `AccountTab.handleKey`), U6 (consume `fc.Threading` +
-> `MessageList.SetThreaded`), U14 (pick offline color: `ColorError`
-> vs `FgDim`), B4 (bump `go.mod` to `go 1.26.0`).
+> **Scope.** Modal overlay infrastructure (the first modal in the
+> codebase); two context-specific binding layouts (account vs.
+> viewer); key routing so `?` opens it from both contexts and any
+> key dismisses it. Layout per `wireframes.md` §5.
 >
-> **Scope (Audit-2, full detail in
-> [`audits/2026-04-25-library-packages-findings.md`](audits/2026-04-25-library-packages-findings.md)):**
-> F1 (delete reflow family in `internal/filter/html.go` — keep
-> `reOrderedList` which `isShortPlain`/`isCompactLine` still use),
-> F2 (delete `filter/headers.go` + test stubs), F3 (rewrite the
-> `package filter` doc comment).
+> **Settled (do not re-brainstorm):** wireframe layout, column
+> groupings, modal behavior; `?` as the open key (`app.go` already
+> routes to a stub); the two-context split.
 >
-> **Settled.** Doc-side tightenings from Audit-1 already landed
-> (A7, A10, A15, U4, U11). U14 is the only design call left.
-> `content/` and `tidy/` follow-ups defer to BACKLOG #11–#13.
+> **Still open — brainstorm these:**
+> - **Future-binding policy.** The wireframe lists keys that don't
+>   exist yet (`c compose`, `r reply`, `f forward`, `d delete`, etc.).
+>   Three choices, each with a real cost (Audit-3 plan-shape §"Pass
+>   2.5b-5"): only-wired (sparse + churns every pass), all-eventual
+>   (silent dead keys; toast feedback isn't until 2.5b-6), or
+>   all-with-future-marker (discoverable but needs a styling call).
 >
-> **Approach.** Implement directly — no brainstorm. After
-> 2.5b-4.5 ships, regenerate the 2.5b-5 (help popover) starter
-> prompt — Audit-3 flags an open question on whether the popover
-> advertises future-but-unwired bindings. Pass-end via
-> `poplar-pass`.
+> **Approach.** Brainstorm the future-binding policy
+> (`superpowers:brainstorming`), write a plan doc at
+> `docs/superpowers/plans/YYYY-MM-DD-help-popover.md`, then
+> implement. Standard pass-end checklist applies.
 
 ## Audits
 
-All three audits done 2026-04-25. Findings:
+Done 2026-04-25:
 [invariants](audits/2026-04-25-invariants-findings.md) ·
 [library packages](audits/2026-04-25-library-packages-findings.md) ·
 [plan shape](audits/2026-04-25-plan-shape-findings.md).

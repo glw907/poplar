@@ -129,7 +129,7 @@ func NewStyles(t *theme.CompiledTheme) Styles {
 			Foreground(t.ColorWarning).
 			Background(t.BgBorder),
 		StatusOffline: lipgloss.NewStyle().
-			Foreground(t.FgDim).
+			Foreground(t.ColorError).
 			Background(t.BgBorder),
 
 		FooterKey: lipgloss.NewStyle().

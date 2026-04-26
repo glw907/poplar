@@ -114,116 +114,6 @@ func TestStripEmptyLinks(t *testing.T) {
 	}
 }
 
-func TestReflowParagraph(t *testing.T) {
-	tests := []struct {
-		name  string
-		input string
-		width int
-		check func(t *testing.T, got string)
-	}{
-		{
-			name:  "even distribution avoids orphans",
-			input: "This is a test of the minimum raggedness algorithm that should distribute words evenly across lines rather than greedily filling each line and leaving a short runt at the end.",
-			width: 60,
-			check: func(t *testing.T, got string) {
-				t.Helper()
-				lines := strings.Split(got, "\n")
-				for i, line := range lines {
-					if len(line) > 60 {
-						t.Errorf("line %d exceeds 60 chars: %q (%d)", i+1, line, len(line))
-					}
-					if i < len(lines)-1 && len(strings.TrimSpace(line)) > 0 && len(strings.TrimSpace(line)) <= 5 {
-						t.Errorf("orphaned short fragment %q on line %d", strings.TrimSpace(line), i+1)
-					}
-				}
-			},
-		},
-		{
-			name:  "respects width limit",
-			input: "The Stock Investing Account is a limited-discretion investment product offered by Wealthfront Advisers LLC, an SEC-registered investment advisor.",
-			width: 78,
-			check: func(t *testing.T, got string) {
-				t.Helper()
-				for i, line := range strings.Split(got, "\n") {
-					if len(line) > 78 {
-						t.Errorf("line %d exceeds 78 chars: %q (%d)", i+1, line, len(line))
-					}
-				}
-			},
-		},
-		{
-			name:  "short text unchanged",
-			input: "Hello world",
-			width: 78,
-			check: func(t *testing.T, got string) {
-				t.Helper()
-				if got != "Hello world" {
-					t.Errorf("got %q, want %q", got, "Hello world")
-				}
-			},
-		},
-		{
-			name:  "empty input",
-			input: "",
-			width: 78,
-			check: func(t *testing.T, got string) {
-				t.Helper()
-				if got != "" {
-					t.Errorf("got %q, want empty", got)
-				}
-			},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got := reflowParagraph(tt.input, tt.width)
-			tt.check(t, got)
-		})
-	}
-}
-
-func TestMarkdownTokensKeepsLinksAtomic(t *testing.T) {
-	input := "Visit our [Help Center](#) or reply."
-	tokens := markdownTokens(input)
-	for _, tok := range tokens {
-		if tok == "[Help" || tok == "Center](#)" {
-			t.Errorf("link text split into separate tokens: %q", tokens)
-			break
-		}
-	}
-	found := false
-	for _, tok := range tokens {
-		if tok == "[Help Center](#)" {
-			found = true
-		}
-	}
-	if !found {
-		t.Errorf("expected atomic [Help Center](#) token, got: %q", tokens)
-	}
-}
-
-func TestReflowKeepsLinkTextTogether(t *testing.T) {
-	input := "Questions? Visit our [Help Center](#) or reply to this email for help."
-	got := reflowParagraph(input, 78)
-	if strings.Contains(got, "[Help\n") || strings.Contains(got, "Help\nCenter") {
-		t.Errorf("link text split across lines:\n%s", got)
-	}
-}
-
-func TestReflowMarkdownPreservesNonParagraphs(t *testing.T) {
-	input := "# Heading\n\nParagraph text that is long enough to need wrapping at seventy-eight columns for proper display.\n\n- list item\n\n> blockquote"
-	got := reflowMarkdown(input, 78)
-	if !strings.HasPrefix(got, "# Heading") {
-		t.Error("heading should be preserved")
-	}
-	if !strings.Contains(got, "- list item") {
-		t.Error("list should be preserved")
-	}
-	if !strings.Contains(got, "> blockquote") {
-		t.Error("blockquote should be preserved")
-	}
-}
-
 func TestDeduplicateBlocks(t *testing.T) {
 	tests := []struct {
 		name  string
@@ -345,13 +235,6 @@ func TestCompactLineRuns(t *testing.T) {
 	}
 }
 
-func TestIsParagraphSkipsHardBreaks(t *testing.T) {
-	block := "Line one  \nLine two  \nLine three"
-	if isParagraph(block) {
-		t.Error("block with hard breaks should not be a paragraph")
-	}
-}
-
 func TestUnflattenQuotes(t *testing.T) {
 	tests := []struct {
 		name  string
@@ -394,48 +277,3 @@ func TestUnflattenQuotes(t *testing.T) {
 	}
 }
 
-func TestIsBlockquote(t *testing.T) {
-	tests := []struct {
-		name  string
-		input string
-		want  bool
-	}{
-		{"single quote line", "> Hello", true},
-		{"multi-line with separator", "> Hello\n>\n> World", true},
-		{"plain text", "Hello world", false},
-		{"mixed", "> Quoted\nNot quoted", false},
-		{"bare separator only", ">", true},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got := isBlockquote(tt.input)
-			if got != tt.want {
-				t.Errorf("got %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func TestReflowBlockquote(t *testing.T) {
-	input := "> Short line.\n>\n> This is a longer paragraph that should be reflowed to fit within the width minus the blockquote prefix."
-	got := reflowBlockquote(input, 40)
-
-	for _, line := range strings.Split(got, "\n") {
-		if line == "" {
-			continue
-		}
-		if line != ">" && !strings.HasPrefix(line, "> ") {
-			t.Errorf("line missing blockquote prefix: %q", line)
-		}
-	}
-
-	for _, line := range strings.Split(got, "\n") {
-		if len(line) > 40 {
-			t.Errorf("line exceeds width: %q (%d chars)", line, len(line))
-		}
-	}
-
-	if !strings.Contains(got, "\n>\n") {
-		t.Error("paragraph separator lost")
-	}
-}

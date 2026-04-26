@@ -78,6 +78,7 @@ type MessageList struct {
 	rows            []displayRow
 	folded          map[mail.UID]bool
 	sort            SortOrder
+	threaded        bool
 	selected        int
 	offset          int
 	styles          Styles
@@ -104,12 +105,13 @@ type searchFilter struct {
 // NewMessageList creates a MessageList with the given messages and size.
 func NewMessageList(styles Styles, msgs []mail.MessageInfo, width, height int) MessageList {
 	m := MessageList{
-		styles: styles,
-		width:  width,
-		height: height,
-		folded: map[mail.UID]bool{},
-		sort:   SortDateDesc,
-		now:    time.Now(),
+		styles:   styles,
+		width:    width,
+		height:   height,
+		folded:   map[mail.UID]bool{},
+		sort:     SortDateDesc,
+		threaded: true,
+		now:      time.Now(),
 	}
 	m.SetMessages(msgs)
 	return m
@@ -144,7 +146,15 @@ func (m *MessageList) SetMessages(msgs []mail.MessageInfo) {
 //     computing depth and box-drawing prefix.
 //  5. Apply fold state.
 func (m *MessageList) rebuild() {
-	buckets := bucketByThreadID(m.source)
+	var buckets [][]mail.MessageInfo
+	if m.threaded {
+		buckets = bucketByThreadID(m.source)
+	} else {
+		buckets = make([][]mail.MessageInfo, len(m.source))
+		for i, msg := range m.source {
+			buckets[i] = []mail.MessageInfo{msg}
+		}
+	}
 	buckets = m.filterBuckets(buckets)
 	if m.filter.query != "" {
 		m.filterResults = len(buckets)
@@ -469,6 +479,20 @@ func (m MessageList) FilterResultCount() int {
 // regardless of this setting.
 func (m *MessageList) SetSort(order SortOrder) {
 	m.sort = order
+	m.rebuild()
+}
+
+// SetThreaded toggles thread grouping. When true (the default),
+// messages are bucketed by ThreadID and the rebuild pipeline emits a
+// thread tree per bucket. When false, every message is its own bucket
+// — display becomes flat (one row per message, no prefixes, no fold
+// state) but sort and filter still apply. Per-folder
+// `[ui.folders.<name>] threading = false` flips this.
+func (m *MessageList) SetThreaded(threaded bool) {
+	if m.threaded == threaded {
+		return
+	}
+	m.threaded = threaded
 	m.rebuild()
 }
 

@@ -78,6 +78,34 @@ func (s Sidebar) SelectedFolderInfo() (mail.Folder, bool) {
 	return mail.Folder{}, false
 }
 
+// ConfigKey returns the UIConfig.Folders lookup key for the folder
+// with the given provider name (canonical name for canonicals,
+// provider name for custom). Returns "" if no matching folder is in
+// the sidebar — the zero-value FolderConfig falls through to
+// group/global defaults.
+func (s Sidebar) ConfigKey(providerName string) string {
+	for _, e := range s.entries {
+		if e.cf.Folder.Name == providerName {
+			return e.cf.ConfigKey()
+		}
+	}
+	return ""
+}
+
+// SelectByCanonical moves the selection to the folder whose
+// canonical name matches target (e.g. "Inbox", "Drafts"). Returns
+// true if a matching folder was found and selected. No-op when no
+// folder matches.
+func (s *Sidebar) SelectByCanonical(target string) bool {
+	for i, e := range s.entries {
+		if e.cf.Canonical == target {
+			s.selected = i
+			return true
+		}
+	}
+	return false
+}
+
 // SelectedIcon returns the icon of the currently selected folder.
 func (s Sidebar) SelectedIcon() string {
 	if s.selected < len(s.entries) {

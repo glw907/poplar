@@ -328,6 +328,30 @@ func TestMessageListThreading(t *testing.T) {
 		}
 	})
 
+	t.Run("SetThreaded(false) flattens thread tree", func(t *testing.T) {
+		msgs := []mail.MessageInfo{
+			{UID: "10", ThreadID: "T1", InReplyTo: "", From: "Root", Date: "2026-04-05 10:00", Flags: mail.FlagSeen},
+			{UID: "11", ThreadID: "T1", InReplyTo: "10", From: "Reply", Date: "2026-04-05 11:00", Flags: mail.FlagSeen},
+			{UID: "20", ThreadID: "T2", InReplyTo: "", From: "Other", Date: "2026-04-05 12:00", Flags: mail.FlagSeen},
+		}
+		ml := NewMessageList(styles, msgs, 90, 20)
+		ml.SetThreaded(false)
+		if got, want := len(ml.rows), 3; got != want {
+			t.Fatalf("len(rows) = %d, want %d", got, want)
+		}
+		for i, r := range ml.rows {
+			if !r.isThreadRoot {
+				t.Errorf("rows[%d] isThreadRoot = false, want true (every row is its own thread when flat)", i)
+			}
+			if r.threadSize != 1 {
+				t.Errorf("rows[%d] threadSize = %d, want 1", i, r.threadSize)
+			}
+			if r.prefix != "" {
+				t.Errorf("rows[%d] prefix = %q, want empty (no thread tree)", i, r.prefix)
+			}
+		}
+	})
+
 	t.Run("synthetic root when no message has empty InReplyTo", func(t *testing.T) {
 		msgs := []mail.MessageInfo{
 			{UID: "10", ThreadID: "T1", InReplyTo: "999", From: "First", Date: "Apr 5", Flags: mail.FlagSeen},

@@ -1,6 +1,6 @@
 module github.com/glw907/poplar
 
-go 1.25.0
+go 1.26.0
 
 require (
 	git.sr.ht/~rjarry/go-opt/v2 v2.1.0

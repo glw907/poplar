@@ -225,6 +225,37 @@ func TestAccountTab_folderLoadedSeedsMsglist(t *testing.T) {
 	}
 }
 
+func TestAccountTab_PerFolderThreadingOverride(t *testing.T) {
+	styles := NewStyles(theme.Nord)
+	backend := mail.NewMockBackend()
+
+	uiCfg := config.DefaultUIConfig()
+	uiCfg.Folders["Inbox"] = config.FolderConfig{
+		Threading:    false,
+		ThreadingSet: true,
+	}
+
+	tab := NewAccountTab(styles, theme.Nord, backend, uiCfg)
+	tab, _ = tab.updateTab(tea.WindowSizeMsg{Width: 120, Height: 30})
+	folders, _ := backend.ListFolders()
+	tab, _ = tab.updateTab(foldersLoadedMsg{folders: folders})
+
+	msgs := []mail.MessageInfo{
+		{UID: "10", ThreadID: "T1", InReplyTo: "", From: "Root", Subject: "a", Date: "Apr 5", Flags: mail.FlagSeen},
+		{UID: "11", ThreadID: "T1", InReplyTo: "10", From: "Reply", Subject: "re: a", Date: "Apr 6", Flags: mail.FlagSeen},
+	}
+	tab, _ = tab.updateTab(folderLoadedMsg{name: "Inbox", msgs: msgs})
+
+	if got := visibleRowCount(tab.msglist); got != 2 {
+		t.Fatalf("flat display visible rows = %d, want 2 (no thread tree)", got)
+	}
+	for i, r := range tab.msglist.rows {
+		if !r.isThreadRoot {
+			t.Errorf("rows[%d] isThreadRoot = false, want true under threading=false", i)
+		}
+	}
+}
+
 func TestAccountTabFoldKeys(t *testing.T) {
 	tab := newLoadedTab(t, 120, 30)
 
@@ -589,6 +620,69 @@ func TestAccountTab_FolderJumpInertWhileViewerOpen(t *testing.T) {
 	tab, _ = tab.updateTab(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("J")})
 	if tab.Title() != startFolder {
 		t.Errorf("J while viewer open changed folder to %q (was %q)", tab.Title(), startFolder)
+	}
+}
+
+func TestAccountTab_FolderJumpKeys(t *testing.T) {
+	tab := newLoadedTab(t, 120, 30)
+	cases := []struct {
+		key       string
+		canonical string
+	}{
+		{"D", "Drafts"},
+		{"S", "Sent"},
+		{"A", "Archive"},
+		{"T", "Trash"},
+		{"X", "Spam"},
+		{"I", "Inbox"},
+	}
+	for _, tc := range cases {
+		t.Run(tc.key+" jumps to "+tc.canonical, func(t *testing.T) {
+			tab2, cmd := tab.updateTab(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune(tc.key)})
+			got := tab2.sidebar.entries[tab2.sidebar.selected].cf.Canonical
+			if got != tc.canonical {
+				t.Errorf("after %q, selected canonical = %q, want %q", tc.key, got, tc.canonical)
+			}
+			if cmd == nil {
+				t.Errorf("after %q, expected a Cmd to load the new folder", tc.key)
+			}
+			tab = tab2
+		})
+	}
+}
+
+func TestAccountTab_FolderJumpUnknownFolderNoOp(t *testing.T) {
+	styles := NewStyles(theme.Nord)
+	backend := mail.NewMockBackend()
+	tab := NewAccountTab(styles, theme.Nord, backend, config.DefaultUIConfig())
+	tab, _ = tab.updateTab(tea.WindowSizeMsg{Width: 120, Height: 30})
+	tab, _ = tab.updateTab(foldersLoadedMsg{folders: []mail.Folder{
+		{Name: "Inbox", Role: "inbox"},
+	}})
+	startFolder := tab.Title()
+	tab, cmd := tab.updateTab(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("D")})
+	if tab.Title() != startFolder {
+		t.Errorf("D with no Drafts folder changed Title to %q (was %q)", tab.Title(), startFolder)
+	}
+	if cmd != nil {
+		t.Errorf("D with no Drafts folder should not emit a Cmd; got %T", cmd)
+	}
+}
+
+func TestAccountTab_FolderJumpClearsSearch(t *testing.T) {
+	tab := newLoadedTab(t, 120, 30)
+
+	tab, _ = tab.updateTab(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("/")})
+	tab, cmd := tab.updateTab(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("a")})
+	drainSearch(t, &tab, cmd)
+	tab, _ = tab.updateTab(tea.KeyMsg{Type: tea.KeyEnter})
+	if tab.sidebarSearch.State() != SearchActive {
+		t.Fatalf("expected SearchActive after Enter; got %v", tab.sidebarSearch.State())
+	}
+
+	tab, _ = tab.updateTab(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("D")})
+	if tab.sidebarSearch.State() != SearchIdle {
+		t.Errorf("after D folder jump, search state = %v, want SearchIdle", tab.sidebarSearch.State())
 	}
 }
 

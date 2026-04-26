@@ -207,8 +207,9 @@ the ADR(s) that justify them.
   `install`, `check`, `clean`.
 - `make check` (vet + test) is the gate before any commit.
 - `make install` places the `poplar` binary in `~/.local/bin/`.
-- Go module: `github.com/glw907/poplar`. Go version in `go.mod`
-  matches the installed toolchain (1.26.1).
+- Go module: `github.com/glw907/poplar`. Go version in `go.mod` is
+  the minimum supported floor (1.26.0); the workstation toolchain is
+  1.26.1.
 - Before writing any Go code, invoke the `go-conventions` skill.
 - Before touching `internal/ui/`, invoke the `elm-conventions`
   skill.

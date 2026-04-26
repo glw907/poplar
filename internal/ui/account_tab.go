@@ -95,11 +95,17 @@ func (m AccountTab) updateTab(msg tea.Msg) (AccountTab, tea.Cmd) {
 		return m, m.selectionChangedCmds()
 
 	case folderLoadedMsg:
+		fc := m.uiCfg.Folders[m.sidebar.ConfigKey(msg.name)]
 		order := SortDateDesc
-		if fc, ok := m.uiCfg.Folders[msg.name]; ok && fc.Sort == "date-asc" {
+		if fc.Sort == "date-asc" {
 			order = SortDateAsc
 		}
+		threaded := m.uiCfg.Threading
+		if fc.ThreadingSet {
+			threaded = fc.Threading
+		}
 		m.msglist.SetSort(order)
+		m.msglist.SetThreaded(threaded)
 		m.msglist.SetMessages(msg.msgs)
 		return m, nil
 
@@ -183,6 +189,8 @@ func (m AccountTab) handleKey(msg tea.KeyMsg) (AccountTab, tea.Cmd) {
 		m.clearSearchIfActive()
 		m.sidebar.MoveUp()
 		return m, m.selectionChangedCmds()
+	case "I", "D", "S", "A", "X", "T":
+		return m.jumpToFolder(folderJumpTargets[msg.String()])
 	case "G":
 		m.msglist.MoveToBottom()
 	case "g":
@@ -203,6 +211,30 @@ func (m AccountTab) handleKey(msg tea.KeyMsg) (AccountTab, tea.Cmd) {
 		m.msglist.ToggleFoldAll()
 	}
 	return m, nil
+}
+
+// folderJumpTargets maps the uppercase folder-jump key to its
+// canonical folder name.
+var folderJumpTargets = map[string]string{
+	"I": "Inbox",
+	"D": "Drafts",
+	"S": "Sent",
+	"A": "Archive",
+	"X": "Spam",
+	"T": "Trash",
+}
+
+// jumpToFolder moves the sidebar selection to the canonical folder
+// with the given name. No-op (and no Cmd) when no folder matches —
+// e.g. an account that doesn't expose a Drafts folder. Behaves like
+// J/K otherwise: clears any active search, fires FolderChangedMsg +
+// loadFolderCmd via selectionChangedCmds.
+func (m AccountTab) jumpToFolder(canonical string) (AccountTab, tea.Cmd) {
+	if !m.sidebar.SelectByCanonical(canonical) {
+		return m, nil
+	}
+	m.clearSearchIfActive()
+	return m, m.selectionChangedCmds()
 }
 
 // openSelectedMessage opens the current msglist selection in the
