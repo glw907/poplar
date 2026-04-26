@@ -23,7 +23,23 @@ func displayCells(s string) int {
 
 // spuaACorrection counts SPUA-A runes in s. Each contributes one
 // extra display cell beyond runewidth's reported width.
+//
+// Fast-paths plain ASCII: SPUA-A codepoints are always 4-byte
+// UTF-8 sequences (leading byte 0xF3 or 0xF4), so a string with
+// no high-bit byte cannot contain one. ASCII byte scans 4× faster
+// than rune iteration in Go because no UTF-8 decoding is needed.
+// Most strings on the render hot path are ASCII (sender names,
+// dates, plain subjects).
 func spuaACorrection(s string) int {
+	for i := 0; i < len(s); i++ {
+		if s[i] >= 0x80 {
+			return spuaACorrectionSlow(s)
+		}
+	}
+	return 0
+}
+
+func spuaACorrectionSlow(s string) int {
 	n := 0
 	for _, r := range s {
 		if r >= spuaAStart && r <= spuaAEnd {

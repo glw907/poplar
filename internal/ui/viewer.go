@@ -235,7 +235,7 @@ func clipPane(s string, width, height int) string {
 		lines = lines[:height]
 	}
 	for i, line := range lines {
-		w := lipgloss.Width(line)
+		w := displayCells(line)
 		switch {
 		case w > width:
 			lines[i] = ansi.Truncate(line, width, "")

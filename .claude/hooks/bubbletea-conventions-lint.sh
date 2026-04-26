@@ -39,27 +39,23 @@ fi
 # Rule 2: ansi.Wordwrap without ansi.Hardwrap nearby (renderer files).
 # Triggers in internal/content/ files, or in any file that defines a
 # function taking a `width int` parameter — those are renderers.
-if grep -nE '(ansi\.Wordwrap\(|wordwrap\.String\()' "$file" >/dev/null; then
-    if ! grep -nE '(ansi\.Hardwrap\(|Hardwrap\()' "$file" >/dev/null; then
-        case "$file" in
-            *"/internal/content/"*) is_renderer=1 ;;
-            *)
-                if grep -nE 'func.*\(.*\bwidth\s+int\b' "$file" >/dev/null; then
-                    is_renderer=1
-                else
-                    is_renderer=0
-                fi
-                ;;
-        esac
-        if [[ "$is_renderer" == "1" ]]; then
+if grep -nE '(ansi\.Wordwrap\(|wordwrap\.String\()' "$file" >/dev/null \
+        && ! grep -nE '(ansi\.Hardwrap\(|Hardwrap\()' "$file" >/dev/null; then
+    case "$file" in
+        *"/internal/content/"*)
             warnings+="  ansi.Wordwrap without ansi.Hardwrap — long tokens overflow (§3 Text rendering)\n"
-        fi
-    fi
+            ;;
+        *)
+            if grep -nE 'func.*\(.*\bwidth\s+int\b' "$file" >/dev/null; then
+                warnings+="  ansi.Wordwrap without ansi.Hardwrap — long tokens overflow (§3 Text rendering)\n"
+            fi
+            ;;
+    esac
 fi
 
 # Rule 3: defensive parent-side clipping. A MaxWidth call near a
 # child View() call is a sign the child isn't honoring its size
-# contract. Match if `MaxWidth(` and `.View()` appear within 3 lines.
+# contract. Match if `MaxWidth(` and `.View()` appear within 2 lines.
 if grep -nE -A2 'MaxWidth\(' "$file" 2>/dev/null \
         | grep -E '\.View\(\)' >/dev/null; then
     warnings+="  MaxWidth applied near a child View() call — fix the child's clipPane instead (§8 Anti-patterns)\n"
