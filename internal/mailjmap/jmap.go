@@ -14,6 +14,7 @@ import (
 
 	"git.sr.ht/~rockorager/go-jmap"
 	jmapmail "git.sr.ht/~rockorager/go-jmap/mail"
+	"git.sr.ht/~rockorager/go-jmap/mail/email"
 	"git.sr.ht/~rockorager/go-jmap/mail/mailbox"
 	lru "github.com/hashicorp/golang-lru/v2"
 
@@ -201,19 +202,79 @@ func (b *Backend) Disconnect() error {
 	return nil
 }
 
-// ListFolders satisfies mail.Backend.
+// ListFolders satisfies mail.Backend. It returns the cached folder
+// map, refreshing from the server if the cache is empty.
 func (b *Backend) ListFolders() ([]mail.Folder, error) {
-	return nil, errors.New("not implemented")
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	if len(b.folders) == 0 {
+		if err := b.refreshFoldersLocked(); err != nil {
+			return nil, fmt.Errorf("list folders: %w", err)
+		}
+	}
+	out := make([]mail.Folder, 0, len(b.folders))
+	for _, e := range b.folders {
+		out = append(out, e.folder)
+	}
+	return out, nil
 }
 
-// OpenFolder satisfies mail.Backend.
-func (b *Backend) OpenFolder(_ string) error {
-	return errors.New("not implemented")
+// OpenFolder satisfies mail.Backend. It sets the current folder to
+// name; returns an error if name is not in the cached folder map.
+func (b *Backend) OpenFolder(name string) error {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	if _, ok := b.folders[name]; !ok {
+		return fmt.Errorf("open folder: unknown folder %q", name)
+	}
+	b.current = name
+	return nil
 }
 
-// QueryFolder satisfies mail.Backend.
-func (b *Backend) QueryFolder(_ string, _, _ int) ([]mail.UID, int, error) {
-	return nil, 0, errors.New("not implemented")
+// QueryFolder satisfies mail.Backend. It issues Email/query against
+// the named folder and returns (UIDs, total, error). offset and limit
+// map directly to JMAP Position and Limit. Results are sorted by
+// receivedAt descending (newest first).
+func (b *Backend) QueryFolder(name string, offset, limit int) ([]mail.UID, int, error) {
+	b.mu.Lock()
+	entry, ok := b.folders[name]
+	accountID := b.session.PrimaryAccounts[jmapmail.URI]
+	b.mu.Unlock()
+	if !ok {
+		return nil, 0, fmt.Errorf("query folder: unknown folder %q", name)
+	}
+
+	req := &jmap.Request{}
+	req.Invoke(&email.Query{
+		Account: accountID,
+		Filter: &email.FilterCondition{
+			InMailbox: jmap.ID(entry.id),
+		},
+		Sort: []*email.SortComparator{
+			{Property: "receivedAt", IsAscending: false},
+		},
+		Position:       int64(offset),
+		Limit:          uint64(limit),
+		CalculateTotal: true,
+	})
+
+	resp, err := b.client.Do(req)
+	if err != nil {
+		return nil, 0, fmt.Errorf("query folder: %w", err)
+	}
+
+	for _, inv := range resp.Responses {
+		qr, ok := inv.Args.(*email.QueryResponse)
+		if !ok {
+			continue
+		}
+		uids := make([]mail.UID, len(qr.IDs))
+		for i, id := range qr.IDs {
+			uids[i] = mail.UID(id)
+		}
+		return uids, int(qr.Total), nil
+	}
+	return nil, 0, fmt.Errorf("query folder: no Email/query response")
 }
 
 // FetchHeaders satisfies mail.Backend.
