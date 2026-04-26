@@ -296,3 +296,4 @@ invariant. ADR numbering is chronological.
 | Viewer prototype, footnote harvesting, optimistic mark-read | 0065, 0066, 0067, 0069 |
 | Help popover modal, future-binding policy | 0071, 0072 |
 | Error banner, ErrorMsg, shared spinner | 0073, 0074 |
+| Bubbletea conventions: research-grounded, lint hook, displayCells, key dispatch, WindowSizeMsg | 0077, 0078, 0079, 0080, 0081 |

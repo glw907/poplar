@@ -11,6 +11,18 @@ import (
 
 const maxBodyWidth = 72
 
+// wrap is the renderer's width-honoring word wrap. Wordwrap respects
+// word boundaries; Hardwrap catches the residue when a single token
+// (long URL, code identifier) exceeds width. Together they guarantee
+// no output line is wider than width — the contract every block-
+// renderer below relies on.
+func wrap(text string, width int) string {
+	if width < 1 {
+		width = 1
+	}
+	return ansi.Hardwrap(ansi.Wordwrap(text, width, ""), width, false)
+}
+
 // RenderBody renders blocks into a styled string using lipgloss.
 // Width is capped at maxBodyWidth for readability.
 func RenderBody(blocks []Block, t *theme.CompiledTheme, width int) string {
@@ -49,13 +61,13 @@ func renderBlock(block Block, t *theme.CompiledTheme, width int) string {
 	switch b := block.(type) {
 	case Paragraph:
 		text := renderSpans(b.Spans, t)
-		text = ansi.Wordwrap(text, width, "")
+		text = wrap(text, width)
 		return t.Paragraph.Render(text)
 
 	case Heading:
 		text := renderSpans(b.Spans, t)
 		prefix := strings.Repeat("#", b.Level) + " "
-		text = ansi.Wordwrap(prefix+text, width, "")
+		text = wrap(prefix+text, width)
 		return t.Heading.Render(text)
 
 	case Blockquote:
@@ -77,14 +89,14 @@ func renderBlock(block Block, t *theme.CompiledTheme, width int) string {
 
 	case QuoteAttribution:
 		text := renderSpans(b.Spans, t)
-		text = ansi.Wordwrap(text, width, "")
+		text = wrap(text, width)
 		return t.Attribution.Render(text)
 
 	case Signature:
 		var lines []string
 		for _, spans := range b.Lines {
 			text := renderSpans(spans, t)
-			text = ansi.Wordwrap(text, width, "")
+			text = wrap(text, width)
 			lines = append(lines, t.Signature.Render(text))
 		}
 		return strings.Join(lines, "\n")
@@ -106,7 +118,7 @@ func renderBlock(block Block, t *theme.CompiledTheme, width int) string {
 			prefix = string(rune('0'+b.Index%10)) + ". "
 		}
 		indent := strings.Repeat(" ", len(prefix))
-		wrapped := ansi.Wordwrap(text, width-len(prefix), "")
+		wrapped := wrap(text, width-len(prefix))
 		lines := strings.Split(wrapped, "\n")
 		for i, line := range lines {
 			if i == 0 {

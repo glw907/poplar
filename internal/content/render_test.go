@@ -271,19 +271,20 @@ func TestRenderBodyWrapStressParagraph(t *testing.T) {
 }
 
 func TestRenderBodyLongURL(t *testing.T) {
-	// A URL longer than the cap with no internal hyphens must not be
-	// split mid-token. Hyphenated URLs may still break (ansi.Wordwrap
-	// treats hyphens as breakpoints) — that case is documented and
-	// not asserted here.
+	// A URL longer than the cap is hard-wrapped so no line exceeds
+	// the width contract. The renderer's job is to honor its width
+	// argument; an unbroken URL would overflow into adjacent panes
+	// in the bubbletea layout, so hardwrap wins over readability.
 	url := "https://news.example.com/items?category=engineering&id=" + strings.Repeat("0123456789", 6)
 	blocks := []Block{Paragraph{Spans: []Span{
 		Text{Content: "see "},
 		Link{Text: url, URL: url},
 	}}}
 	result := RenderBody(blocks, theme.Nord, maxBodyWidth)
-	visible := stripANSITest(result)
-	if !strings.Contains(visible, url) {
-		t.Errorf("URL split across lines: %q", visible)
+	for _, line := range strings.Split(stripANSITest(result), "\n") {
+		if w := lipgloss.Width(line); w > maxBodyWidth {
+			t.Errorf("long-URL line exceeds cap: %q (w=%d, cap=%d)", line, w, maxBodyWidth)
+		}
 	}
 }
 
