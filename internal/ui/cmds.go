@@ -1,10 +1,14 @@
 package ui
 
 import (
+	"bytes"
 	"io"
+	"strings"
 
+	gomail "github.com/emersion/go-message/mail"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/glw907/poplar/internal/content"
+	"github.com/glw907/poplar/internal/filter"
 	"github.com/glw907/poplar/internal/mail"
 )
 
@@ -183,6 +187,10 @@ type ViewerScrollMsg struct {
 
 // loadBodyCmd fetches a message body, parses it into blocks, and
 // delivers a bodyLoadedMsg. Errors fall through as ErrorMsg.
+//
+// Real backends return raw RFC822 bytes; the mock returns markdown
+// directly. extractDisplayText sniffs the format and walks MIME
+// when present, falling back to raw bytes otherwise.
 func loadBodyCmd(b mail.Backend, uid mail.UID) tea.Cmd {
 	return func() tea.Msg {
 		r, err := b.FetchBody(uid)
@@ -193,8 +201,83 @@ func loadBodyCmd(b mail.Backend, uid mail.UID) tea.Cmd {
 		if err != nil {
 			return ErrorMsg{Op: "read body", Err: err}
 		}
-		return bodyLoadedMsg{uid: uid, blocks: content.ParseBlocks(string(buf))}
+		text := extractDisplayText(buf)
+		return bodyLoadedMsg{uid: uid, blocks: content.ParseBlocks(text)}
 	}
+}
+
+// extractDisplayText converts a fetched body buffer into markdown ready
+// for content.ParseBlocks. RFC822 input is walked via emersion/go-mail
+// to extract the preferred inline text part (text/plain over text/html);
+// non-RFC822 input (e.g. the mock backend's pre-cleaned markdown) is
+// returned unchanged. The extracted text runs through filter.CleanPlain
+// (which auto-routes to CleanHTML when the part is HTML) so the output
+// is always normalized markdown.
+func extractDisplayText(buf []byte) string {
+	if !looksLikeRFC822(buf) {
+		return string(buf)
+	}
+	mr, err := gomail.CreateReader(bytes.NewReader(buf))
+	if err != nil {
+		return string(buf)
+	}
+	defer mr.Close()
+
+	var plain, html string
+	for {
+		p, err := mr.NextPart()
+		if err != nil {
+			break
+		}
+		ih, ok := p.Header.(*gomail.InlineHeader)
+		if !ok {
+			io.Copy(io.Discard, p.Body)
+			continue
+		}
+		ct, _, _ := ih.ContentType()
+		body, rerr := io.ReadAll(p.Body)
+		if rerr != nil {
+			continue
+		}
+		switch ct {
+		case "text/plain":
+			if plain == "" {
+				plain = string(body)
+			}
+		case "text/html":
+			if html == "" {
+				html = string(body)
+			}
+		}
+	}
+	switch {
+	case plain != "":
+		return filter.CleanPlain(plain)
+	case html != "":
+		return filter.CleanHTML(html)
+	default:
+		return ""
+	}
+}
+
+// looksLikeRFC822 sniffs whether buf opens with a plausible mail header.
+// Header lines have the shape `Field-Name: value`; a blank line ends the
+// header block. The check looks at the first non-empty line only.
+func looksLikeRFC822(buf []byte) bool {
+	s := string(buf)
+	if i := strings.IndexByte(s, '\n'); i > 0 {
+		s = s[:i]
+	}
+	colon := strings.IndexByte(s, ':')
+	if colon <= 0 || colon > 78 {
+		return false
+	}
+	for _, r := range s[:colon] {
+		if !((r >= 'A' && r <= 'Z') || (r >= 'a' && r <= 'z') || (r >= '0' && r <= '9') || r == '-' || r == '_') {
+			return false
+		}
+	}
+	return true
 }
 
 // markReadCmd flips the seen flag on the backend. Errors flow back

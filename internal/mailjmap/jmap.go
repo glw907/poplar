@@ -172,15 +172,18 @@ func (b *Backend) Connect(_ context.Context) error {
 	return nil
 }
 
-// fetchEmailState issues Email/get with ids=[] to fetch the current
-// Email state string. It does not hold b.mu — callers supply the
-// client and session directly.
+// fetchEmailState issues Email/get with a single sentinel ID to cheaply
+// fetch the current Email state string. An empty IDs slice would be
+// dropped by omitempty (becoming "fetch all"), which Fastmail rejects on
+// large mailboxes; a single non-existent ID lands in `notFound` and the
+// server still returns the live state. It does not hold b.mu — callers
+// supply the client and session directly.
 func fetchEmailState(cli jmapClient, session *jmap.Session) (string, error) {
 	accountID := session.PrimaryAccounts[jmapmail.URI]
 	req := &jmap.Request{Using: []jmap.URI{jmapmail.URI}}
 	req.Invoke(&email.Get{
 		Account:    accountID,
-		IDs:        []jmap.ID{},
+		IDs:        []jmap.ID{"poplar-state-probe"},
 		Properties: []string{"id"},
 	})
 	resp, err := cli.Do(req)
@@ -188,6 +191,9 @@ func fetchEmailState(cli jmapClient, session *jmap.Session) (string, error) {
 		return "", fmt.Errorf("email/get: %w", err)
 	}
 	for _, inv := range resp.Responses {
+		if me, ok := inv.Args.(*jmap.MethodError); ok {
+			return "", fmt.Errorf("email/get: server error: %s", me.Error())
+		}
 		gr, ok := inv.Args.(*email.GetResponse)
 		if !ok {
 			continue
