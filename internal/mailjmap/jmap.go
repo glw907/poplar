@@ -492,42 +492,225 @@ func (b *Backend) FetchBody(uid mail.UID) (io.Reader, error) {
 	return bytes.NewReader(v.([]byte)), nil
 }
 
-// Search satisfies mail.Backend.
+// Search satisfies mail.Backend. Sidebar search filters in-memory in
+// Pass 2.5b-7; backend Search is unused. Pass 6 may wire server-side search.
 func (b *Backend) Search(_ mail.SearchCriteria) ([]mail.UID, error) {
-	return nil, errors.New("not implemented")
+	return nil, nil
 }
 
-// Move satisfies mail.Backend.
-func (b *Backend) Move(_ []mail.UID, _ string) error {
-	return errors.New("not implemented")
+// Move satisfies mail.Backend. It moves uids into destFolder by patching
+// mailboxIds to contain only the destination mailbox.
+func (b *Backend) Move(uids []mail.UID, destFolder string) error {
+	if len(uids) == 0 {
+		return nil
+	}
+	b.mu.Lock()
+	entry, ok := b.folders[destFolder]
+	accountID := b.accountIDLocked()
+	b.mu.Unlock()
+	if !ok {
+		return fmt.Errorf("move: unknown folder %q", destFolder)
+	}
+	update := make(map[jmap.ID]jmap.Patch, len(uids))
+	for _, u := range uids {
+		update[jmap.ID(u)] = jmap.Patch{
+			"mailboxIds": map[string]bool{entry.id: true},
+		}
+	}
+	req := &jmap.Request{Using: []jmap.URI{jmapmail.URI}}
+	callID := req.Invoke(&email.Set{
+		Account: accountID,
+		Update:  update,
+	})
+	resp, err := b.client.Do(req)
+	if err != nil {
+		return fmt.Errorf("move: %w", err)
+	}
+	if err := checkEmailSetUpdated(resp, callID); err != nil {
+		return fmt.Errorf("move: %w", err)
+	}
+	return nil
 }
 
-// Copy satisfies mail.Backend.
-func (b *Backend) Copy(_ []mail.UID, _ string) error {
-	return errors.New("not implemented")
+// Copy satisfies mail.Backend. It copies uids into destFolder by creating
+// new messages with the same blob and the destination mailbox. This is a
+// same-account copy using Email/set Create.
+func (b *Backend) Copy(uids []mail.UID, destFolder string) error {
+	if len(uids) == 0 {
+		return nil
+	}
+	b.mu.Lock()
+	destEntry, ok := b.folders[destFolder]
+	accountID := b.accountIDLocked()
+	blobIDs := make(map[mail.UID]string, len(uids))
+	for _, u := range uids {
+		blobIDs[u] = b.blobIDs[u]
+	}
+	b.mu.Unlock()
+	if !ok {
+		return fmt.Errorf("copy: unknown folder %q", destFolder)
+	}
+
+	create := make(map[jmap.ID]*email.Email, len(uids))
+	for i, u := range uids {
+		blobID := blobIDs[u]
+		if blobID == "" {
+			return fmt.Errorf("copy: unknown blob for uid %q (call FetchHeaders first)", u)
+		}
+		key := jmap.ID(fmt.Sprintf("copy-%d", i))
+		create[key] = &email.Email{
+			BlobID:     jmap.ID(blobID),
+			MailboxIDs: map[jmap.ID]bool{jmap.ID(destEntry.id): true},
+		}
+	}
+	req := &jmap.Request{Using: []jmap.URI{jmapmail.URI}}
+	callID := req.Invoke(&email.Set{
+		Account: accountID,
+		Create:  create,
+	})
+	resp, err := b.client.Do(req)
+	if err != nil {
+		return fmt.Errorf("copy: %w", err)
+	}
+	if err := checkEmailSetCreated(resp, callID); err != nil {
+		return fmt.Errorf("copy: %w", err)
+	}
+	return nil
 }
 
-// Delete satisfies mail.Backend.
-func (b *Backend) Delete(_ []mail.UID) error {
-	return errors.New("not implemented")
+// Delete satisfies mail.Backend. It soft-deletes by moving uids to Trash.
+func (b *Backend) Delete(uids []mail.UID) error {
+	if len(uids) == 0 {
+		return nil
+	}
+	b.mu.Lock()
+	_, ok := b.folders["Trash"]
+	b.mu.Unlock()
+	if !ok {
+		return fmt.Errorf("delete: Trash folder not found")
+	}
+	if err := b.Move(uids, "Trash"); err != nil {
+		return fmt.Errorf("delete: %w", err)
+	}
+	return nil
 }
 
-// Flag satisfies mail.Backend.
-func (b *Backend) Flag(_ []mail.UID, _ mail.Flag, _ bool) error {
-	return errors.New("not implemented")
+// Flag satisfies mail.Backend. It sets or clears a JMAP keyword for each uid.
+func (b *Backend) Flag(uids []mail.UID, flag mail.Flag, set bool) error {
+	keyword, err := keywordForFlag(flag)
+	if err != nil {
+		return err
+	}
+	return b.setKeyword(uids, keyword, set)
 }
 
 // MarkRead satisfies mail.Backend.
-func (b *Backend) MarkRead(_ []mail.UID) error {
-	return errors.New("not implemented")
+func (b *Backend) MarkRead(uids []mail.UID) error {
+	return b.setKeyword(uids, "$seen", true)
 }
 
 // MarkAnswered satisfies mail.Backend.
-func (b *Backend) MarkAnswered(_ []mail.UID) error {
-	return errors.New("not implemented")
+func (b *Backend) MarkAnswered(uids []mail.UID) error {
+	return b.setKeyword(uids, "$answered", true)
 }
 
-// Send satisfies mail.Backend.
+// Send satisfies mail.Backend. Compose is planned for Pass 9.
 func (b *Backend) Send(_ string, _ []string, _ io.Reader) error {
-	return errors.New("not implemented")
+	return errors.New("send not implemented in pass 3 — see pass 9")
+}
+
+// accountIDLocked returns the primary JMAP account ID. Caller must hold b.mu.
+func (b *Backend) accountIDLocked() jmap.ID {
+	return b.session.PrimaryAccounts[jmapmail.URI]
+}
+
+// keywordForFlag maps a mail.Flag to its JMAP keyword string.
+func keywordForFlag(flag mail.Flag) (string, error) {
+	switch flag {
+	case mail.FlagSeen:
+		return "$seen", nil
+	case mail.FlagFlagged:
+		return "$flagged", nil
+	case mail.FlagAnswered:
+		return "$answered", nil
+	case mail.FlagDraft:
+		return "$draft", nil
+	case mail.FlagForwarded:
+		return "$forwarded", nil
+	default:
+		return "", fmt.Errorf("unsupported flag for JMAP: %v", flag)
+	}
+}
+
+// setKeyword patches the given JMAP keyword to set (true) or unset (nil) for
+// all uids in a single Email/set request.
+func (b *Backend) setKeyword(uids []mail.UID, keyword string, set bool) error {
+	if len(uids) == 0 {
+		return nil
+	}
+	b.mu.Lock()
+	accountID := b.accountIDLocked()
+	b.mu.Unlock()
+
+	var val interface{}
+	if set {
+		val = true
+	}
+	update := make(map[jmap.ID]jmap.Patch, len(uids))
+	for _, u := range uids {
+		update[jmap.ID(u)] = jmap.Patch{
+			"keywords/" + keyword: val,
+		}
+	}
+	req := &jmap.Request{Using: []jmap.URI{jmapmail.URI}}
+	callID := req.Invoke(&email.Set{
+		Account: accountID,
+		Update:  update,
+	})
+	resp, err := b.client.Do(req)
+	if err != nil {
+		return fmt.Errorf("set keyword %s: %w", keyword, err)
+	}
+	if err := checkEmailSetUpdated(resp, callID); err != nil {
+		return fmt.Errorf("set keyword %s: %w", keyword, err)
+	}
+	return nil
+}
+
+// checkEmailSetUpdated finds the Email/setResponse matching callID and returns
+// an error if any ids appear in NotUpdated.
+func checkEmailSetUpdated(resp *jmap.Response, callID string) error {
+	for _, inv := range resp.Responses {
+		if inv.CallID != callID {
+			continue
+		}
+		sr, ok := inv.Args.(*email.SetResponse)
+		if !ok {
+			continue
+		}
+		for id, se := range sr.NotUpdated {
+			return fmt.Errorf("not updated %s: %s", id, se.Type)
+		}
+		return nil
+	}
+	return fmt.Errorf("no Email/set response")
+}
+
+// checkEmailSetCreated finds the Email/setResponse matching callID and returns
+// an error if any ids appear in NotCreated.
+func checkEmailSetCreated(resp *jmap.Response, callID string) error {
+	for _, inv := range resp.Responses {
+		if inv.CallID != callID {
+			continue
+		}
+		sr, ok := inv.Args.(*email.SetResponse)
+		if !ok {
+			continue
+		}
+		for id, se := range sr.NotCreated {
+			return fmt.Errorf("not created %s: %s", id, se.Type)
+		}
+		return nil
+	}
+	return fmt.Errorf("no Email/set response")
 }

@@ -3,6 +3,7 @@ package mailjmap
 import (
 	"context"
 	"errors"
+	"fmt"
 	"io"
 	"sync"
 	"sync/atomic"
@@ -743,5 +744,410 @@ func TestDispatchMailboxChanges_EmitsFolderInfo(t *testing.T) {
 	}
 	if !found {
 		t.Error("expected UpdateFolderInfo for Inbox, got none")
+	}
+}
+
+// --- setKeyword / MarkRead / MarkAnswered ---
+
+func TestSetKeyword_EmptyUIDs(t *testing.T) {
+	fake := &fakeClient{}
+	b := newTestBackend(fake, "acct-1", nil)
+
+	if err := b.MarkRead(nil); err != nil {
+		t.Errorf("MarkRead(nil): %v", err)
+	}
+	if err := b.MarkRead([]mail.UID{}); err != nil {
+		t.Errorf("MarkRead([]): %v", err)
+	}
+	if len(fake.sent) != 0 {
+		t.Errorf("expected no RPC calls, got %d", len(fake.sent))
+	}
+}
+
+func TestMarkRead_RequestShape(t *testing.T) {
+	var capturedReq *jmap.Request
+	fake := &fakeClient{
+		respond: func(req *jmap.Request) (*jmap.Response, error) {
+			capturedReq = req
+			return fakeResponse(&jmap.Invocation{
+				Name:   "Email/set",
+				CallID: "0",
+				Args:   &email.SetResponse{},
+			}), nil
+		},
+	}
+	b := newTestBackend(fake, "acct-42", nil)
+
+	uids := []mail.UID{"e-1", "e-2"}
+	if err := b.MarkRead(uids); err != nil {
+		t.Fatalf("MarkRead: %v", err)
+	}
+
+	if capturedReq == nil {
+		t.Fatal("no request sent")
+	}
+	if len(capturedReq.Calls) != 1 {
+		t.Fatalf("calls = %d, want 1", len(capturedReq.Calls))
+	}
+	s, ok := capturedReq.Calls[0].Args.(*email.Set)
+	if !ok {
+		t.Fatalf("args type = %T, want *email.Set", capturedReq.Calls[0].Args)
+	}
+	if s.Account != "acct-42" {
+		t.Errorf("account = %q, want %q", s.Account, "acct-42")
+	}
+	if len(s.Update) != 2 {
+		t.Fatalf("update len = %d, want 2", len(s.Update))
+	}
+	for _, uid := range uids {
+		patch, ok := s.Update[jmap.ID(uid)]
+		if !ok {
+			t.Errorf("missing uid %q in Update", uid)
+			continue
+		}
+		val, ok := patch["keywords/$seen"]
+		if !ok {
+			t.Errorf("uid %q: missing keywords/$seen", uid)
+		}
+		if val != true {
+			t.Errorf("uid %q: keywords/$seen = %v, want true", uid, val)
+		}
+	}
+}
+
+func TestSetKeyword_NotUpdatedError(t *testing.T) {
+	fake := &fakeClient{
+		respond: func(_ *jmap.Request) (*jmap.Response, error) {
+			return fakeResponse(&jmap.Invocation{
+				Name:   "Email/set",
+				CallID: "0",
+				Args: &email.SetResponse{
+					NotUpdated: map[jmap.ID]*jmap.SetError{
+						"e-1": {Type: "notFound"},
+					},
+				},
+			}), nil
+		},
+	}
+	b := newTestBackend(fake, "acct-1", nil)
+
+	err := b.MarkRead([]mail.UID{"e-1"})
+	if err == nil {
+		t.Fatal("expected error from NotUpdated, got nil")
+	}
+}
+
+func TestMarkAnswered_RequestShape(t *testing.T) {
+	var capturedReq *jmap.Request
+	fake := &fakeClient{
+		respond: func(req *jmap.Request) (*jmap.Response, error) {
+			capturedReq = req
+			return fakeResponse(&jmap.Invocation{
+				Name:   "Email/set",
+				CallID: "0",
+				Args:   &email.SetResponse{},
+			}), nil
+		},
+	}
+	b := newTestBackend(fake, "acct-1", nil)
+
+	if err := b.MarkAnswered([]mail.UID{"e-5"}); err != nil {
+		t.Fatalf("MarkAnswered: %v", err)
+	}
+
+	s, ok := capturedReq.Calls[0].Args.(*email.Set)
+	if !ok {
+		t.Fatalf("args type = %T", capturedReq.Calls[0].Args)
+	}
+	patch := s.Update[jmap.ID("e-5")]
+	if patch["keywords/$answered"] != true {
+		t.Errorf("keywords/$answered = %v, want true", patch["keywords/$answered"])
+	}
+}
+
+// --- Flag ---
+
+func TestFlag_KeywordMapping(t *testing.T) {
+	tests := []struct {
+		flag            mail.Flag
+		set             bool
+		wantKeyword     string
+		wantVal         interface{}
+	}{
+		{mail.FlagSeen, true, "keywords/$seen", true},
+		{mail.FlagSeen, false, "keywords/$seen", nil},
+		{mail.FlagFlagged, true, "keywords/$flagged", true},
+		{mail.FlagAnswered, true, "keywords/$answered", true},
+		{mail.FlagDraft, true, "keywords/$draft", true},
+		{mail.FlagForwarded, true, "keywords/$forwarded", true},
+	}
+
+	for _, tt := range tests {
+		name := fmt.Sprintf("flag=%d set=%v", tt.flag, tt.set)
+		t.Run(name, func(t *testing.T) {
+			var capturedReq *jmap.Request
+			fake := &fakeClient{
+				respond: func(req *jmap.Request) (*jmap.Response, error) {
+					capturedReq = req
+					return fakeResponse(&jmap.Invocation{
+						Name:   "Email/set",
+						CallID: "0",
+						Args:   &email.SetResponse{},
+					}), nil
+				},
+			}
+			b := newTestBackend(fake, "acct-1", nil)
+			if err := b.Flag([]mail.UID{"e-1"}, tt.flag, tt.set); err != nil {
+				t.Fatalf("Flag: %v", err)
+			}
+			s, ok := capturedReq.Calls[0].Args.(*email.Set)
+			if !ok {
+				t.Fatalf("args type = %T", capturedReq.Calls[0].Args)
+			}
+			patch := s.Update[jmap.ID("e-1")]
+			val := patch[tt.wantKeyword]
+			if val != tt.wantVal {
+				t.Errorf("%s = %v, want %v", tt.wantKeyword, val, tt.wantVal)
+			}
+		})
+	}
+}
+
+func TestFlag_UnsupportedFlag(t *testing.T) {
+	fake := &fakeClient{}
+	b := newTestBackend(fake, "acct-1", nil)
+
+	err := b.Flag([]mail.UID{"e-1"}, mail.FlagRecent, true)
+	if err == nil {
+		t.Fatal("expected error for unsupported flag")
+	}
+	if len(fake.sent) != 0 {
+		t.Errorf("expected no RPC for unsupported flag, got %d", len(fake.sent))
+	}
+}
+
+// --- Move ---
+
+func TestMove_EmptyUIDs(t *testing.T) {
+	fake := &fakeClient{}
+	folders := map[string]folderEntry{
+		"Sent": {id: "mb-sent", folder: mail.Folder{Name: "Sent"}},
+	}
+	b := newTestBackend(fake, "acct-1", folders)
+
+	if err := b.Move(nil, "Sent"); err != nil {
+		t.Errorf("Move(nil): %v", err)
+	}
+	if len(fake.sent) != 0 {
+		t.Errorf("expected no RPC, got %d", len(fake.sent))
+	}
+}
+
+func TestMove_RequestShape(t *testing.T) {
+	var capturedReq *jmap.Request
+	fake := &fakeClient{
+		respond: func(req *jmap.Request) (*jmap.Response, error) {
+			capturedReq = req
+			return fakeResponse(&jmap.Invocation{
+				Name:   "Email/set",
+				CallID: "0",
+				Args:   &email.SetResponse{},
+			}), nil
+		},
+	}
+	folders := map[string]folderEntry{
+		"Archive": {id: "mb-arch", folder: mail.Folder{Name: "Archive"}},
+	}
+	b := newTestBackend(fake, "acct-1", folders)
+
+	if err := b.Move([]mail.UID{"e-1", "e-2"}, "Archive"); err != nil {
+		t.Fatalf("Move: %v", err)
+	}
+	if capturedReq == nil {
+		t.Fatal("no request sent")
+	}
+	s, ok := capturedReq.Calls[0].Args.(*email.Set)
+	if !ok {
+		t.Fatalf("args type = %T", capturedReq.Calls[0].Args)
+	}
+	if len(s.Update) != 2 {
+		t.Errorf("update len = %d, want 2", len(s.Update))
+	}
+	patch := s.Update[jmap.ID("e-1")]
+	mboxIDs, ok := patch["mailboxIds"].(map[string]bool)
+	if !ok {
+		t.Fatalf("mailboxIds type = %T", patch["mailboxIds"])
+	}
+	if !mboxIDs["mb-arch"] {
+		t.Errorf("mailboxIds[mb-arch] = false, want true")
+	}
+}
+
+func TestMove_UnknownFolder(t *testing.T) {
+	fake := &fakeClient{}
+	b := newTestBackend(fake, "acct-1", nil)
+
+	err := b.Move([]mail.UID{"e-1"}, "Nonexistent")
+	if err == nil {
+		t.Fatal("expected error for unknown folder")
+	}
+}
+
+// --- Delete ---
+
+func TestDelete_EmptyUIDs(t *testing.T) {
+	fake := &fakeClient{}
+	folders := map[string]folderEntry{
+		"Trash": {id: "mb-trash", folder: mail.Folder{Name: "Trash"}},
+	}
+	b := newTestBackend(fake, "acct-1", folders)
+	if err := b.Delete(nil); err != nil {
+		t.Errorf("Delete(nil): %v", err)
+	}
+	if len(fake.sent) != 0 {
+		t.Errorf("expected no RPC, got %d", len(fake.sent))
+	}
+}
+
+func TestDelete_MovesToTrash(t *testing.T) {
+	var capturedReq *jmap.Request
+	fake := &fakeClient{
+		respond: func(req *jmap.Request) (*jmap.Response, error) {
+			capturedReq = req
+			return fakeResponse(&jmap.Invocation{
+				Name:   "Email/set",
+				CallID: "0",
+				Args:   &email.SetResponse{},
+			}), nil
+		},
+	}
+	folders := map[string]folderEntry{
+		"Trash": {id: "mb-trash", folder: mail.Folder{Name: "Trash"}},
+	}
+	b := newTestBackend(fake, "acct-1", folders)
+
+	if err := b.Delete([]mail.UID{"e-10"}); err != nil {
+		t.Fatalf("Delete: %v", err)
+	}
+	if capturedReq == nil {
+		t.Fatal("no request sent")
+	}
+	s, ok := capturedReq.Calls[0].Args.(*email.Set)
+	if !ok {
+		t.Fatalf("args type = %T", capturedReq.Calls[0].Args)
+	}
+	patch := s.Update[jmap.ID("e-10")]
+	mboxIDs, ok := patch["mailboxIds"].(map[string]bool)
+	if !ok {
+		t.Fatalf("mailboxIds type = %T, want map[string]bool", patch["mailboxIds"])
+	}
+	if !mboxIDs["mb-trash"] {
+		t.Errorf("expected e-10 moved to mb-trash")
+	}
+}
+
+func TestDelete_NoTrashFolder(t *testing.T) {
+	fake := &fakeClient{}
+	b := newTestBackend(fake, "acct-1", nil) // no Trash folder
+	err := b.Delete([]mail.UID{"e-1"})
+	if err == nil {
+		t.Fatal("expected error when Trash not found")
+	}
+}
+
+// --- Copy ---
+
+func TestCopy_EmptyUIDs(t *testing.T) {
+	fake := &fakeClient{}
+	folders := map[string]folderEntry{
+		"Archive": {id: "mb-arch", folder: mail.Folder{Name: "Archive"}},
+	}
+	b := newTestBackend(fake, "acct-1", folders)
+	if err := b.Copy(nil, "Archive"); err != nil {
+		t.Errorf("Copy(nil): %v", err)
+	}
+	if len(fake.sent) != 0 {
+		t.Errorf("expected no RPC, got %d", len(fake.sent))
+	}
+}
+
+func TestCopy_RequestShape(t *testing.T) {
+	var capturedReq *jmap.Request
+	fake := &fakeClient{
+		respond: func(req *jmap.Request) (*jmap.Response, error) {
+			capturedReq = req
+			return fakeResponse(&jmap.Invocation{
+				Name:   "Email/set",
+				CallID: "0",
+				Args:   &email.SetResponse{},
+			}), nil
+		},
+	}
+	folders := map[string]folderEntry{
+		"Archive": {id: "mb-arch", folder: mail.Folder{Name: "Archive"}},
+	}
+	b := newTestBackend(fake, "acct-1", folders)
+	b.blobIDs["e-1"] = "blob-e1"
+
+	if err := b.Copy([]mail.UID{"e-1"}, "Archive"); err != nil {
+		t.Fatalf("Copy: %v", err)
+	}
+	if capturedReq == nil {
+		t.Fatal("no request sent")
+	}
+	s, ok := capturedReq.Calls[0].Args.(*email.Set)
+	if !ok {
+		t.Fatalf("args type = %T", capturedReq.Calls[0].Args)
+	}
+	if len(s.Create) != 1 {
+		t.Fatalf("create len = %d, want 1", len(s.Create))
+	}
+	for _, e := range s.Create {
+		if e.BlobID != "blob-e1" {
+			t.Errorf("BlobID = %q, want %q", e.BlobID, "blob-e1")
+		}
+		if !e.MailboxIDs["mb-arch"] {
+			t.Errorf("MailboxIDs[mb-arch] = false, want true")
+		}
+	}
+}
+
+func TestCopy_UnknownBlobID(t *testing.T) {
+	fake := &fakeClient{}
+	folders := map[string]folderEntry{
+		"Archive": {id: "mb-arch", folder: mail.Folder{Name: "Archive"}},
+	}
+	b := newTestBackend(fake, "acct-1", folders)
+	// blobIDs not populated
+
+	err := b.Copy([]mail.UID{"e-missing"}, "Archive")
+	if err == nil {
+		t.Fatal("expected error for missing blob")
+	}
+	if len(fake.sent) != 0 {
+		t.Errorf("expected no RPC for missing blob, got %d", len(fake.sent))
+	}
+}
+
+// --- Send ---
+
+func TestSend_ReturnsNotImplemented(t *testing.T) {
+	b := newTestBackend(&fakeClient{}, "acct-1", nil)
+	err := b.Send("from@example.com", []string{"to@example.com"}, nil)
+	if err == nil {
+		t.Fatal("expected error from Send stub")
+	}
+}
+
+// --- Search ---
+
+func TestSearch_ReturnsNilNil(t *testing.T) {
+	b := newTestBackend(&fakeClient{}, "acct-1", nil)
+	uids, err := b.Search(mail.SearchCriteria{})
+	if err != nil {
+		t.Errorf("Search: unexpected error: %v", err)
+	}
+	if uids != nil {
+		t.Errorf("Search: got %v, want nil", uids)
 	}
 }
