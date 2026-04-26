@@ -6,6 +6,7 @@ import (
 
 	"github.com/charmbracelet/bubbles/spinner"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/charmbracelet/x/ansi"
 	"github.com/glw907/poplar/internal/theme"
 )
 
@@ -100,13 +101,21 @@ func applyBg(base, bgStyle lipgloss.Style) lipgloss.Style {
 	return base
 }
 
-// fillRowToWidth right-pads a fully-rendered row of ANSI segments to
-// exactly width display cells, using bgStyle for the trailing fill so
-// the row's background extends to the panel edge. Shared by sidebar
-// and message list row renderers.
+// fillRowToWidth fits a fully-rendered row of ANSI segments to
+// exactly width display cells. Short rows are right-padded with
+// bgStyle so the row's background extends to the panel edge; over-
+// wide rows are truncated to width. Shared by sidebar and message
+// list row renderers.
+//
+// Width is measured with displayCells so Nerd Font SPUA-A icons are
+// counted at their true 2-cell width.
 func fillRowToWidth(row string, width int, bgStyle lipgloss.Style) string {
-	if rw := lipgloss.Width(row); rw < width {
+	rw := displayCells(row)
+	if rw < width {
 		return row + bgStyle.Render(strings.Repeat(" ", width-rw))
+	}
+	if rw > width {
+		return ansi.Truncate(row, width, "")
 	}
 	return row
 }

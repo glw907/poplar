@@ -206,9 +206,9 @@ func (s Sidebar) renderRow(idx int, entry folderEntry, bgStyle lipgloss.Style) s
 		countWidth = lipgloss.Width(countStr)
 	}
 
-	// Layout: indicator(1) + sp(1) + icon + sp×2 + name + gap + count + margin(1)
+	// Layout: indicator(1) + sp(1) + icon(2) + sp×2 + name + gap + count + margin(1)
 	leftContent := indicator + bgStyle.Render(" ") + icon + bgStyle.Render("  ") + name
-	leftWidth := lipgloss.Width(leftContent)
+	leftWidth := displayCells(leftContent)
 
 	rightMargin := 1
 	gap := max(1, s.width-leftWidth-countWidth-rightMargin)

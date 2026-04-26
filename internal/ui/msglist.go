@@ -12,14 +12,15 @@ import (
 )
 
 // Column widths for the message list. Subject takes whatever remains
-// after the fixed columns. Flag cell is 1 cell wide because
-// lipgloss.Width reports Nerd Font glyphs as 1 cell — the wireframe's
-// "2-cell" labels describe visual width, not lipgloss math.
+// after the fixed columns. The flag cell is 2 cells wide: Nerd Font
+// SPUA-A glyphs render as 2 cells in real terminals, and the no-flag
+// case pads to match (see renderFlagCell).
 const (
 	mlSenderWidth = 22
 	mlDateWidth   = 14
-	// cursor + sp×2 + flag + sp×2 + sender + sp×2 + subject-pad + sp×2 + date + sp
-	mlFixedWidth = 1 + 2 + 1 + 2 + mlSenderWidth + 2 + 2 + mlDateWidth + 1
+	mlFlagWidth   = 2
+	// cursor + sp×2 + flag(2) + sp×2 + sender + sp×2 + subject-pad + sp×2 + date + sp
+	mlFixedWidth = 1 + 2 + mlFlagWidth + 2 + mlSenderWidth + 2 + 2 + mlDateWidth + 1
 )
 
 // Nerd Font glyphs used in the message list.
@@ -858,7 +859,7 @@ func (m MessageList) renderFlagCell(msg mail.MessageInfo, isUnread bool, bgStyle
 	case isUnread:
 		glyph = mlIconUnread
 	default:
-		return bgStyle.Render(" ")
+		return bgStyle.Render("  ")
 	}
 	return applyBg(iconStyle, bgStyle).Render(glyph)
 }

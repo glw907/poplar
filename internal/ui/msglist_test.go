@@ -5,7 +5,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/charmbracelet/lipgloss"
 	"github.com/glw907/poplar/internal/mail"
 	"github.com/glw907/poplar/internal/theme"
 )
@@ -131,7 +130,7 @@ func TestMessageList(t *testing.T) {
 		const w = 90
 		ml := NewMessageList(styles, msgs, w, 12)
 		for _, line := range strings.Split(ml.View(), "\n") {
-			if got := lipgloss.Width(line); got != w {
+			if got := displayCells(line); got != w {
 				t.Errorf("row width = %d, want %d: %q", got, w, stripANSI(line))
 			}
 		}

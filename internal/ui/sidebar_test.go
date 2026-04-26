@@ -5,7 +5,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/charmbracelet/lipgloss"
 	"github.com/glw907/poplar/internal/config"
 	"github.com/glw907/poplar/internal/mail"
 	"github.com/glw907/poplar/internal/theme"
@@ -100,7 +99,7 @@ func TestSidebar(t *testing.T) {
 		view := sb.View()
 		lines := strings.Split(view, "\n")
 		for i, line := range lines {
-			w := lipgloss.Width(line)
+			w := displayCells(line)
 			if w != 30 {
 				t.Errorf("line %d width = %d, want 30: %q",
 					i, w, stripANSI(line))
