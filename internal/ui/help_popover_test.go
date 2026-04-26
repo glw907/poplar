@@ -164,3 +164,60 @@ func TestHelpPopover_ViewerViewContent(t *testing.T) {
 		}
 	}
 }
+
+func TestHelpPopover_WiredStyling(t *testing.T) {
+	styles := NewStyles(theme.Nord)
+
+	// Wired rows use HelpKey (Bold) for the key column; unwired rows
+	// use Dim (not Bold) for the entire row. Test via style properties
+	// rather than rendered ANSI (lipgloss suppresses ANSI without a TTY).
+	if !styles.HelpKey.GetBold() {
+		t.Error("HelpKey style must be bold (used for wired key column)")
+	}
+	if styles.Dim.GetBold() {
+		t.Error("Dim style must not be bold (used for unwired rows)")
+	}
+
+	// Sanity-check that the data tables use wired=true / wired=false
+	// as expected for the rows the render path branches on.
+	wiredRow, ok := findAccountRow("Navigate", "j/k")
+	if !ok {
+		t.Fatal("Navigate j/k row not found in accountGroups")
+	}
+	if !wiredRow.wired {
+		t.Error("Navigate j/k: expected wired=true")
+	}
+
+	unwiredRow, ok := findAccountRow("Triage", "d")
+	if !ok {
+		t.Fatal("Triage d row not found in accountGroups")
+	}
+	if unwiredRow.wired {
+		t.Error("Triage d: expected wired=false")
+	}
+
+	// Confirm render path routes correctly: wired row content is
+	// present in the account popover, unwired row content is present too.
+	view := stripANSI(NewHelpPopover(styles, HelpAccount).View(120, 30))
+	for _, want := range []string{"j/k", "up/down", "d", "delete"} {
+		if !strings.Contains(view, want) {
+			t.Errorf("account popover missing %q", want)
+		}
+	}
+}
+
+func TestHelpPopover_GroupHeadersBoldEvenWhenAllUnwired(t *testing.T) {
+	styles := NewStyles(theme.Nord)
+
+	// HelpGroupHeader must be bold — it is used for every group heading
+	// including "Reply" which has no wired rows today.
+	if !styles.HelpGroupHeader.GetBold() {
+		t.Error("HelpGroupHeader style must be bold")
+	}
+
+	// Confirm "Reply" heading appears in the rendered account popover.
+	view := stripANSI(NewHelpPopover(styles, HelpAccount).View(120, 30))
+	if !strings.Contains(view, "Reply") {
+		t.Error("account popover: Reply group heading not found")
+	}
+}
