@@ -45,8 +45,14 @@ the ADR(s) that justify them.
 - Idiomatic bubbletea is the default. UI uses `bubbles` components
   as primary analogues; deviations are ADR'd. `View()`
   self-enforces size via `clipPane`; renderers honor `width` via
-  wordwrap + hardwrap; width math uses `lipgloss.Width` or
-  `displayCells` (never `len()`); keys declared as `key.Binding`,
+  wordwrap + hardwrap; width math uses `displayCells` for any string
+  that may carry a Nerd Font icon and `lipgloss.Width` for icon-free
+  strings (never `len()`); truncation of icon-bearing strings goes
+  through `displayTruncate`, never bare `ansi.Truncate`;
+  `lipgloss.JoinHorizontal`/`JoinVertical` are forbidden for any
+  composition that may include a row carrying a SPUA-A glyph (they
+  pad with `lipgloss.Width`, undercounting); use direct row-by-row
+  `strings.Join` with pre-padded children. Keys declared as `key.Binding`,
   dispatched via `key.Matches`; `WindowSizeMsg` handlers both
   `SetSize` children and forward the msg. Full contract in
   `docs/poplar/bubbletea-conventions.md`, grounded in
@@ -105,14 +111,11 @@ the ADR(s) that justify them.
   lex comparison only when `SentAt` is zero on both operands.
 - Message list date column formatting lives in
   `internal/ui/date_format.go` as `formatRelativeDate(t, now)`.
-  Same calendar day as `now` → 12-hour time (e.g. `10:23 AM`).
-  Any other day → `Mon 2006-01-02` (3-letter weekday + ISO date).
-  Zero time → empty string. Both the same-day check and the
-  returned string are in `now`'s location. `MessageList` captures
-  a clock snapshot into its `now` field at construction and on
-  every `SetMessages`, and `rebuild` precomputes the display
-  string into each `displayRow.dateText` so the render path does
-  no I/O and no per-frame formatting.
+  Same calendar day as `now` → 12-hour time (e.g. `10:23 AM`); any
+  other day → `Mon 2006-01-02`; zero time → empty. All in `now`'s
+  location. `MessageList` snapshots `now` at construction and on
+  `SetMessages`; `rebuild` precomputes `displayRow.dateText` so the
+  render path does no I/O and no per-frame formatting.
 - `MessageList` owns thread grouping and fold state. It holds
   `source []MessageInfo` (the raw backend payload) alongside a
   derived `rows []displayRow` rebuilt by a group→sort→flatten
@@ -134,19 +137,15 @@ the ADR(s) that justify them.
 - `ErrorMsg{Op string; Err error}` is the canonical Cmd error type.
   Every poplar `tea.Cmd` that can fail returns `ErrorMsg` with a
   short verb-phrase `Op` ("mark read", "fetch body", "open folder").
-  `App` owns `lastErr ErrorMsg`; `App.Update` intercepts every
-  `ErrorMsg` and stores it (last-write-wins). The banner is one
-  foreground-only row above the status bar (`⚠ <Op>: <Err>`),
-  truncated to width with `…`. When `lastErr.Err != nil` the account
-  region shrinks by one cell so total view height is unchanged. The
-  banner is chrome — it does not steal keys. Help short-circuits
-  `View`, so the banner is hidden along with everything else while a
-  modal is open. No dismiss key, no severity, no queue in v1.
-- The bubbles/spinner placeholder is constructed via the shared
-  `NewSpinner(t *theme.CompiledTheme)` helper in
-  `internal/ui/styles.go`: Dot variant, `FgDim` foreground. Every
-  placeholder spinner (viewer load now; folder load and send progress
-  later) goes through this constructor.
+  `App` owns `lastErr ErrorMsg`; `App.Update` stores it (last-write-
+  wins). Banner is one foreground-only row above the status bar
+  (`⚠ <Op>: <Err>`), truncated to width with `…`; account region
+  shrinks by one cell when shown so view height is unchanged. Banner
+  is chrome — no key steal, no dismiss, no severity, no queue. While
+  help is open, banner is part of the dimmed underlay.
+- Spinner placeholders go through `NewSpinner(t)` in
+  `internal/ui/styles.go`: Dot variant, `FgDim`. Used by viewer load;
+  future folder load and send progress will share it.
 - Body content rendering caps at `maxBodyWidth = 72` cells.
   Headers wrap at the panel content width (uncapped). Outbound
   links are harvested by `content.RenderBodyWithFootnotes` into
@@ -174,11 +173,13 @@ the ADR(s) that justify them.
   `helpOpen bool` and `help HelpPopover`; `viewerOpen` selects the
   context (`HelpAccount` vs `HelpViewer`) at open time. While
   `helpOpen` is true, `App.Update` short-circuits all keys other
-  than `?`/`Esc` (no delegation to children) and `App.View` returns
-  `m.help.View(width, height)` directly — the underlying account
-  layout is skipped. `HelpPopover` is render-only (no `Init`/
-  `Update`); centering is `lipgloss.Place`. No background dim in
-  v1.
+  than `?`/`Esc` (no delegation to children). `App.View` renders
+  the underlying frame, dims it via `DimANSI` (SGR-faint injector),
+  then composites the popover box atop with `PlaceOverlay`
+  (vendored from superfile, MIT). `HelpPopover` exposes
+  `Box(w,h)`/`Position(box,w,h)` for compositing; `View(w,h)` is the
+  standalone fallback used when the popover doesn't fit. No `Init`/
+  `Update`; centering is computed from `Position`.
 - Help popover advertises the full planned keybinding vocabulary,
   not just currently-wired keys. Each row in the static binding
   tables (`accountGroups`, `viewerGroups`,
@@ -294,6 +295,6 @@ invariant. ADR numbering is chronological.
 | Per-screen prototype passes | 0022 (superseded by 0070), 0070 |
 | Sidebar search shelf, filter-and-hide, thread-level | 0064 |
 | Viewer prototype, footnote harvesting, optimistic mark-read | 0065, 0066, 0067, 0069 |
-| Help popover modal, future-binding policy | 0071, 0072 |
+| Help popover modal, future-binding policy, overlay+dim | 0071 (superseded by 0082), 0072, 0082 |
 | Error banner, ErrorMsg, shared spinner | 0073, 0074 |
-| Bubbletea conventions: research-grounded, lint hook, displayCells, key dispatch, WindowSizeMsg | 0077, 0078, 0079, 0080, 0081 |
+| Bubbletea conventions: research-grounded, lint hook, displayCells, key dispatch, WindowSizeMsg, displayCells-everywhere | 0077, 0078, 0079, 0080, 0081, 0083 |

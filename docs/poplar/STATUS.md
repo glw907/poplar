@@ -1,10 +1,10 @@
 # Poplar Status
 
-**Current pass:** Pass 4.1 — render bugfix pass. Plan at
-`docs/superpowers/plans/2026-04-27-render-bugfix-pass.md` (7
-findings: viewer body overflow, message-list border jitter, column
-padding, popover vertical centering, popover overlay + dimmed
-background, viewer left padding, search shelf empty-query count).
+**Current pass:** Pass 2.5b-4b next — viewer completion (link picker
+`Tab`, filtered `n/N`, URL bug cleanup). Pass 4.1 done — 7 render
+fixes landed; ADR-0082 (popover overlay+dim, supersedes 0071) and
+ADR-0083 (displayCells everywhere, no JoinHorizontal/Vertical on
+SPUA-A rows) added.
 
 ## Passes
 
@@ -19,8 +19,8 @@ background, viewer left padding, search shelf empty-query count).
 | 2.9 | Research: emersion vs aerc fork (BACKLOG #10) | done |
 | 3 | JMAP direct-on-rockorager + delete fork + wire live | done |
 | 4 | Bubbletea conventions audit + infrastructure | done — [audit](audits/2026-04-26-bubbletea-conventions.md) |
-| 4.1 | Render bugfix pass — 7 findings, absorbs #14 | next |
-| 2.5b-4b | Viewer completion: link picker (`Tab`) + `n/N` filtered (#9) + URL bug cleanup | pending |
+| 4.1 | Render bugfix pass — 7 findings, absorbs #14 | done |
+| 2.5b-4b | Viewer completion: link picker (`Tab`) + `n/N` filtered (#9) + URL bug cleanup | next |
 | 5 | Bubbletea conventions cleanup: `key.Matches` (#17) + delegation (#18) + App.View trust (#19) | pending |
 | 6 | Triage actions (delete/archive/star/read; toast + undo bar) | pending |
 | 7 | Polish I — popover narrow-terminal (#15) + small render drift cleanup | pending |
@@ -32,26 +32,23 @@ background, viewer left padding, search shelf empty-query count).
 | 2.5b-train | Tooling: mailrender training capture | opportunistic |
 | 1.1 | Neovim companion plugin (post-v1, #6) | post-v1 |
 
-## Next starter prompt (Pass 4.1)
+## Next starter prompt (Pass 2.5b-4b)
 
-> **Goal.** Fix the rendering regressions surfaced after Pass 4 —
-> 7 findings catalogued in
-> `docs/superpowers/plans/2026-04-27-render-bugfix-pass.md`.
+> **Goal.** Complete the viewer: link picker on `Tab`, filtered
+> `n/N` (BACKLOG #9), URL-handling cleanup deferred from 4.1.
 >
-> **Scope.** Visible rendering bugs in `internal/ui/`. URL-handling
-> bugs deferred to Pass 2.5b-4b. App.View trust refactor (#19)
-> stays in Pass 5.
+> **Scope.** `internal/ui/viewer.go`, `account_tab.go` for `n/N`,
+> `internal/content/{parse,render_footnote}.go` for URL bugs.
 >
-> **Settled:** Pass 4 conventions discipline — every fix moves
-> closer to `bubbletea-conventions.md`, not away. F3b vendors
-> superfile's `PlaceOverlay` (MIT) and adds a small SGR-faint
-> injector; this supersedes ADR-0071's "no dim in v1."
+> **Settled:** ADR-0066/0067 footnote + launcher; ADR-0082 overlay
+> (link picker reuses `PlaceOverlay`+`DimANSI`).
 >
-> **Still open — brainstorm:** none — plan is ready to execute.
+> **Still open — brainstorm:** link picker layout (column/grid,
+> key affordances); `n/N` when no filter active; URL-bug triage.
 >
-> **Approach.** Execute findings in plan order (F1 → F2 → F5 → F3
-> → F3b → F6 → F4). Standard pass-end checklist applies; expect
-> 1–2 ADRs (F2 outcome + F3b overlay/dim).
+> **Approach.** Brainstorm open questions, write plan at
+> `docs/superpowers/plans/YYYY-MM-DD-viewer-completion.md`, then
+> implement. Standard pass-end checklist applies.
 
 ## Audits
 

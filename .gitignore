@@ -11,6 +11,7 @@
 .config/aerc/generated/
 .claude/memory/
 .claude/hookify.*.local.md
+.claude/scheduled_tasks.lock
 audit-output/
 corpus/
 .worktrees/

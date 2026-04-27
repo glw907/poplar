@@ -1,6 +1,6 @@
 ---
 title: Help popover modal infrastructure
-status: accepted
+status: superseded by 0082
 date: 2026-04-25
 ---
 
