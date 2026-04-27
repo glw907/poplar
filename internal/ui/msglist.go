@@ -814,13 +814,7 @@ func (m MessageList) renderRow(idx int, bgStyle lipgloss.Style) string {
 	// Subject column: prefix (in MsgListThreadPrefix style) followed by
 	// the subject text (in the read/unread style), with the subject
 	// truncated to fit whatever space remains after the prefix.
-	//
-	// mlFixedWidth budgets mlFlagWidth cells for the flag, but SPUA-A
-	// glyphs (unread/flagged/answered icons) are undercounted by 1 in
-	// lipgloss.Width / runewidth. Adjust the subject budget by the
-	// shortfall so every row has lipgloss.Width == m.width.
-	flagAdj := mlFlagWidth - lipgloss.Width(flag)
-	subjectWidth := max(1, m.width-mlFixedWidth+flagAdj)
+	subjectWidth := max(1, m.width-mlFixedWidth)
 	prefixCells := runewidth.StringWidth(row.prefix)
 	subjectCells := max(0, subjectWidth-prefixCells)
 
