@@ -136,6 +136,36 @@ func TestMessageList(t *testing.T) {
 		}
 	})
 
+	t.Run("read and unread rows have identical displayCells width at multiple widths", func(t *testing.T) {
+		// SPUA-A flag glyphs (unread/flagged/answered) render as 2 terminal
+		// cells; displayCells is the authoritative counter. Both read and unread
+		// rows must reach exactly w display cells so the right border lands at
+		// a fixed column regardless of flag state.
+		for _, w := range []int{80, 100, 120, 160} {
+			readMsg := mail.MessageInfo{
+				UID: "r", ThreadID: "r", From: "Alice", Subject: "Hello",
+				Date: "Mon 2026-04-26", Flags: mail.FlagSeen,
+			}
+			unreadMsg := mail.MessageInfo{
+				UID: "u", ThreadID: "u", From: "Bob", Subject: "World",
+				Date: "Mon 2026-04-26", Flags: 0,
+			}
+			ml := NewMessageList(styles, []mail.MessageInfo{readMsg, unreadMsg}, w, 5)
+			lines := strings.Split(ml.View(), "\n")
+			if len(lines) < 2 {
+				t.Fatalf("w=%d: expected at least 2 rows, got %d", w, len(lines))
+			}
+			readW := displayCells(lines[0])
+			unreadW := displayCells(lines[1])
+			if readW != w {
+				t.Errorf("w=%d: read row displayCells=%d, want %d", w, readW, w)
+			}
+			if unreadW != w {
+				t.Errorf("w=%d: unread row displayCells=%d, want %d", w, unreadW, w)
+			}
+		}
+	})
+
 	t.Run("unread messages show envelope icon", func(t *testing.T) {
 		ml := NewMessageList(styles, msgs, 90, 20)
 		plain := stripANSI(ml.View())

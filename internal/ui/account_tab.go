@@ -432,34 +432,35 @@ func (m AccountTab) View() string {
 		sidebarLines = sidebarLines[:m.height]
 	}
 
-	sidebarView := strings.Join(sidebarLines, "\n")
-	divider := renderDivider(m.height, m.styles)
+	divLine := m.styles.PanelDivider.Render("│")
 
-	var right string
+	var rightLines []string
 	switch {
 	case m.viewer.IsOpen():
-		right = m.viewer.View()
+		rightLines = strings.Split(m.viewer.View(), "\n")
 	case m.loading && m.msglist.Count() == 0:
 		text := m.spinner.View() + " Loading messages…"
 		mw := max(1, m.width-min(sidebarWidth, m.width/2)-1)
-		right = lipgloss.Place(
-			mw, m.height,
-			lipgloss.Center, lipgloss.Center,
-			m.styles.Dim.Render(text),
-		)
+		rightLines = strings.Split(
+			lipgloss.Place(mw, m.height, lipgloss.Center, lipgloss.Center,
+				m.styles.Dim.Render(text)),
+			"\n")
 	default:
-		right = m.msglist.View()
+		rightLines = strings.Split(m.msglist.View(), "\n")
 	}
 
-	return lipgloss.JoinHorizontal(lipgloss.Top, sidebarView, divider, right)
+	// Assemble columns row-by-row rather than via lipgloss.JoinHorizontal.
+	// JoinHorizontal pads based on lipgloss.Width, which undercounts Nerd
+	// Font SPUA-A glyphs by 1 cell each. The sidebar and msglist renderers
+	// use displayCells (the correct terminal-cell count) via fillRowToWidth,
+	// so each row is already exactly the right terminal width. Direct
+	// concatenation preserves that property; JoinHorizontal would add
+	// spurious padding to SPUA-A rows and widen them by 1–2 cells.
+	n := min(len(sidebarLines), len(rightLines))
+	assembled := make([]string, n)
+	for i := range n {
+		assembled[i] = sidebarLines[i] + divLine + rightLines[i]
+	}
+	return strings.Join(assembled, "\n")
 }
 
-// renderDivider renders a vertical line of │ characters.
-func renderDivider(height int, s Styles) string {
-	div := s.PanelDivider.Render("│")
-	lines := make([]string, height)
-	for i := range lines {
-		lines[i] = div
-	}
-	return strings.Join(lines, "\n")
-}

@@ -6,7 +6,6 @@ import (
 
 	"github.com/charmbracelet/bubbles/spinner"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/charmbracelet/x/ansi"
 	"github.com/glw907/poplar/internal/theme"
 )
 
@@ -115,7 +114,7 @@ func fillRowToWidth(row string, width int, bgStyle lipgloss.Style) string {
 		return row + bgStyle.Render(strings.Repeat(" ", width-rw))
 	}
 	if rw > width {
-		return ansi.Truncate(row, width, "")
+		return displayTruncate(row, width)
 	}
 	return row
 }

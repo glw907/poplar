@@ -434,14 +434,56 @@ func TestApp_BannerLastWriteWins(t *testing.T) {
 	}
 }
 
-func TestApp_BannerHiddenWhileHelpOpen(t *testing.T) {
+func TestApp_PopoverOverlaysErrorBanner(t *testing.T) {
+	// With the dimmed-overlay design the error banner is part of the dimmed
+	// background that is visible behind the popover. The popover must also
+	// appear in the output — the overlay composites over, not replaces, the
+	// frame. The banner does not steal keys; that's enforced by Update, not
+	// View.
 	app := newLoadedApp(t, 100, 30)
 	app, _ = app.Update(ErrorMsg{Op: "fetch body", Err: errors.New("EOF")})
 	app, _ = app.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'?'}})
 
 	view := stripANSI(app.View())
-	if strings.Contains(view, "fetch body") {
-		t.Errorf("banner rendered while help popover open: %q", view)
+	// Popover must be present.
+	if !strings.Contains(view, "Message List") {
+		t.Errorf("popover missing from view with error banner open: %q", view)
+	}
+	// The banner text is in the dimmed background (overlay design).
+	if !strings.Contains(view, "fetch body") {
+		t.Errorf("banner background missing from view: %q", view)
+	}
+}
+
+// TestApp_HelpOverlayDimsBg is the F3b.3 composite test. It verifies:
+//  1. Both the popover box content and the underlying account-view content
+//     appear in the ANSI-stripped output (overlay, not replacement).
+//  2. The raw (ANSI-preserved) output contains ESC[2m or ESC[2; somewhere,
+//     confirming the background frame was passed through DimANSI.
+func TestApp_HelpOverlayDimsBg(t *testing.T) {
+	app := newLoadedApp(t, 120, 40)
+	app, _ = app.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'?'}})
+	if !app.helpOpen {
+		t.Fatal("setup: ? did not open help")
+	}
+
+	raw := app.View()
+	plain := stripANSI(raw)
+
+	// Popover box must appear.
+	if !strings.Contains(plain, "Navigate") {
+		t.Errorf("popover content 'Navigate' missing from overlay view:\n%s", plain)
+	}
+
+	// Underlying account-view content must appear (folder name in sidebar).
+	if !strings.Contains(plain, "Inbox") {
+		t.Errorf("background content 'Inbox' missing from overlay view:\n%s", plain)
+	}
+
+	// The raw output must carry dim ANSI codes injected by DimANSI.
+	hasDim := strings.Contains(raw, "\x1b[2m") || strings.Contains(raw, "\x1b[2;")
+	if !hasDim {
+		t.Error("raw view missing ESC[2m or ESC[2; dim marker — background was not dimmed")
 	}
 }
 
@@ -527,5 +569,37 @@ func TestApp_BackendUpdateReArmspump(t *testing.T) {
 	_, cmd := app.Update(msg)
 	if cmd == nil {
 		t.Error("backendUpdateMsg handler returned nil Cmd; pump would die")
+	}
+}
+
+func TestApp_RightBorderAlignment(t *testing.T) {
+	// The right border │ must land at the same terminal column for every
+	// content row, regardless of whether the row contains SPUA-A Nerd Font
+	// glyphs (sidebar folder icons, message flag icons). App.View uses
+	// displayCells (not lipgloss.Width) so each row is padded correctly
+	// before the border is appended.
+	for _, w := range []int{80, 100, 120, 160} {
+		app := newLoadedApp(t, w, 30)
+		view := app.View()
+		lines := strings.Split(view, "\n")
+		// Skip empty lines and lines that are all-border (top/bottom chrome).
+		borderRune := '│'
+		for lineIdx, line := range lines {
+			if line == "" {
+				continue
+			}
+			// Content rows end with │. Find the position of the last │.
+			// All content rows must have it at the same display column = w-1.
+			plain := stripANSI(line)
+			if !strings.ContainsRune(plain, borderRune) {
+				continue
+			}
+			// Measure display cells of the full line (including the border).
+			dw := displayCells(line)
+			if dw != w {
+				t.Errorf("w=%d line %d: displayCells=%d, want %d: %q",
+					w, lineIdx, dw, w, plain)
+			}
+		}
 	}
 }

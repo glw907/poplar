@@ -814,7 +814,14 @@ func (m MessageList) renderRow(idx int, bgStyle lipgloss.Style) string {
 	// Subject column: prefix (in MsgListThreadPrefix style) followed by
 	// the subject text (in the read/unread style), with the subject
 	// truncated to fit whatever space remains after the prefix.
-	subjectWidth := max(1, m.width-mlFixedWidth)
+	//
+	// mlFixedWidth budgets mlFlagWidth (2) cells for the flag. When the
+	// flag cell holds a Nerd Font SPUA-A glyph, lipgloss.Width undercounts
+	// it by 1, so the row builder would allocate one extra cell to subject
+	// — making the assembled row one terminal cell wider than m.width.
+	// Subtract spuaACorrection(flag) from the subject budget so that
+	// displayCells(assembled row) == m.width regardless of flag content.
+	subjectWidth := max(1, m.width-mlFixedWidth-spuaACorrection(flag))
 	prefixCells := runewidth.StringWidth(row.prefix)
 	subjectCells := max(0, subjectWidth-prefixCells)
 

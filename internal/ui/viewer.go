@@ -9,7 +9,6 @@ import (
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/charmbracelet/x/ansi"
 	"github.com/glw907/poplar/internal/content"
 	"github.com/glw907/poplar/internal/mail"
 	"github.com/glw907/poplar/internal/theme"
@@ -224,7 +223,7 @@ func (v Viewer) View() string {
 // clipPane enforces the size contract every bubbletea component
 // owes its parent: exactly height rows, each exactly width cells.
 // Lines longer than width are truncated (ANSI-aware via
-// ansi.Truncate); shorter lines are padded; the row count is
+// displayTruncate); shorter lines are padded; the row count is
 // enforced both ways. This is what bubbles components do
 // internally when they call lipgloss.Place — the same idiom
 // applied here so the viewer can never lie to JoinHorizontal.
@@ -240,7 +239,7 @@ func clipPane(s string, width, height int) string {
 		w := displayCells(line)
 		switch {
 		case w > width:
-			lines[i] = ansi.Truncate(line, width, "")
+			lines[i] = displayTruncate(line, width)
 		case w < width:
 			lines[i] = line + strings.Repeat(" ", width-w)
 		}

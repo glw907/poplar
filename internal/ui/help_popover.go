@@ -150,11 +150,12 @@ var viewerBottomHints = []bindingRow{
 	{"?", "close", true},
 }
 
-// View renders the popover centered on a width × height area.
-// The caller (App) is expected to pass its full screen dimensions;
-// the popover sizes its box from content and lipgloss.Place
-// handles centering.
-func (h HelpPopover) View(width, height int) string {
+// Box returns the popover box string sized from its content. The returned
+// string does NOT include full-screen padding — it is the raw box ready
+// for overlay compositing. The second return value is a "too narrow"
+// fallback string; it is non-empty when the box does not fit within
+// (width, height) and the caller should display it instead.
+func (h HelpPopover) Box(width, height int) (box string, tooNarrow string) {
 	var title, body string
 	var bottomHints []bindingRow
 	switch h.context {
@@ -171,33 +172,55 @@ func (h HelpPopover) View(width, height int) string {
 
 	// Wrap inner in a rounded box, with top border drawn manually
 	// so the title can be embedded. Border(style, top, right, bottom, left).
-	box := lipgloss.NewStyle().
+	b := lipgloss.NewStyle().
 		Border(lipgloss.RoundedBorder(), false, true, true, true).
 		BorderForeground(h.styles.FrameBorder.GetForeground()).
 		Padding(1, 2).
 		Render(inner)
 
-	boxWidth := lipgloss.Width(box)
+	boxWidth := lipgloss.Width(b)
 	topEdge := h.renderTopEdge(title, boxWidth)
-	popover := topEdge + "\n" + box
+	popover := topEdge + "\n" + b
 
-	// lipgloss.Place is a no-op when content is wider than the
-	// target, so without a guard the popover would overflow the
-	// terminal at narrow widths. Render a fallback notice instead.
 	if boxWidth > width || lipgloss.Height(popover) > height {
-		notice := h.styles.Dim.Render(
-			"Terminal too narrow for help popover")
+		return "", h.styles.Dim.Render("Terminal too narrow for help popover")
+	}
+	return popover, ""
+}
+
+// Position returns the top-left (x, y) cell coordinates at which the
+// popover box should be placed to appear centered on (width, height).
+func (h HelpPopover) Position(box string, width, height int) (x, y int) {
+	bw := lipgloss.Width(box)
+	bh := lipgloss.Height(box)
+	x = (width - bw) / 2
+	y = (height - bh) / 2
+	if x < 0 {
+		x = 0
+	}
+	if y < 0 {
+		y = 0
+	}
+	return x, y
+}
+
+// View renders the popover centered on a width × height area.
+// When the underlying account frame is available the caller should use
+// Box + Position + PlaceOverlay instead; View is retained as a fallback
+// for callers that need a standalone full-screen string (e.g. tests).
+func (h HelpPopover) View(width, height int) string {
+	box, tooNarrow := h.Box(width, height)
+	if tooNarrow != "" {
 		return lipgloss.Place(
 			width, height,
 			lipgloss.Center, lipgloss.Center,
-			notice,
+			tooNarrow,
 		)
 	}
-
 	return lipgloss.Place(
 		width, height,
 		lipgloss.Center, lipgloss.Center,
-		popover,
+		box,
 	)
 }
 

@@ -1,6 +1,9 @@
 package ui
 
-import "github.com/charmbracelet/lipgloss"
+import (
+	"github.com/charmbracelet/lipgloss"
+	"github.com/charmbracelet/x/ansi"
+)
 
 // Nerd Font icons live in the Supplementary Private Use Area-A
 // (U+F0000–U+FFFFD). Every modern terminal renders them as 2 display
@@ -47,4 +50,23 @@ func spuaACorrectionSlow(s string) int {
 		}
 	}
 	return n
+}
+
+// displayTruncate truncates the ANSI string s to at most n terminal display
+// cells, counting Nerd Font SPUA-A glyphs as 2 cells each. ansi.Truncate
+// uses runewidth internally and undercounts SPUA-A by 1 per glyph; this
+// wrapper decrements the runewidth limit until the result is within n cells.
+// At most spuaACorrection(s) iterations run (typically 0–2).
+func displayTruncate(s string, n int) string {
+	limit := n
+	for {
+		t := ansi.Truncate(s, limit, "")
+		if displayCells(t) <= n {
+			return t
+		}
+		limit--
+		if limit < 0 {
+			return ""
+		}
+	}
 }

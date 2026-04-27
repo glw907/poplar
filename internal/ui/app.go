@@ -157,21 +157,25 @@ func (m App) Update(msg tea.Msg) (App, tea.Cmd) {
 	return m, cmd
 }
 
-// View composes the full-screen layout.
-func (m App) View() string {
-	if m.width == 0 || m.height == 0 {
-		return ""
-	}
-	if m.helpOpen {
-		return m.help.View(m.width, m.height)
-	}
-
+// renderFrame builds the full-screen account layout string. It is extracted
+// from View so it can be dimmed and composited under the help popover.
+func (m App) renderFrame() string {
 	rawContent := m.acct.View()
 	rightBorder := m.styles.FrameBorder.Render("│")
 	contentLines := strings.Split(rawContent, "\n")
 	for i, line := range contentLines {
-		pad := max(0, m.width-1-lipgloss.Width(line))
-		contentLines[i] = line + strings.Repeat(" ", pad) + rightBorder
+		// displayCells measures actual terminal width, counting Nerd Font
+		// SPUA-A glyphs at their true 2-cell render width. Clip or pad so
+		// every content row occupies exactly m.width-1 terminal cells before
+		// the right border is appended.
+		dw := displayCells(line)
+		contentWidth := m.width - 1
+		if dw > contentWidth {
+			line = displayTruncate(line, contentWidth)
+		} else if dw < contentWidth {
+			line = line + strings.Repeat(" ", contentWidth-dw)
+		}
+		contentLines[i] = line + rightBorder
 	}
 	content := strings.Join(contentLines, "\n")
 
@@ -185,7 +189,43 @@ func (m App) View() string {
 		parts = append(parts, banner)
 	}
 	parts = append(parts, status, foot)
-	return lipgloss.JoinVertical(lipgloss.Left, parts...)
+	// Use strings.Join rather than lipgloss.JoinVertical. JoinVertical pads
+	// all rows to the widest row using lipgloss.Width, which undercounts
+	// SPUA-A Nerd Font glyphs by 1 cell each. Content rows already have the
+	// correct terminal width (ensured by displayCells above); JoinVertical
+	// would add spurious 1-cell padding to any row with SPUA-A content,
+	// causing those rows to land 1 cell outside the terminal width.
+	return strings.Join(parts, "\n")
+}
+
+// View composes the full-screen layout. When the help popover is open the
+// underlying account frame is rendered, dimmed via DimANSI, and then the
+// popover box is composited over it via PlaceOverlay so the underlying
+// context remains visible but recedes visually.
+func (m App) View() string {
+	if m.width == 0 || m.height == 0 {
+		return ""
+	}
+
+	frame := m.renderFrame()
+
+	if m.helpOpen {
+		box, tooNarrow := m.help.Box(m.width, m.height)
+		dimmed := DimANSI(frame)
+		if tooNarrow != "" {
+			// Terminal too narrow for the full popover: show the notice
+			// centered over the dimmed frame.
+			x, y := (m.width-lipgloss.Width(tooNarrow))/2, m.height/2
+			if x < 0 {
+				x = 0
+			}
+			return PlaceOverlay(x, y, tooNarrow, dimmed)
+		}
+		x, y := m.help.Position(box, m.width, m.height)
+		return PlaceOverlay(x, y, box, dimmed)
+	}
+
+	return frame
 }
 
 // translateConnState maps mail.ConnState to the UI ConnectionState type.
