@@ -5,6 +5,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/charmbracelet/lipgloss"
 	"github.com/glw907/poplar/internal/mail"
 	"github.com/glw907/poplar/internal/theme"
 )
@@ -127,11 +128,44 @@ func TestMessageList(t *testing.T) {
 	})
 
 	t.Run("all rendered rows have configured width", func(t *testing.T) {
+		// lipgloss.Width mirrors what the terminal uses for cell layout.
+		// The row builder widens the subject column to compensate for SPUA-A
+		// undercount so every row lands at exactly w regardless of flag glyph.
 		const w = 90
 		ml := NewMessageList(styles, msgs, w, 12)
 		for _, line := range strings.Split(ml.View(), "\n") {
-			if got := displayCells(line); got != w {
+			if got := lipgloss.Width(line); got != w {
 				t.Errorf("row width = %d, want %d: %q", got, w, stripANSI(line))
+			}
+		}
+	})
+
+	t.Run("read and unread rows have identical lipgloss.Width at multiple widths", func(t *testing.T) {
+		// SPUA-A flag glyphs (unread/flagged/answered) must not shift row width
+		// relative to no-glyph rows. Each case renders one read and one unread
+		// row and asserts lipgloss.Width equality.
+		for _, w := range []int{80, 100, 120, 160} {
+			readMsg := mail.MessageInfo{
+				UID: "r", ThreadID: "r", From: "Alice", Subject: "Hello",
+				Date: "Mon 2026-04-26", Flags: mail.FlagSeen,
+			}
+			unreadMsg := mail.MessageInfo{
+				UID: "u", ThreadID: "u", From: "Bob", Subject: "World",
+				Date: "Mon 2026-04-26", Flags: 0,
+			}
+			ml := NewMessageList(styles, []mail.MessageInfo{readMsg, unreadMsg}, w, 5)
+			lines := strings.Split(ml.View(), "\n")
+			if len(lines) < 2 {
+				t.Fatalf("w=%d: expected at least 2 rows, got %d", w, len(lines))
+			}
+			readW := lipgloss.Width(lines[0])
+			unreadW := lipgloss.Width(lines[1])
+			if readW != unreadW {
+				t.Errorf("w=%d: read lipgloss.Width=%d != unread lipgloss.Width=%d",
+					w, readW, unreadW)
+			}
+			if readW != w {
+				t.Errorf("w=%d: read row lipgloss.Width=%d, want %d", w, readW, w)
 			}
 		}
 	})
