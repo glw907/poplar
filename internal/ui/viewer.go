@@ -215,7 +215,9 @@ func (v Viewer) View() string {
 		)
 		return clipPane(placed, v.width, v.height)
 	}
-	out := lipgloss.JoinVertical(lipgloss.Left, v.headerStr, v.viewport.View())
+	headers := padLeftLines(v.headerStr, 1)
+	body := padLeftLines(v.viewport.View(), 1)
+	out := lipgloss.JoinVertical(lipgloss.Left, headers, body)
 	return clipPane(out, v.width, v.height)
 }
 
@@ -252,6 +254,10 @@ func clipPane(s string, width, height int) string {
 // layout renders headers + body and populates the viewport. Called
 // from SetBody and from SetSize when the viewer is already ready.
 // Headers stay pinned above the viewport; only the body scrolls.
+//
+// contentWidth is one cell narrower than v.width. padLeftLines adds
+// the leading space back in View(), so the total per-line cell count
+// equals v.width after clipPane pads the remainder.
 func (v *Viewer) layout() {
 	hdrs := content.ParsedHeaders{
 		From:    []content.Address{{Name: v.msg.From}},
@@ -259,16 +265,29 @@ func (v *Viewer) layout() {
 		Date:    v.msg.Date,
 		Subject: v.msg.Subject,
 	}
-	width := max(1, v.width)
-	v.headerStr = content.RenderHeaders(hdrs, v.theme, width)
-	body, urls := content.RenderBodyWithFootnotes(v.blocks, v.theme, width)
+	contentWidth := max(1, v.width-1)
+	v.headerStr = content.RenderHeaders(hdrs, v.theme, contentWidth)
+	body, urls := content.RenderBodyWithFootnotes(v.blocks, v.theme, contentWidth)
 	v.links = urls
 	headerHeight := lipgloss.Height(v.headerStr)
 	bodyHeight := max(1, v.height-headerHeight)
-	vp := viewport.New(width, bodyHeight)
+	vp := viewport.New(contentWidth, bodyHeight)
 	vp.KeyMap = viewerViewportKeymap()
 	vp.SetContent(body)
 	v.viewport = vp
+}
+
+// padLeftLines prepends n spaces to every newline-separated line in s.
+func padLeftLines(s string, n int) string {
+	if n <= 0 || s == "" {
+		return s
+	}
+	pad := strings.Repeat(" ", n)
+	lines := strings.Split(s, "\n")
+	for i, l := range lines {
+		lines[i] = pad + l
+	}
+	return strings.Join(lines, "\n")
 }
 
 // viewerViewportKeymap configures the viewport with modifier-free

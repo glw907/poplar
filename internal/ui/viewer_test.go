@@ -169,3 +169,29 @@ func TestViewerClosedViewIsEmpty(t *testing.T) {
 		t.Errorf("closed View must be empty, got %q", v.View())
 	}
 }
+
+// TestViewerLeftPaddingGeometry verifies that every rendered line in the
+// ready phase starts with a space and is exactly v.width display cells wide.
+func TestViewerLeftPaddingGeometry(t *testing.T) {
+	const w, h = 80, 20
+	v := newTestViewer().SetSize(w, h).Open(mail.MessageInfo{
+		UID: "1", Subject: "Geometry test", From: "Alice",
+	})
+	v = v.SetBody([]content.Block{
+		content.Paragraph{Spans: []content.Span{content.Text{Content: "Hello, padding world."}}},
+	})
+
+	out := v.View()
+	lines := strings.Split(out, "\n")
+	for i, line := range lines {
+		if line == "" {
+			continue
+		}
+		if !strings.HasPrefix(line, " ") {
+			t.Errorf("line %d does not start with a space: %q", i, line)
+		}
+		if got := displayCells(line); got != w {
+			t.Errorf("line %d width = %d, want %d: %q", i, got, w, line)
+		}
+	}
+}
