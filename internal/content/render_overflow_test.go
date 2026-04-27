@@ -31,6 +31,9 @@ func TestFootnoteURLNoOverflow(t *testing.T) {
 			if len(urls) != 1 {
 				t.Fatalf("expected 1 url, got %d", len(urls))
 			}
+			if !strings.Contains(out, "[^1]:") {
+				t.Errorf("footnote entry missing from output:\n%s", out)
+			}
 			widthCap := w
 			if widthCap > maxBodyWidth {
 				widthCap = maxBodyWidth
