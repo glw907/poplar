@@ -76,7 +76,9 @@ func renderBlock(block Block, t *theme.CompiledTheme, width int) string {
 			style = t.DeepQuote
 		}
 		prefix := "> " // single level; structural nesting handles depth
-		content := joinRenderedBlocks(b.Blocks, t, width-len(prefix))
+		// Use lipgloss.Width (display cells) not len (bytes) for the
+		// prefix deduction so wide-char prefixes don't undercount.
+		content := joinRenderedBlocks(b.Blocks, t, width-lipgloss.Width(prefix))
 		var lines []string
 		for _, line := range strings.Split(content, "\n") {
 			if line == "" {
@@ -117,8 +119,11 @@ func renderBlock(block Block, t *theme.CompiledTheme, width int) string {
 		if b.Ordered {
 			prefix = string(rune('0'+b.Index%10)) + ". "
 		}
-		indent := strings.Repeat(" ", len(prefix))
-		wrapped := wrap(text, width-len(prefix))
+		// Use lipgloss.Width (display cells) not len (bytes) for the
+		// prefix deduction and indent width.
+		prefixW := lipgloss.Width(prefix)
+		indent := strings.Repeat(" ", prefixW)
+		wrapped := wrap(text, width-prefixW)
 		lines := strings.Split(wrapped, "\n")
 		for i, line := range lines {
 			if i == 0 {

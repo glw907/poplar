@@ -39,7 +39,11 @@ func RenderBodyWithFootnotes(blocks []Block, t *theme.CompiledTheme, width int) 
 	b.WriteString(t.HorizontalRule.Render(strings.Repeat("─", w)))
 	for i, u := range urls {
 		b.WriteString("\n")
-		b.WriteString(t.Link.Render(fmt.Sprintf("[^%d]: %s", i+1, u)))
+		// Wrap before styling: a long URL is an unbreakable token that
+		// wordwrap cannot split; hardwrap catches it so no output line
+		// exceeds the width budget.
+		label := fmt.Sprintf("[^%d]: %s", i+1, u)
+		b.WriteString(t.Link.Render(wrap(label, w)))
 	}
 	return b.String(), urls
 }
