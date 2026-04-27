@@ -221,3 +221,32 @@ func TestHelpPopover_GroupHeadersBoldEvenWhenAllUnwired(t *testing.T) {
 		t.Error("account popover: Reply group heading not found")
 	}
 }
+
+// TestHelpPopover_VerticallyCentered locks in the F3 acceptance: the
+// popover's blank-row margins above and below the box are equal (±1).
+// Prior regression rendered the box pinned ~1 row from the top.
+func TestHelpPopover_VerticallyCentered(t *testing.T) {
+	styles := NewStyles(theme.Nord)
+	for _, dims := range []struct{ w, h int }{{120, 30}, {120, 40}, {160, 50}} {
+		view := stripANSI(NewHelpPopover(styles, HelpAccount).View(dims.w, dims.h))
+		lines := strings.Split(view, "\n")
+		var first, last int = -1, -1
+		for i, ln := range lines {
+			if strings.TrimSpace(ln) != "" {
+				if first < 0 {
+					first = i
+				}
+				last = i
+			}
+		}
+		if first < 0 {
+			t.Fatalf("%dx%d: empty view", dims.w, dims.h)
+		}
+		topBlank := first
+		botBlank := len(lines) - 1 - last
+		if diff := topBlank - botBlank; diff < -1 || diff > 1 {
+			t.Errorf("%dx%d: top blank %d vs bottom blank %d (diff %d, want |diff|<=1)",
+				dims.w, dims.h, topBlank, botBlank, diff)
+		}
+	}
+}
