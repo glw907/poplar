@@ -15,6 +15,7 @@ import (
 type App struct {
 	acct       AccountTab
 	backend    mail.Backend
+	icons      IconSet
 	styles     Styles
 	topLine    TopLine
 	statusBar  StatusBar
@@ -30,14 +31,15 @@ type App struct {
 
 // NewApp creates the root model with a single AccountTab. Folder loading
 // happens in Init's Cmd chain, not in the constructor.
-func NewApp(t *theme.CompiledTheme, backend mail.Backend, uiCfg config.UIConfig) App {
+func NewApp(t *theme.CompiledTheme, backend mail.Backend, uiCfg config.UIConfig, icons IconSet) App {
 	styles := NewStyles(t)
 	sb := NewStatusBar(styles)
 	sb = sb.SetConnectionState(Offline)
 
 	return App{
-		acct:      NewAccountTab(styles, t, backend, uiCfg),
+		acct:      NewAccountTab(styles, t, backend, uiCfg, icons),
 		backend:   backend,
+		icons:     icons,
 		styles:    styles,
 		topLine:   NewTopLine(styles),
 		statusBar: sb,

@@ -80,7 +80,9 @@ func runRoot(f rootFlags) error {
 		return fmt.Errorf("load UI config: %w", err)
 	}
 
-	app := ui.NewApp(t, backend, uiCfg)
+	// Pass FancyIcons temporarily; Task 11 will wire the resolved IconSet
+	// from term.Resolve based on the detected terminal capabilities.
+	app := ui.NewApp(t, backend, uiCfg, ui.FancyIcons)
 
 	p := tea.NewProgram(appModel{app: app}, tea.WithAltScreen())
 	if _, err := p.Run(); err != nil {

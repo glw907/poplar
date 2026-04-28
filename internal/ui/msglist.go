@@ -23,13 +23,8 @@ const (
 	mlFixedWidth = 1 + 2 + mlFlagWidth + 2 + mlSenderWidth + 2 + 2 + mlDateWidth + 1
 )
 
-// Nerd Font glyphs used in the message list.
-const (
-	mlCursorGlyph  = "▐"
-	mlIconUnread   = "󰇮"
-	mlIconAnswered = "󰑚"
-	mlIconFlagged  = "󰈻"
-)
+// mlCursorGlyph is the cursor indicator in column 0.
+const mlCursorGlyph = "▐"
 
 // Box-drawing tokens for thread prefixes. Each string is exactly 3
 // display cells; buildPrefix relies on that to keep column math
@@ -75,16 +70,17 @@ type displayRow struct {
 // The source slice is preserved alongside a derived []displayRow so
 // fold mutations re-flatten without a backend refetch.
 type MessageList struct {
-	source          []mail.MessageInfo
-	rows            []displayRow
-	folded          map[mail.UID]bool
-	sort            SortOrder
-	threaded        bool
-	selected        int
-	offset          int
-	styles          Styles
-	width           int
-	height          int
+	source  []mail.MessageInfo
+	rows    []displayRow
+	folded  map[mail.UID]bool
+	sort    SortOrder
+	threaded bool
+	selected int
+	offset   int
+	styles   Styles
+	icons    IconSet
+	width    int
+	height   int
 	// now is the clock snapshot fed into displayDate during rebuild.
 	// Captured at construction and refreshed on SetMessages so View
 	// never has to call time.Now() itself (keeps I/O out of the
@@ -104,9 +100,10 @@ type searchFilter struct {
 }
 
 // NewMessageList creates a MessageList with the given messages and size.
-func NewMessageList(styles Styles, msgs []mail.MessageInfo, width, height int) MessageList {
+func NewMessageList(styles Styles, msgs []mail.MessageInfo, width, height int, icons IconSet) MessageList {
 	m := MessageList{
 		styles:   styles,
+		icons:    icons,
 		width:    width,
 		height:   height,
 		folded:   map[mail.UID]bool{},
@@ -857,14 +854,14 @@ func (m MessageList) renderFlagCell(msg mail.MessageInfo, isUnread bool, bgStyle
 	var glyph string
 	switch {
 	case msg.Flags&mail.FlagFlagged != 0:
-		glyph = mlIconFlagged
+		glyph = m.icons.FlagFlagged
 		if isUnread {
 			iconStyle = m.styles.MsgListFlagFlagged
 		}
 	case msg.Flags&mail.FlagAnswered != 0:
-		glyph = mlIconAnswered
+		glyph = m.icons.FlagAnswered
 	case isUnread:
-		glyph = mlIconUnread
+		glyph = m.icons.FlagUnread
 	default:
 		return bgStyle.Render("  ")
 	}

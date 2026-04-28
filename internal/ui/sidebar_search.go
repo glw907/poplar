@@ -20,6 +20,7 @@ type SidebarSearch struct {
 	state   SearchState
 	results int
 	styles  Styles
+	icons   IconSet
 	width   int
 }
 
@@ -27,7 +28,7 @@ type SidebarSearch struct {
 // width. The textinput is created with "/" as its prompt so the
 // rendered view shows "/query▏" directly without our shelf having
 // to stitch a prefix in front of it.
-func NewSidebarSearch(styles Styles, width int) SidebarSearch {
+func NewSidebarSearch(styles Styles, width int, icons IconSet) SidebarSearch {
 	ti := textinput.New()
 	ti.Prompt = "/"
 	ti.CharLimit = 0
@@ -36,6 +37,7 @@ func NewSidebarSearch(styles Styles, width int) SidebarSearch {
 		mode:   SearchModeName,
 		state:  SearchIdle,
 		styles: styles,
+		icons:  icons,
 		width:  width,
 	}
 }
@@ -148,15 +150,15 @@ func (s SidebarSearch) renderBlankRow() string {
 }
 
 // renderPromptRow renders the prompt line.
-//   - Idle: shows "󰍉 / to search" hint in dim color.
-//   - Typing: shows "󰍉" + textinput.View() which renders "/query▏"
+//   - Idle: shows icons.Search + " / to search" hint in dim color.
+//   - Typing: shows icons.Search + textinput.View() which renders "/query▏"
 //     (cursor ▏ drawn automatically because the input is Focused).
-//   - Active: shows "󰍉" + a manually-rendered "/query" with a
+//   - Active: shows icons.Search + a manually-rendered "/query" with a
 //     brighter foreground to signal "committed query." No cursor
 //     because the input is Blurred.
 func (s SidebarSearch) renderPromptRow() string {
 	if s.state == SearchIdle {
-		icon := applyBg(s.styles.SearchIcon, s.styles.SidebarBg).Render("󰍉")
+		icon := applyBg(s.styles.SearchIcon, s.styles.SidebarBg).Render(s.icons.Search)
 		hint := applyBg(s.styles.SearchHint, s.styles.SidebarBg).Render(" / to search")
 		content := s.styles.SidebarBg.Render("  ") + icon + hint
 		return fillRowToWidth(content, s.width, s.styles.SidebarBg)
@@ -166,7 +168,7 @@ func (s SidebarSearch) renderPromptRow() string {
 	if s.state == SearchTyping {
 		iconStyle = iconStyle.Foreground(s.styles.SearchResultCount.GetForeground())
 	}
-	icon := applyBg(iconStyle, s.styles.SidebarBg).Render("󰍉")
+	icon := applyBg(iconStyle, s.styles.SidebarBg).Render(s.icons.Search)
 
 	var prompt string
 	if s.state == SearchTyping {

@@ -21,6 +21,7 @@ type Sidebar struct {
 	entries  []folderEntry
 	selected int
 	styles   Styles
+	icons    IconSet
 	width    int
 	height   int
 }
@@ -28,11 +29,12 @@ type Sidebar struct {
 // NewSidebar creates a Sidebar from a pre-classified folder list and
 // a UIConfig. Ordering, hiding, labelling, and indent calculation
 // happen here. Hidden folders are dropped before indexing.
-func NewSidebar(styles Styles, classified []mail.ClassifiedFolder, uiCfg config.UIConfig, width, height int) Sidebar {
+func NewSidebar(styles Styles, classified []mail.ClassifiedFolder, uiCfg config.UIConfig, width, height int, icons IconSet) Sidebar {
 	return Sidebar{
-		entries:  buildEntries(classified, uiCfg),
+		entries:  buildEntries(classified, uiCfg, icons),
 		selected: 0,
 		styles:   styles,
+		icons:    icons,
 		width:    width,
 		height:   height,
 	}
@@ -46,7 +48,7 @@ func (s *Sidebar) SetFolders(classified []mail.ClassifiedFolder, uiCfg config.UI
 	if s.selected < len(s.entries) {
 		prevName = s.entries[s.selected].cf.Folder.Name
 	}
-	s.entries = buildEntries(classified, uiCfg)
+	s.entries = buildEntries(classified, uiCfg, s.icons)
 	s.selected = 0
 	if prevName != "" {
 		for i, e := range s.entries {
@@ -229,7 +231,7 @@ func (s Sidebar) renderBlankLine() string {
 // buildEntries applies UIConfig to the classified folders: drops hidden
 // folders, resolves display labels, sorts each group by rank then display
 // name, and concatenates Primary + Disposal + Custom in that order.
-func buildEntries(classified []mail.ClassifiedFolder, uiCfg config.UIConfig) []folderEntry {
+func buildEntries(classified []mail.ClassifiedFolder, uiCfg config.UIConfig, icons IconSet) []folderEntry {
 	var primary, disposal, custom []folderEntry
 	for _, cf := range classified {
 		fc := uiCfg.Folders[cf.ConfigKey()]
@@ -238,7 +240,7 @@ func buildEntries(classified []mail.ClassifiedFolder, uiCfg config.UIConfig) []f
 		}
 		entry := folderEntry{
 			cf:   cf,
-			icon: sidebarIcon(cf),
+			icon: sidebarIconFrom(icons, cf),
 		}
 		if fc.Label != "" {
 			entry.cf.DisplayName = fc.Label
@@ -301,31 +303,31 @@ func rankOf(cf mail.ClassifiedFolder, uiCfg config.UIConfig) int {
 	return nonCanonicalDefaultRank
 }
 
-// sidebarIcon returns the Nerd Font icon for a classified folder.
-// Canonicals use their canonical icon; custom folders fall back to the
-// heuristic name matcher.
-func sidebarIcon(cf mail.ClassifiedFolder) string {
+// sidebarIconFrom returns the icon for a classified folder from the given
+// IconSet. Canonicals use their canonical icon; custom folders fall back
+// to the heuristic name matcher.
+func sidebarIconFrom(icons IconSet, cf mail.ClassifiedFolder) string {
 	switch cf.Canonical {
 	case "Inbox":
-		return "󰇰"
+		return icons.Inbox
 	case "Drafts":
-		return "󰏫"
+		return icons.Drafts
 	case "Sent":
-		return "󰑚"
+		return icons.Sent
 	case "Archive":
-		return "󰀼"
+		return icons.Archive
 	case "Spam":
-		return "󰍷"
+		return icons.Spam
 	case "Trash":
-		return "󰩺"
+		return icons.Trash
 	}
 	lower := strings.ToLower(cf.Folder.Name)
 	switch {
 	case strings.Contains(lower, "notification"):
-		return "󰂚"
+		return icons.Notification
 	case strings.Contains(lower, "remind"):
-		return "󰑴"
+		return icons.Reminder
 	default:
-		return "󰡡"
+		return icons.CustomFolder
 	}
 }

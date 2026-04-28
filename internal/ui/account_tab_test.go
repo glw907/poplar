@@ -20,7 +20,7 @@ func newLoadedTab(t *testing.T, width, height int) AccountTab {
 	t.Helper()
 	styles := NewStyles(theme.Nord)
 	backend := mail.NewMockBackend()
-	tab := NewAccountTab(styles, theme.Nord, backend, config.DefaultUIConfig())
+	tab := NewAccountTab(styles, theme.Nord, backend, config.DefaultUIConfig(), FancyIcons)
 	tab, _ = tab.updateTab(tea.WindowSizeMsg{Width: width, Height: height})
 
 	// Resolve the Init Cmd to drive the tab into its post-load state.
@@ -198,7 +198,7 @@ func TestAccountTab(t *testing.T) {
 func TestAccountTabInit_ReturnsFoldersCmd(t *testing.T) {
 	styles := NewStyles(theme.Nord)
 	backend := mail.NewMockBackend()
-	tab := NewAccountTab(styles, theme.Nord, backend, config.DefaultUIConfig())
+	tab := NewAccountTab(styles, theme.Nord, backend, config.DefaultUIConfig(), FancyIcons)
 	msg := runCmd(tab.Init())
 	if _, ok := msg.(foldersLoadedMsg); !ok {
 		t.Fatalf("expected foldersLoadedMsg from Init, got %T", msg)
@@ -208,7 +208,7 @@ func TestAccountTabInit_ReturnsFoldersCmd(t *testing.T) {
 func TestAccountTab_foldersLoadedSeedsSidebar(t *testing.T) {
 	styles := NewStyles(theme.Nord)
 	backend := mail.NewMockBackend()
-	tab := NewAccountTab(styles, theme.Nord, backend, config.DefaultUIConfig())
+	tab := NewAccountTab(styles, theme.Nord, backend, config.DefaultUIConfig(), FancyIcons)
 	folders, _ := backend.ListFolders()
 	tab, cmd := tab.updateTab(foldersLoadedMsg{folders: folders})
 	if len(tab.sidebar.entries) == 0 {
@@ -228,7 +228,7 @@ func TestAccountTab_foldersLoadedSeedsSidebar(t *testing.T) {
 func TestAccountTab_headersAppliedSeedsMsglist(t *testing.T) {
 	styles := NewStyles(theme.Nord)
 	backend := mail.NewMockBackend()
-	tab := NewAccountTab(styles, theme.Nord, backend, config.DefaultUIConfig())
+	tab := NewAccountTab(styles, theme.Nord, backend, config.DefaultUIConfig(), FancyIcons)
 	tab, _ = tab.updateTab(tea.WindowSizeMsg{Width: 120, Height: 30})
 	msgs := []mail.MessageInfo{
 		{UID: "1", Subject: "hello", From: "a", Date: "now"},
@@ -249,7 +249,7 @@ func TestAccountTab_PerFolderThreadingOverride(t *testing.T) {
 		ThreadingSet: true,
 	}
 
-	tab := NewAccountTab(styles, theme.Nord, backend, uiCfg)
+	tab := NewAccountTab(styles, theme.Nord, backend, uiCfg, FancyIcons)
 	tab, _ = tab.updateTab(tea.WindowSizeMsg{Width: 120, Height: 30})
 	folders, _ := backend.ListFolders()
 	tab, _ = tab.updateTab(foldersLoadedMsg{folders: folders})
@@ -602,7 +602,7 @@ func TestAccountTab_EnterMarksRead(t *testing.T) {
 func TestAccountTab_EnterEmptyFolderNoOp(t *testing.T) {
 	styles := NewStyles(theme.Nord)
 	backend := mail.NewMockBackend()
-	tab := NewAccountTab(styles, theme.Nord, backend, config.DefaultUIConfig())
+	tab := NewAccountTab(styles, theme.Nord, backend, config.DefaultUIConfig(), FancyIcons)
 	tab, _ = tab.updateTab(tea.WindowSizeMsg{Width: 120, Height: 30})
 	tab, _ = tab.updateTab(headersAppliedMsg{name: "Inbox", msgs: nil})
 	tab, cmd := tab.updateTab(tea.KeyMsg{Type: tea.KeyEnter})
@@ -668,7 +668,7 @@ func TestAccountTab_FolderJumpKeys(t *testing.T) {
 func TestAccountTab_FolderJumpUnknownFolderNoOp(t *testing.T) {
 	styles := NewStyles(theme.Nord)
 	backend := mail.NewMockBackend()
-	tab := NewAccountTab(styles, theme.Nord, backend, config.DefaultUIConfig())
+	tab := NewAccountTab(styles, theme.Nord, backend, config.DefaultUIConfig(), FancyIcons)
 	tab, _ = tab.updateTab(tea.WindowSizeMsg{Width: 120, Height: 30})
 	tab, _ = tab.updateTab(foldersLoadedMsg{folders: []mail.Folder{
 		{Name: "Inbox", Role: "inbox"},
@@ -792,7 +792,7 @@ func TestAccountTab_PaginationInitialLoad(t *testing.T) {
 	// 600 messages — first window fetches 500.
 	backend := newPagingFakeBackend(600)
 	styles := NewStyles(theme.Nord)
-	tab := NewAccountTab(styles, theme.Nord, backend, config.DefaultUIConfig())
+	tab := NewAccountTab(styles, theme.Nord, backend, config.DefaultUIConfig(), FancyIcons)
 	tab, _ = tab.updateTab(tea.WindowSizeMsg{Width: 120, Height: 30})
 
 	// Simulate: folders loaded → selectionChangedCmds → openFolderCmd chain.
@@ -816,7 +816,7 @@ func TestAccountTab_MaybeLoadMore_NearBottom(t *testing.T) {
 	// 600 messages; after initial load of 500, cursor near bottom should trigger load-more.
 	backend := newPagingFakeBackend(600)
 	styles := NewStyles(theme.Nord)
-	tab := NewAccountTab(styles, theme.Nord, backend, config.DefaultUIConfig())
+	tab := NewAccountTab(styles, theme.Nord, backend, config.DefaultUIConfig(), FancyIcons)
 	tab, _ = tab.updateTab(tea.WindowSizeMsg{Width: 120, Height: 30})
 
 	folders, _ := backend.ListFolders()
@@ -837,7 +837,7 @@ func TestAccountTab_MaybeLoadMore_NearBottom(t *testing.T) {
 func TestAccountTab_MaybeLoadMore_InFlightNoDuplicate(t *testing.T) {
 	backend := newPagingFakeBackend(600)
 	styles := NewStyles(theme.Nord)
-	tab := NewAccountTab(styles, theme.Nord, backend, config.DefaultUIConfig())
+	tab := NewAccountTab(styles, theme.Nord, backend, config.DefaultUIConfig(), FancyIcons)
 	tab, _ = tab.updateTab(tea.WindowSizeMsg{Width: 120, Height: 30})
 
 	folders, _ := backend.ListFolders()
@@ -858,7 +858,7 @@ func TestAccountTab_MaybeLoadMore_LoadedEqualsTotal(t *testing.T) {
 	// 14 messages (the mock count) — loaded == total from the start.
 	backend := mail.NewMockBackend()
 	styles := NewStyles(theme.Nord)
-	tab := NewAccountTab(styles, theme.Nord, backend, config.DefaultUIConfig())
+	tab := NewAccountTab(styles, theme.Nord, backend, config.DefaultUIConfig(), FancyIcons)
 	tab, _ = tab.updateTab(tea.WindowSizeMsg{Width: 120, Height: 30})
 
 	folders, _ := backend.ListFolders()
@@ -876,7 +876,7 @@ func TestAccountTab_LoadingSpinner(t *testing.T) {
 	t.Run("loading is true after selectionChangedCmds, before headersApplied", func(t *testing.T) {
 		styles := NewStyles(theme.Nord)
 		backend := mail.NewMockBackend()
-		tab := NewAccountTab(styles, theme.Nord, backend, config.DefaultUIConfig())
+		tab := NewAccountTab(styles, theme.Nord, backend, config.DefaultUIConfig(), FancyIcons)
 		tab, _ = tab.updateTab(tea.WindowSizeMsg{Width: 120, Height: 30})
 		folders, _ := backend.ListFolders()
 		// foldersLoadedMsg calls selectionChangedCmds which sets loading=true.
@@ -889,7 +889,7 @@ func TestAccountTab_LoadingSpinner(t *testing.T) {
 	t.Run("loading is false after headersAppliedMsg", func(t *testing.T) {
 		styles := NewStyles(theme.Nord)
 		backend := mail.NewMockBackend()
-		tab := NewAccountTab(styles, theme.Nord, backend, config.DefaultUIConfig())
+		tab := NewAccountTab(styles, theme.Nord, backend, config.DefaultUIConfig(), FancyIcons)
 		tab, _ = tab.updateTab(tea.WindowSizeMsg{Width: 120, Height: 30})
 		folders, _ := backend.ListFolders()
 		tab, _ = tab.updateTab(foldersLoadedMsg{folders: folders})
@@ -905,7 +905,7 @@ func TestAccountTab_LoadingSpinner(t *testing.T) {
 	t.Run("view contains Loading placeholder while loading and msglist empty", func(t *testing.T) {
 		styles := NewStyles(theme.Nord)
 		backend := mail.NewMockBackend()
-		tab := NewAccountTab(styles, theme.Nord, backend, config.DefaultUIConfig())
+		tab := NewAccountTab(styles, theme.Nord, backend, config.DefaultUIConfig(), FancyIcons)
 		tab, _ = tab.updateTab(tea.WindowSizeMsg{Width: 120, Height: 30})
 		folders, _ := backend.ListFolders()
 		// After foldersLoadedMsg, loading=true and msglist is still empty.
@@ -929,7 +929,7 @@ func TestAccountTab_WindowCounter(t *testing.T) {
 	t.Run("returns empty when no page loaded", func(t *testing.T) {
 		styles := NewStyles(theme.Nord)
 		backend := mail.NewMockBackend()
-		tab := NewAccountTab(styles, theme.Nord, backend, config.DefaultUIConfig())
+		tab := NewAccountTab(styles, theme.Nord, backend, config.DefaultUIConfig(), FancyIcons)
 		got := tab.WindowCounter()
 		if got != "" {
 			t.Errorf("WindowCounter() = %q, want empty", got)

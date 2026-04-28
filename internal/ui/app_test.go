@@ -13,6 +13,12 @@ import (
 	"github.com/glw907/poplar/internal/theme"
 )
 
+func init() {
+	// Fixture expectations were written with FancyIcons (SPUA-A glyphs).
+	// spuaCellWidth must be 2 so displayCells measures them correctly.
+	SetSPUACellWidth(2)
+}
+
 // stripANSI removes ANSI escape sequences to get plain text for positional checks.
 var ansiRe = regexp.MustCompile(`\x1b\[[0-9;]*[a-zA-Z]`)
 
@@ -25,7 +31,7 @@ func stripANSI(s string) string {
 func newLoadedApp(t *testing.T, width, height int) App {
 	t.Helper()
 	backend := mail.NewMockBackend()
-	app := NewApp(theme.Nord, backend, config.DefaultUIConfig())
+	app := NewApp(theme.Nord, backend, config.DefaultUIConfig(), FancyIcons)
 	app, _ = app.Update(tea.WindowSizeMsg{Width: width, Height: height})
 	drainApp(t, &app, app.Init())
 	return app
@@ -89,7 +95,7 @@ func TestApp(t *testing.T) {
 	backend := mail.NewMockBackend()
 
 	t.Run("quit on q", func(t *testing.T) {
-		app := NewApp(theme.Nord, backend, config.DefaultUIConfig())
+		app := NewApp(theme.Nord, backend, config.DefaultUIConfig(), FancyIcons)
 		app.width = 80
 		app.height = 24
 		_, cmd := app.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'q'}})
@@ -103,7 +109,7 @@ func TestApp(t *testing.T) {
 	})
 
 	t.Run("quit on ctrl+c", func(t *testing.T) {
-		app := NewApp(theme.Nord, backend, config.DefaultUIConfig())
+		app := NewApp(theme.Nord, backend, config.DefaultUIConfig(), FancyIcons)
 		app.width = 80
 		app.height = 24
 		_, cmd := app.Update(tea.KeyMsg{Type: tea.KeyCtrlC})
@@ -113,7 +119,7 @@ func TestApp(t *testing.T) {
 	})
 
 	t.Run("window size stored", func(t *testing.T) {
-		app := NewApp(theme.Nord, backend, config.DefaultUIConfig())
+		app := NewApp(theme.Nord, backend, config.DefaultUIConfig(), FancyIcons)
 		app, _ = app.Update(tea.WindowSizeMsg{Width: 120, Height: 40})
 		if app.width != 120 || app.height != 40 {
 			t.Errorf("size = %dx%d, want 120x40", app.width, app.height)
@@ -160,7 +166,7 @@ func TestApp(t *testing.T) {
 	})
 
 	t.Run("content height is height minus 3 chrome rows", func(t *testing.T) {
-		app := NewApp(theme.Nord, backend, config.DefaultUIConfig())
+		app := NewApp(theme.Nord, backend, config.DefaultUIConfig(), FancyIcons)
 		app.width = 80
 		app.height = 24
 		if app.contentHeight() != 21 {
@@ -193,7 +199,7 @@ func TestApp(t *testing.T) {
 	})
 
 	t.Run("footer starts in account context", func(t *testing.T) {
-		app := NewApp(theme.Nord, backend, config.DefaultUIConfig())
+		app := NewApp(theme.Nord, backend, config.DefaultUIConfig(), FancyIcons)
 		if app.footer.context != AccountContext {
 			t.Errorf("footer context = %d, want AccountContext", app.footer.context)
 		}
@@ -501,7 +507,7 @@ func TestApp_BannerShrinksContentByOneRow(t *testing.T) {
 
 func TestApp_InitialConnStateIsOffline(t *testing.T) {
 	backend := mail.NewMockBackend()
-	app := NewApp(theme.Nord, backend, config.DefaultUIConfig())
+	app := NewApp(theme.Nord, backend, config.DefaultUIConfig(), FancyIcons)
 	if got := app.statusBar.ConnectionState(); got != Offline {
 		t.Errorf("initial connState = %v, want Offline", got)
 	}
@@ -520,7 +526,7 @@ func TestApp_BackendUpdateConnState(t *testing.T) {
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
 			backend := mail.NewMockBackend()
-			app := NewApp(theme.Nord, backend, config.DefaultUIConfig())
+			app := NewApp(theme.Nord, backend, config.DefaultUIConfig(), FancyIcons)
 			msg := backendUpdateMsg{update: mail.Update{
 				Type:      mail.UpdateConnState,
 				ConnState: tc.connState,
@@ -537,7 +543,7 @@ func TestApp_BackendUpdateClosedChannelGoesOffline(t *testing.T) {
 	// Simulate the closed-channel case: pumpUpdatesCmd delivers a
 	// backendUpdateMsg with ConnState=ConnOffline.
 	backend := mail.NewMockBackend()
-	app := NewApp(theme.Nord, backend, config.DefaultUIConfig())
+	app := NewApp(theme.Nord, backend, config.DefaultUIConfig(), FancyIcons)
 	// Force to Connected first so we can confirm the transition.
 	app, _ = app.Update(backendUpdateMsg{update: mail.Update{
 		Type:      mail.UpdateConnState,
@@ -561,7 +567,7 @@ func TestApp_BackendUpdateReArmspump(t *testing.T) {
 	// (the re-armed pump). We can't execute it without blocking, but
 	// we confirm the Cmd is present.
 	backend := mail.NewMockBackend()
-	app := NewApp(theme.Nord, backend, config.DefaultUIConfig())
+	app := NewApp(theme.Nord, backend, config.DefaultUIConfig(), FancyIcons)
 	msg := backendUpdateMsg{update: mail.Update{
 		Type:      mail.UpdateConnState,
 		ConnState: mail.ConnConnected,

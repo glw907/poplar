@@ -58,6 +58,6 @@ var FancyIcons = IconSet{
 	CustomFolder: "\U000F0861", // nf-md-folder-outline
 	Search:       "\U000F0349", // nf-md-magnify
 	FlagFlagged:  "\U000F023B", // nf-md-flag
-	FlagAnswered: "\U000F01EE", // nf-md-mailbox (placeholder for answered)
-	FlagUnread:   "\U000F01EE", // legacy mlIconUnread
+	FlagAnswered: "\U000F045A", // nf-md-send (placeholder for answered; matches legacy mlIconAnswered)
+	FlagUnread:   "\U000F01EE", // nf-md-mailbox (matches legacy mlIconUnread)
 }

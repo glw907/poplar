@@ -14,7 +14,7 @@ func TestMessageList(t *testing.T) {
 	msgs := mockMessages()
 
 	t.Run("renders all visible messages", func(t *testing.T) {
-		ml := NewMessageList(styles, msgs, 90, 20)
+		ml := NewMessageList(styles, msgs, 90, 20, FancyIcons)
 		plain := stripANSI(ml.View())
 		for _, msg := range msgs {
 			if !strings.Contains(plain, msg.From) {
@@ -28,7 +28,7 @@ func TestMessageList(t *testing.T) {
 	})
 
 	t.Run("initial selection is first message", func(t *testing.T) {
-		ml := NewMessageList(styles, msgs, 90, 20)
+		ml := NewMessageList(styles, msgs, 90, 20, FancyIcons)
 		if ml.Selected() != 0 {
 			t.Errorf("Selected() = %d, want 0", ml.Selected())
 		}
@@ -38,7 +38,7 @@ func TestMessageList(t *testing.T) {
 	})
 
 	t.Run("selected row has cursor character", func(t *testing.T) {
-		ml := NewMessageList(styles, msgs, 90, 20)
+		ml := NewMessageList(styles, msgs, 90, 20, FancyIcons)
 		plain := stripANSI(ml.View())
 		lines := strings.Split(plain, "\n")
 		if len(lines) == 0 || !strings.HasPrefix(lines[0], "▐") {
@@ -47,7 +47,7 @@ func TestMessageList(t *testing.T) {
 	})
 
 	t.Run("MoveDown advances selection", func(t *testing.T) {
-		ml := NewMessageList(styles, msgs, 90, 20)
+		ml := NewMessageList(styles, msgs, 90, 20, FancyIcons)
 		ml.MoveDown()
 		if ml.Selected() != 1 {
 			t.Errorf("after MoveDown, Selected() = %d, want 1", ml.Selected())
@@ -55,7 +55,7 @@ func TestMessageList(t *testing.T) {
 	})
 
 	t.Run("MoveUp at top stays at 0", func(t *testing.T) {
-		ml := NewMessageList(styles, msgs, 90, 20)
+		ml := NewMessageList(styles, msgs, 90, 20, FancyIcons)
 		ml.MoveUp()
 		if ml.Selected() != 0 {
 			t.Errorf("MoveUp at top: Selected() = %d, want 0", ml.Selected())
@@ -63,7 +63,7 @@ func TestMessageList(t *testing.T) {
 	})
 
 	t.Run("MoveDown at bottom stays at last", func(t *testing.T) {
-		ml := NewMessageList(styles, msgs, 90, 20)
+		ml := NewMessageList(styles, msgs, 90, 20, FancyIcons)
 		for range len(msgs) + 5 {
 			ml.MoveDown()
 		}
@@ -74,7 +74,7 @@ func TestMessageList(t *testing.T) {
 	})
 
 	t.Run("MoveToBottom jumps to last", func(t *testing.T) {
-		ml := NewMessageList(styles, msgs, 90, 20)
+		ml := NewMessageList(styles, msgs, 90, 20, FancyIcons)
 		ml.MoveToBottom()
 		if ml.Selected() != len(msgs)-1 {
 			t.Errorf("MoveToBottom: Selected() = %d, want %d",
@@ -83,7 +83,7 @@ func TestMessageList(t *testing.T) {
 	})
 
 	t.Run("MoveToTop jumps to first", func(t *testing.T) {
-		ml := NewMessageList(styles, msgs, 90, 20)
+		ml := NewMessageList(styles, msgs, 90, 20, FancyIcons)
 		ml.MoveDown()
 		ml.MoveDown()
 		ml.MoveToTop()
@@ -93,7 +93,7 @@ func TestMessageList(t *testing.T) {
 	})
 
 	t.Run("HalfPageDown moves by half height", func(t *testing.T) {
-		ml := NewMessageList(styles, msgs, 90, 10)
+		ml := NewMessageList(styles, msgs, 90, 10, FancyIcons)
 		ml.HalfPageDown()
 		if ml.Selected() != 5 {
 			t.Errorf("HalfPageDown with height 10: Selected() = %d, want 5",
@@ -102,7 +102,7 @@ func TestMessageList(t *testing.T) {
 	})
 
 	t.Run("scroll keeps cursor visible", func(t *testing.T) {
-		ml := NewMessageList(styles, msgs, 90, 4)
+		ml := NewMessageList(styles, msgs, 90, 4, FancyIcons)
 		// Step past the visible window.
 		for range 6 {
 			ml.MoveDown()
@@ -128,7 +128,7 @@ func TestMessageList(t *testing.T) {
 
 	t.Run("all rendered rows have configured width", func(t *testing.T) {
 		const w = 90
-		ml := NewMessageList(styles, msgs, w, 12)
+		ml := NewMessageList(styles, msgs, w, 12, FancyIcons)
 		for _, line := range strings.Split(ml.View(), "\n") {
 			if got := displayCells(line); got != w {
 				t.Errorf("row width = %d, want %d: %q", got, w, stripANSI(line))
@@ -150,7 +150,7 @@ func TestMessageList(t *testing.T) {
 				UID: "u", ThreadID: "u", From: "Bob", Subject: "World",
 				Date: "Mon 2026-04-26", Flags: 0,
 			}
-			ml := NewMessageList(styles, []mail.MessageInfo{readMsg, unreadMsg}, w, 5)
+			ml := NewMessageList(styles, []mail.MessageInfo{readMsg, unreadMsg}, w, 5, FancyIcons)
 			lines := strings.Split(ml.View(), "\n")
 			if len(lines) < 2 {
 				t.Fatalf("w=%d: expected at least 2 rows, got %d", w, len(lines))
@@ -167,7 +167,7 @@ func TestMessageList(t *testing.T) {
 	})
 
 	t.Run("unread messages show envelope icon", func(t *testing.T) {
-		ml := NewMessageList(styles, msgs, 90, 20)
+		ml := NewMessageList(styles, msgs, 90, 20, FancyIcons)
 		plain := stripANSI(ml.View())
 		// First three mock messages are unread.
 		if !strings.Contains(plain, "󰇮") {
@@ -176,7 +176,7 @@ func TestMessageList(t *testing.T) {
 	})
 
 	t.Run("flagged messages show flag icon", func(t *testing.T) {
-		ml := NewMessageList(styles, msgs, 90, 20)
+		ml := NewMessageList(styles, msgs, 90, 20, FancyIcons)
 		plain := stripANSI(ml.View())
 		if !strings.Contains(plain, "󰈻") {
 			t.Error("expected flag icon for flagged message")
@@ -184,7 +184,7 @@ func TestMessageList(t *testing.T) {
 	})
 
 	t.Run("answered messages show reply icon", func(t *testing.T) {
-		ml := NewMessageList(styles, msgs, 90, 20)
+		ml := NewMessageList(styles, msgs, 90, 20, FancyIcons)
 		plain := stripANSI(ml.View())
 		if !strings.Contains(plain, "󰑚") {
 			t.Error("expected reply icon for answered message")
@@ -192,7 +192,7 @@ func TestMessageList(t *testing.T) {
 	})
 
 	t.Run("date column is right-aligned", func(t *testing.T) {
-		ml := NewMessageList(styles, msgs, 90, 20)
+		ml := NewMessageList(styles, msgs, 90, 20, FancyIcons)
 		plain := stripANSI(ml.View())
 		lines := strings.Split(plain, "\n")
 		if len(lines) == 0 {
@@ -208,7 +208,7 @@ func TestMessageList(t *testing.T) {
 	})
 
 	t.Run("empty list shows placeholder", func(t *testing.T) {
-		ml := NewMessageList(styles, nil, 90, 10)
+		ml := NewMessageList(styles, nil, 90, 10, FancyIcons)
 		plain := stripANSI(ml.View())
 		if !strings.Contains(plain, "No messages") {
 			t.Errorf("empty list should show placeholder: %q", plain)
@@ -216,7 +216,7 @@ func TestMessageList(t *testing.T) {
 	})
 
 	t.Run("SetMessages resets cursor and offset", func(t *testing.T) {
-		ml := NewMessageList(styles, msgs, 90, 4)
+		ml := NewMessageList(styles, msgs, 90, 4, FancyIcons)
 		ml.MoveToBottom()
 		ml.SetMessages(msgs[:2])
 		if ml.Selected() != 0 {
@@ -225,7 +225,7 @@ func TestMessageList(t *testing.T) {
 	})
 
 	t.Run("SetSize updates dimensions", func(t *testing.T) {
-		ml := NewMessageList(styles, msgs, 90, 20)
+		ml := NewMessageList(styles, msgs, 90, 20, FancyIcons)
 		ml.SetSize(60, 10)
 		if ml.width != 60 || ml.height != 10 {
 			t.Errorf("size = %dx%d, want 60x10", ml.width, ml.height)
@@ -236,7 +236,7 @@ func TestMessageList(t *testing.T) {
 		long := []mail.MessageInfo{
 			{UID: "x", From: strings.Repeat("VeryLongName", 5), Subject: "subject", Date: "today"},
 		}
-		ml := NewMessageList(styles, long, 90, 5)
+		ml := NewMessageList(styles, long, 90, 5, FancyIcons)
 		plain := stripANSI(ml.View())
 		if !strings.Contains(plain, "…") {
 			t.Error("expected ellipsis when sender exceeds column width")
@@ -268,7 +268,7 @@ func TestMessageListThreading(t *testing.T) {
 			{UID: "10", ThreadID: "T1", InReplyTo: "", From: "Root", Date: "Apr 5", Flags: mail.FlagSeen},
 			{UID: "11", ThreadID: "T1", InReplyTo: "10", From: "Reply", Date: "Apr 6", Flags: mail.FlagSeen},
 		}
-		ml := NewMessageList(styles, msgs, 90, 20)
+		ml := NewMessageList(styles, msgs, 90, 20, FancyIcons)
 		if got, want := len(ml.rows), 3; got != want {
 			t.Fatalf("len(rows) = %d, want %d", got, want)
 		}
@@ -303,7 +303,7 @@ func TestMessageListThreading(t *testing.T) {
 			{UID: "12", ThreadID: "T1", InReplyTo: "10", From: "Late", Date: "Apr 3", Flags: mail.FlagSeen},
 			{UID: "11", ThreadID: "T1", InReplyTo: "10", From: "Early", Date: "Apr 2", Flags: mail.FlagSeen},
 		}
-		ml := NewMessageList(styles, msgs, 90, 20)
+		ml := NewMessageList(styles, msgs, 90, 20, FancyIcons)
 		if got, want := len(ml.rows), 3; got != want {
 			t.Fatalf("len(rows) = %d, want %d", got, want)
 		}
@@ -334,7 +334,7 @@ func TestMessageListThreading(t *testing.T) {
 			// Newer thread second in input.
 			{UID: "20", ThreadID: "T2", InReplyTo: "", From: "New", Date: "Apr 5", Flags: mail.FlagSeen},
 		}
-		ml := NewMessageList(styles, msgs, 90, 20)
+		ml := NewMessageList(styles, msgs, 90, 20, FancyIcons)
 		if ml.rows[0].msg.UID != "20" {
 			t.Errorf("first row UID = %q, want 20 (T2 root)", ml.rows[0].msg.UID)
 		}
@@ -351,7 +351,7 @@ func TestMessageListThreading(t *testing.T) {
 			{UID: "20", ThreadID: "T2", InReplyTo: "", From: "New", Date: "Apr 5", Flags: mail.FlagSeen},
 			{UID: "10", ThreadID: "T1", InReplyTo: "", From: "Old", Date: "Apr 1", Flags: mail.FlagSeen},
 		}
-		ml := NewMessageList(styles, msgs, 90, 20)
+		ml := NewMessageList(styles, msgs, 90, 20, FancyIcons)
 		ml.SetSort(SortDateAsc)
 		if ml.rows[0].msg.UID != "10" {
 			t.Errorf("first row UID = %q, want 10 (T1)", ml.rows[0].msg.UID)
@@ -364,7 +364,7 @@ func TestMessageListThreading(t *testing.T) {
 			{UID: "11", ThreadID: "T1", InReplyTo: "10", From: "Reply", Date: "2026-04-05 11:00", Flags: mail.FlagSeen},
 			{UID: "20", ThreadID: "T2", InReplyTo: "", From: "Other", Date: "2026-04-05 12:00", Flags: mail.FlagSeen},
 		}
-		ml := NewMessageList(styles, msgs, 90, 20)
+		ml := NewMessageList(styles, msgs, 90, 20, FancyIcons)
 		ml.SetThreaded(false)
 		if got, want := len(ml.rows), 3; got != want {
 			t.Fatalf("len(rows) = %d, want %d", got, want)
@@ -387,7 +387,7 @@ func TestMessageListThreading(t *testing.T) {
 			{UID: "10", ThreadID: "T1", InReplyTo: "999", From: "First", Date: "Apr 5", Flags: mail.FlagSeen},
 			{UID: "11", ThreadID: "T1", InReplyTo: "999", From: "Second", Date: "Apr 6", Flags: mail.FlagSeen},
 		}
-		ml := NewMessageList(styles, msgs, 90, 20)
+		ml := NewMessageList(styles, msgs, 90, 20, FancyIcons)
 		if got, want := len(ml.rows), 2; got != want {
 			t.Fatalf("len(rows) = %d, want %d", got, want)
 		}
@@ -408,7 +408,7 @@ func TestMessageListThreading(t *testing.T) {
 			{UID: "10", ThreadID: "T1", InReplyTo: "", From: "Root", Date: "2026-04-05 10:00", Flags: mail.FlagSeen},
 			{UID: "11", ThreadID: "T1", InReplyTo: "10", From: "Reply", Date: "2026-04-05 11:00", Flags: mail.FlagSeen},
 		}
-		ml := NewMessageList(styles, msgs, 90, 20)
+		ml := NewMessageList(styles, msgs, 90, 20, FancyIcons)
 		if got, want := visibleRowCount(ml), 2; got != want {
 			t.Fatalf("initial visible rows = %d, want %d", got, want)
 		}
@@ -426,7 +426,7 @@ func TestMessageListThreading(t *testing.T) {
 			{UID: "10", ThreadID: "T1", InReplyTo: "", From: "Root", Date: "2026-04-05 10:00", Flags: mail.FlagSeen},
 			{UID: "11", ThreadID: "T1", InReplyTo: "10", From: "Reply", Date: "2026-04-05 11:00", Flags: mail.FlagSeen},
 		}
-		ml := NewMessageList(styles, msgs, 90, 20)
+		ml := NewMessageList(styles, msgs, 90, 20, FancyIcons)
 		ml.MoveDown() // cursor on UID 11 (child)
 		ml.ToggleFold()
 		if got, want := visibleRowCount(ml), 1; got != want {
@@ -445,7 +445,7 @@ func TestMessageListThreading(t *testing.T) {
 			{UID: "21", ThreadID: "T2", InReplyTo: "20", From: "ReplyB", Date: "2026-04-06 11:00", Flags: mail.FlagSeen},
 			{UID: "30", ThreadID: "T3", InReplyTo: "", From: "Solo", Date: "2026-04-07 10:00", Flags: mail.FlagSeen},
 		}
-		ml := NewMessageList(styles, msgs, 90, 20)
+		ml := NewMessageList(styles, msgs, 90, 20, FancyIcons)
 		if got, want := visibleRowCount(ml), 5; got != want {
 			t.Fatalf("initial visible = %d, want %d", got, want)
 		}
@@ -466,7 +466,7 @@ func TestMessageListThreading(t *testing.T) {
 			{UID: "20", ThreadID: "T2", InReplyTo: "", From: "RootB", Date: "2026-04-06 10:00", Flags: mail.FlagSeen},
 			{UID: "21", ThreadID: "T2", InReplyTo: "20", From: "ReplyB", Date: "2026-04-06 11:00", Flags: mail.FlagSeen},
 		}
-		ml := NewMessageList(styles, msgs, 90, 20)
+		ml := NewMessageList(styles, msgs, 90, 20, FancyIcons)
 		// Fold only T1 so the list is in a mixed state.
 		ml.ToggleFold()
 		if got, want := visibleRowCount(ml), 3; got != want {
@@ -484,7 +484,7 @@ func TestMessageListThreading(t *testing.T) {
 			{UID: "10", ThreadID: "T1", InReplyTo: "", From: "Root", Date: "2026-04-05 10:00", Flags: mail.FlagSeen},
 			{UID: "11", ThreadID: "T1", InReplyTo: "10", From: "Reply", Date: "2026-04-05 11:00", Flags: mail.FlagSeen},
 		}
-		ml := NewMessageList(styles, msgs, 90, 20)
+		ml := NewMessageList(styles, msgs, 90, 20, FancyIcons)
 		ml.ToggleFold()
 		ml.SetMessages(msgs) // same data
 		if got, want := visibleRowCount(ml), 2; got != want {
@@ -504,7 +504,7 @@ func TestMessageListThreading(t *testing.T) {
 			{UID: "12", ThreadID: "T1", InReplyTo: "11", From: "Deep", Date: "2026-04-05 12:00", Flags: mail.FlagSeen},
 			{UID: "13", ThreadID: "T1", InReplyTo: "10", From: "ReplyB", Date: "2026-04-05 13:00", Flags: mail.FlagSeen},
 		}
-		ml := NewMessageList(styles, msgs, 90, 20)
+		ml := NewMessageList(styles, msgs, 90, 20, FancyIcons)
 		if got, want := len(ml.rows), 4; got != want {
 			t.Fatalf("len(rows) = %d, want %d", got, want)
 		}
@@ -537,7 +537,7 @@ func TestMessageListThreading(t *testing.T) {
 			{UID: "11", ThreadID: "T1", InReplyTo: "10", Subject: "Re: Root subject", From: "ReplyA", Date: "2026-04-05 11:00", Flags: mail.FlagSeen},
 			{UID: "12", ThreadID: "T1", InReplyTo: "10", Subject: "Re: Root subject", From: "ReplyB", Date: "2026-04-05 12:00", Flags: mail.FlagSeen},
 		}
-		ml := NewMessageList(styles, msgs, 100, 20)
+		ml := NewMessageList(styles, msgs, 100, 20, FancyIcons)
 		plain := stripANSI(ml.View())
 		if !strings.Contains(plain, "├─ Re: Root subject") {
 			t.Error("expected ├─ prefix on first reply")
@@ -553,7 +553,7 @@ func TestMessageListThreading(t *testing.T) {
 			{UID: "11", ThreadID: "T1", InReplyTo: "10", Subject: "Re: Root", From: "A", Date: "2026-04-05 11:00", Flags: mail.FlagSeen},
 			{UID: "12", ThreadID: "T1", InReplyTo: "10", Subject: "Re: Root", From: "B", Date: "2026-04-05 12:00", Flags: mail.FlagSeen},
 		}
-		ml := NewMessageList(styles, msgs, 100, 20)
+		ml := NewMessageList(styles, msgs, 100, 20, FancyIcons)
 		ml.ToggleFold()
 		plain := stripANSI(ml.View())
 		if !strings.Contains(plain, "[3] Root") {
@@ -568,7 +568,7 @@ func TestMessageListThreading(t *testing.T) {
 			{UID: "11", ThreadID: "T1", InReplyTo: "10", From: "Reply", Subject: "thread", Date: "2026-04-09 11:00", Flags: mail.FlagSeen},
 			{UID: "2", ThreadID: "2", From: "Below", Subject: "below", Date: "2026-04-08", Flags: mail.FlagSeen},
 		}
-		ml := NewMessageList(styles, msgs, 90, 20)
+		ml := NewMessageList(styles, msgs, 90, 20, FancyIcons)
 		// Default sort puts these in date-desc order: Above, Root, Reply, Below.
 		ml.MoveDown() // cursor on Root (index 1)
 		ml.ToggleFold()
@@ -587,7 +587,7 @@ func TestMessageListThreading(t *testing.T) {
 			{UID: "11", ThreadID: "T1", InReplyTo: "10", From: "Reply", Subject: "thread", Date: "2026-04-09 11:00", Flags: mail.FlagSeen},
 			{UID: "2", ThreadID: "2", From: "Below", Subject: "below", Date: "2026-04-08", Flags: mail.FlagSeen},
 		}
-		ml := NewMessageList(styles, msgs, 90, 20)
+		ml := NewMessageList(styles, msgs, 90, 20, FancyIcons)
 		ml.MoveDown() // cursor on Root
 		ml.ToggleFold()
 		ml.MoveDown() // → index 3 (Below)
@@ -602,7 +602,7 @@ func TestMessageListThreading(t *testing.T) {
 			{UID: "10", ThreadID: "T1", InReplyTo: "", From: "Root", Date: "2026-04-09", Flags: mail.FlagSeen},
 			{UID: "11", ThreadID: "T1", InReplyTo: "10", From: "Reply", Date: "2026-04-09 11:00", Flags: mail.FlagSeen},
 		}
-		ml := NewMessageList(styles, msgs, 90, 20)
+		ml := NewMessageList(styles, msgs, 90, 20, FancyIcons)
 		ml.ToggleFold() // fold T1, child at index 1 hidden
 		ml.MoveToBottom()
 		if got, want := ml.Selected(), 0; got != want {
@@ -619,7 +619,7 @@ func TestMessageListWithMockBackend(t *testing.T) {
 		t.Fatalf("FetchHeaders: %v", err)
 	}
 
-	ml := NewMessageList(styles, msgs, 120, 30)
+	ml := NewMessageList(styles, msgs, 120, 30, FancyIcons)
 
 	t.Run("14 source messages produce 14 displayRows expanded", func(t *testing.T) {
 		if got, want := len(ml.rows), 14; got != want {
@@ -649,7 +649,7 @@ func TestMessageListWithMockBackend(t *testing.T) {
 	})
 
 	t.Run("ToggleFoldAll collapses the threaded conversation", func(t *testing.T) {
-		ml := NewMessageList(styles, msgs, 120, 30)
+		ml := NewMessageList(styles, msgs, 120, 30, FancyIcons)
 		ml.ToggleFoldAll()
 		visible := visibleRowCount(ml)
 		// 10 single-message threads (unaffected) + 1 visible folded root = 11.
@@ -693,7 +693,7 @@ func TestMessageListFilter(t *testing.T) {
 	}
 
 	t.Run("empty query keeps all rows", func(t *testing.T) {
-		ml := NewMessageList(styles, msgs, 90, 20)
+		ml := NewMessageList(styles, msgs, 90, 20, FancyIcons)
 		ml.SetFilter("", SearchModeName)
 		if got := len(ml.rows); got != 3 {
 			t.Errorf("len(rows) after empty filter = %d, want 3", got)
@@ -701,7 +701,7 @@ func TestMessageListFilter(t *testing.T) {
 	})
 
 	t.Run("substring match on subject", func(t *testing.T) {
-		ml := NewMessageList(styles, msgs, 90, 20)
+		ml := NewMessageList(styles, msgs, 90, 20, FancyIcons)
 		ml.SetFilter("project", SearchModeName)
 		if got := len(ml.rows); got != 1 {
 			t.Errorf("len(rows) = %d, want 1", got)
@@ -712,7 +712,7 @@ func TestMessageListFilter(t *testing.T) {
 	})
 
 	t.Run("substring match on sender", func(t *testing.T) {
-		ml := NewMessageList(styles, msgs, 90, 20)
+		ml := NewMessageList(styles, msgs, 90, 20, FancyIcons)
 		ml.SetFilter("bob", SearchModeName)
 		if got := len(ml.rows); got != 1 {
 			t.Errorf("len(rows) = %d, want 1", got)
@@ -723,7 +723,7 @@ func TestMessageListFilter(t *testing.T) {
 	})
 
 	t.Run("case-insensitive", func(t *testing.T) {
-		ml := NewMessageList(styles, msgs, 90, 20)
+		ml := NewMessageList(styles, msgs, 90, 20, FancyIcons)
 		ml.SetFilter("ALICE", SearchModeName)
 		if got := len(ml.rows); got != 1 {
 			t.Errorf("len(rows) = %d, want 1", got)
@@ -731,7 +731,7 @@ func TestMessageListFilter(t *testing.T) {
 	})
 
 	t.Run("no matches returns empty rows", func(t *testing.T) {
-		ml := NewMessageList(styles, msgs, 90, 20)
+		ml := NewMessageList(styles, msgs, 90, 20, FancyIcons)
 		ml.SetFilter("zzz-nothing", SearchModeName)
 		if got := len(ml.rows); got != 0 {
 			t.Errorf("len(rows) = %d, want 0", got)
@@ -739,7 +739,7 @@ func TestMessageListFilter(t *testing.T) {
 	})
 
 	t.Run("ClearFilter restores all rows", func(t *testing.T) {
-		ml := NewMessageList(styles, msgs, 90, 20)
+		ml := NewMessageList(styles, msgs, 90, 20, FancyIcons)
 		ml.SetFilter("project", SearchModeName)
 		ml.ClearFilter()
 		if got := len(ml.rows); got != 3 {
@@ -748,7 +748,7 @@ func TestMessageListFilter(t *testing.T) {
 	})
 
 	t.Run("[name] mode does not match date", func(t *testing.T) {
-		ml := NewMessageList(styles, msgs, 90, 20)
+		ml := NewMessageList(styles, msgs, 90, 20, FancyIcons)
 		ml.SetFilter("Apr 10", SearchModeName)
 		if got := len(ml.rows); got != 0 {
 			t.Errorf("len(rows) for Apr 10 under [name] = %d, want 0", got)
@@ -756,7 +756,7 @@ func TestMessageListFilter(t *testing.T) {
 	})
 
 	t.Run("[all] mode matches date", func(t *testing.T) {
-		ml := NewMessageList(styles, msgs, 90, 20)
+		ml := NewMessageList(styles, msgs, 90, 20, FancyIcons)
 		ml.SetFilter("Apr 10", SearchModeAll)
 		if got := len(ml.rows); got != 1 {
 			t.Errorf("len(rows) for Apr 10 under [all] = %d, want 1", got)
@@ -767,7 +767,7 @@ func TestMessageListFilter(t *testing.T) {
 	})
 
 	t.Run("[all] mode also matches subject and sender", func(t *testing.T) {
-		ml := NewMessageList(styles, msgs, 90, 20)
+		ml := NewMessageList(styles, msgs, 90, 20, FancyIcons)
 		ml.SetFilter("project", SearchModeAll)
 		if got := len(ml.rows); got != 1 {
 			t.Errorf("len(rows) for project under [all] = %d, want 1", got)
@@ -775,8 +775,8 @@ func TestMessageListFilter(t *testing.T) {
 	})
 
 	t.Run("[all] and [name] differ on date-only queries", func(t *testing.T) {
-		mlName := NewMessageList(styles, msgs, 90, 20)
-		mlAll := NewMessageList(styles, msgs, 90, 20)
+		mlName := NewMessageList(styles, msgs, 90, 20, FancyIcons)
+		mlAll := NewMessageList(styles, msgs, 90, 20, FancyIcons)
 		mlName.SetFilter("Apr 09", SearchModeName)
 		mlAll.SetFilter("Apr 09", SearchModeAll)
 		if len(mlName.rows) != 0 {
@@ -788,7 +788,7 @@ func TestMessageListFilter(t *testing.T) {
 	})
 
 	t.Run("cursor saved on first filter application", func(t *testing.T) {
-		ml := NewMessageList(styles, msgs, 90, 20)
+		ml := NewMessageList(styles, msgs, 90, 20, FancyIcons)
 		ml.MoveDown()
 		ml.MoveDown()
 		if ml.selected != 2 {
@@ -801,7 +801,7 @@ func TestMessageListFilter(t *testing.T) {
 	})
 
 	t.Run("subsequent keystrokes don't overwrite saved cursor", func(t *testing.T) {
-		ml := NewMessageList(styles, msgs, 90, 20)
+		ml := NewMessageList(styles, msgs, 90, 20, FancyIcons)
 		ml.MoveDown()
 		ml.MoveDown()
 		ml.SetFilter("p", SearchModeName)
@@ -813,7 +813,7 @@ func TestMessageListFilter(t *testing.T) {
 	})
 
 	t.Run("clear restores pre-search cursor", func(t *testing.T) {
-		ml := NewMessageList(styles, msgs, 90, 20)
+		ml := NewMessageList(styles, msgs, 90, 20, FancyIcons)
 		ml.MoveDown()
 		ml.MoveDown()
 		ml.SetFilter("project", SearchModeName)
@@ -824,7 +824,7 @@ func TestMessageListFilter(t *testing.T) {
 	})
 
 	t.Run("clear with invalid saved cursor clamps to 0", func(t *testing.T) {
-		ml := NewMessageList(styles, msgs, 90, 20)
+		ml := NewMessageList(styles, msgs, 90, 20, FancyIcons)
 		ml.MoveDown()
 		ml.MoveDown()
 		ml.SetFilter("project", SearchModeName)
@@ -836,7 +836,7 @@ func TestMessageListFilter(t *testing.T) {
 	})
 
 	t.Run("re-activating search after clear starts fresh save", func(t *testing.T) {
-		ml := NewMessageList(styles, msgs, 90, 20)
+		ml := NewMessageList(styles, msgs, 90, 20, FancyIcons)
 		ml.SetFilter("project", SearchModeName)
 		ml.ClearFilter()
 		ml.MoveDown()
@@ -858,7 +858,7 @@ func TestMessageListFilterFoldShadow(t *testing.T) {
 	}
 
 	t.Run("filter expands folded thread when any message matches", func(t *testing.T) {
-		ml := NewMessageList(styles, msgs, 90, 20)
+		ml := NewMessageList(styles, msgs, 90, 20, FancyIcons)
 		ml.ToggleFoldAll()
 		visibleBefore := 0
 		for _, r := range ml.rows {
@@ -883,7 +883,7 @@ func TestMessageListFilterFoldShadow(t *testing.T) {
 	})
 
 	t.Run("clear filter restores saved fold state", func(t *testing.T) {
-		ml := NewMessageList(styles, msgs, 90, 20)
+		ml := NewMessageList(styles, msgs, 90, 20, FancyIcons)
 		ml.ToggleFoldAll()
 		ml.SetFilter("server", SearchModeName)
 		ml.ClearFilter()
@@ -920,7 +920,7 @@ func TestMessageListFilterResultCount(t *testing.T) {
 	}
 
 	t.Run("count is thread count, not message count", func(t *testing.T) {
-		ml := NewMessageList(styles, msgs, 90, 20)
+		ml := NewMessageList(styles, msgs, 90, 20, FancyIcons)
 		ml.SetFilter("project", SearchModeName)
 		if got := ml.FilterResultCount(); got != 3 {
 			t.Errorf("FilterResultCount = %d, want 3 (2 singletons + 1 thread)", got)
@@ -928,7 +928,7 @@ func TestMessageListFilterResultCount(t *testing.T) {
 	})
 
 	t.Run("zero when no matches", func(t *testing.T) {
-		ml := NewMessageList(styles, msgs, 90, 20)
+		ml := NewMessageList(styles, msgs, 90, 20, FancyIcons)
 		ml.SetFilter("zzz-nothing", SearchModeName)
 		if got := ml.FilterResultCount(); got != 0 {
 			t.Errorf("FilterResultCount = %d, want 0", got)
@@ -936,7 +936,7 @@ func TestMessageListFilterResultCount(t *testing.T) {
 	})
 
 	t.Run("zero when no filter active", func(t *testing.T) {
-		ml := NewMessageList(styles, msgs, 90, 20)
+		ml := NewMessageList(styles, msgs, 90, 20, FancyIcons)
 		if got := ml.FilterResultCount(); got != 0 {
 			t.Errorf("FilterResultCount with no filter = %d, want 0", got)
 		}
@@ -958,7 +958,7 @@ func TestMessageList_AppendMessages_PreservesCursor(t *testing.T) {
 		{UID: "7", ThreadID: "7", Subject: "Seventh", From: "Grace", Date: "Apr 04", Flags: mail.FlagSeen},
 	}
 
-	ml := NewMessageList(styles, initial, 90, 20)
+	ml := NewMessageList(styles, initial, 90, 20, FancyIcons)
 	// Advance to the third visible row (index 2).
 	ml.MoveDown()
 	ml.MoveDown()
@@ -996,7 +996,7 @@ func TestMessageList_IsNearBottom(t *testing.T) {
 	}
 
 	t.Run("cursor near bottom returns true", func(t *testing.T) {
-		ml := NewMessageList(styles, make100(), 90, 20)
+		ml := NewMessageList(styles, make100(), 90, 20, FancyIcons)
 		ml.MoveToBottom() // selected = 99
 		if !ml.IsNearBottom(5) {
 			t.Error("IsNearBottom(5) = false, want true when cursor at last row")
@@ -1004,7 +1004,7 @@ func TestMessageList_IsNearBottom(t *testing.T) {
 	})
 
 	t.Run("cursor within k of bottom returns true", func(t *testing.T) {
-		ml := NewMessageList(styles, make100(), 90, 20)
+		ml := NewMessageList(styles, make100(), 90, 20, FancyIcons)
 		ml.MoveToBottom()
 		ml.MoveUp()
 		ml.MoveUp()
@@ -1015,7 +1015,7 @@ func TestMessageList_IsNearBottom(t *testing.T) {
 	})
 
 	t.Run("cursor far from bottom returns false", func(t *testing.T) {
-		ml := NewMessageList(styles, make100(), 90, 20)
+		ml := NewMessageList(styles, make100(), 90, 20, FancyIcons)
 		// Move to row 50 (selected=50, 50 from end of 100).
 		for range 50 {
 			ml.MoveDown()
@@ -1026,7 +1026,7 @@ func TestMessageList_IsNearBottom(t *testing.T) {
 	})
 
 	t.Run("empty list returns false", func(t *testing.T) {
-		ml := NewMessageList(styles, nil, 90, 20)
+		ml := NewMessageList(styles, nil, 90, 20, FancyIcons)
 		if ml.IsNearBottom(5) {
 			t.Error("IsNearBottom(5) = true, want false for empty list")
 		}
@@ -1037,7 +1037,7 @@ func TestMessageListPlaceholder(t *testing.T) {
 	styles := NewStyles(theme.Nord)
 
 	t.Run("empty source shows No messages", func(t *testing.T) {
-		ml := NewMessageList(styles, nil, 90, 20)
+		ml := NewMessageList(styles, nil, 90, 20, FancyIcons)
 		plain := stripANSI(ml.View())
 		if !strings.Contains(plain, "No messages") {
 			t.Error("empty source should render 'No messages'")
@@ -1051,7 +1051,7 @@ func TestMessageListPlaceholder(t *testing.T) {
 		msgs := []mail.MessageInfo{
 			{UID: "1", ThreadID: "1", Subject: "Hello", From: "Alice", Date: "Apr 10"},
 		}
-		ml := NewMessageList(styles, msgs, 90, 20)
+		ml := NewMessageList(styles, msgs, 90, 20, FancyIcons)
 		ml.SetFilter("nothing-here-zzz", SearchModeName)
 		plain := stripANSI(ml.View())
 		if !strings.Contains(plain, "No matches") {
@@ -1088,7 +1088,7 @@ func TestMessageList_ColumnGaps(t *testing.T) {
 		Date:     "Mon 2026-04-27", // 14 chars; fits date column exactly
 		Flags:    mail.FlagSeen,   // read, no flag glyph
 	}
-	ml := NewMessageList(styles, []mail.MessageInfo{msg}, w, 3)
+	ml := NewMessageList(styles, []mail.MessageInfo{msg}, w, 3, FancyIcons)
 	line := stripANSI(strings.Split(ml.View(), "\n")[0])
 	runes := []rune(line)
 

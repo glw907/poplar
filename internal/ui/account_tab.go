@@ -36,6 +36,7 @@ type folderPage struct {
 // key is always live. J/K/G navigate folders, j/k navigate messages.
 type AccountTab struct {
 	styles Styles
+	icons  IconSet
 	// backend is held as a read-only reference so Update can build
 	// tea.Cmd closures that call backend methods. It is never
 	// mutated and its results are never cached as owned state —
@@ -56,14 +57,15 @@ type AccountTab struct {
 
 // NewAccountTab builds an empty AccountTab. The initial folder list is
 // fetched via Init's returned Cmd, not synchronously.
-func NewAccountTab(styles Styles, t *theme.CompiledTheme, backend mail.Backend, uiCfg config.UIConfig) AccountTab {
+func NewAccountTab(styles Styles, t *theme.CompiledTheme, backend mail.Backend, uiCfg config.UIConfig, icons IconSet) AccountTab {
 	return AccountTab{
 		styles:        styles,
+		icons:         icons,
 		backend:       backend,
 		uiCfg:         uiCfg,
-		sidebar:       NewSidebar(styles, nil, uiCfg, sidebarWidth, 1),
-		sidebarSearch: NewSidebarSearch(styles, sidebarWidth),
-		msglist:       NewMessageList(styles, nil, 1, 1),
+		sidebar:       NewSidebar(styles, nil, uiCfg, sidebarWidth, 1, icons),
+		sidebarSearch: NewSidebarSearch(styles, sidebarWidth, icons),
+		msglist:       NewMessageList(styles, nil, 1, 1, icons),
 		viewer:        NewViewer(styles, t, backend.AccountName()),
 		pages:         make(map[string]*folderPage),
 		spinner:       NewSpinner(t),
