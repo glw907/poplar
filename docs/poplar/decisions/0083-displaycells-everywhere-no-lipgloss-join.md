@@ -1,6 +1,6 @@
 ---
 title: displayCells/displayTruncate everywhere; no lipgloss.Join* on SPUA-A rows
-status: accepted
+status: narrowed by 0084
 date: 2026-04-27
 ---
 
@@ -83,3 +83,12 @@ row is exactly `m.width` display cells before `fillRowToWidth` runs.
   discipline by extending it to truncation and composition.
 - The `bubbletea-conventions.md` width-math section gains a paragraph
   about `lipgloss.Join*` being unsafe for icon-bearing rows.
+
+## Narrowed by 0084
+
+The discipline now applies only when `spuaCellWidth != 1`. In simple
+mode (the default for systems without a Nerd Font installed),
+`lipgloss.Width` is canonical and `Join*` is safe. The existing manual
+row-by-row join code is kept in this pass — it is correct under both
+width regimes — but a future cleanup pass may revert simple-mode call
+sites to `Join*`.

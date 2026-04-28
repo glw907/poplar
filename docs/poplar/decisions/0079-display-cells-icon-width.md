@@ -1,6 +1,6 @@
 ---
 title: displayCells helper for Nerd Font icon width
-status: accepted
+status: superseded by 0084
 date: 2026-04-26
 ---
 
@@ -60,3 +60,11 @@ may contain an icon glyph.
   `runewidth.SetEastAsianWidth(false)` package-wide was rejected
   because it changes behavior for non-Nerd-Font East Asian width
   cases (CJK punctuation) and is a global side effect.
+
+## Superseded
+
+This ADR's premise — "every modern terminal renders SPUA-A as 2 cells"
+— was never verified. The fix it claimed to land for BACKLOG #16 was
+declared-fixed without user visual confirmation; the same jitter
+defect persisted, just inverted. ADR-0084 replaces the static "+1"
+correction with a runtime CPR probe. See 0084 for the corrected model.
