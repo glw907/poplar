@@ -1,6 +1,7 @@
 /mailrender
 /fastmail-cli
 /tidytext
+/poplar
 
 .config/aerc/signature.md
 .config/aerc/accounts.conf
