@@ -1,10 +1,11 @@
 # Poplar Status
 
 **Current pass:** Pass 2.5b-4b next — viewer completion (link picker
-`Tab`, filtered `n/N`, URL bug cleanup). Pass 4.1 done — 7 render
-fixes landed; ADR-0082 (popover overlay+dim, supersedes 0071) and
-ADR-0083 (displayCells everywhere, no JoinHorizontal/Vertical on
-SPUA-A rows) added.
+`Tab`, filtered `n/N`, URL bug cleanup). Pass SPUA-policy done —
+three-mode iconography (auto/simple/fancy) with sysfont detection +
+CPR cell-width probe; ADR-0084 supersedes 0079, narrows 0083; new
+`poplar diagnose` subcommand; matrix doc + workstation captures
+under `docs/poplar/testing/`.
 
 ## Passes
 
@@ -20,6 +21,7 @@ SPUA-A rows) added.
 | 3 | JMAP direct-on-rockorager + delete fork + wire live | done |
 | 4 | Bubbletea conventions audit + infrastructure | done — [audit](audits/2026-04-26-bubbletea-conventions.md) |
 | 4.1 | Render bugfix pass — 7 findings, absorbs #14 | done |
+| SPUA-policy | Three-mode iconography (auto/simple/fancy) + runtime probe | done — ADR-0084, [matrix](testing/icon-modes.md) |
 | 2.5b-4b | Viewer completion: link picker (`Tab`) + `n/N` filtered (#9) + URL bug cleanup | next |
 | 5 | Bubbletea conventions cleanup: `key.Matches` (#17) + delegation (#18) + App.View trust (#19) | pending |
 | 6 | Triage actions (delete/archive/star/read; toast + undo bar) | pending |
