@@ -7,6 +7,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/glw907/poplar/internal/config"
+	"github.com/glw907/poplar/internal/term"
 	"github.com/glw907/poplar/internal/theme"
 	"github.com/glw907/poplar/internal/ui"
 	"github.com/spf13/cobra"
@@ -80,9 +81,17 @@ func runRoot(f rootFlags) error {
 		return fmt.Errorf("load UI config: %w", err)
 	}
 
-	// Pass FancyIcons temporarily; Task 11 will wire the resolved IconSet
-	// from term.Resolve based on the detected terminal capabilities.
-	app := ui.NewApp(t, backend, uiCfg, ui.FancyIcons)
+	hasNF := term.HasNerdFont()
+	probe := term.MeasureSPUACells()
+	mode, cellWidth := term.Resolve(uiCfg.Icons, hasNF, probe)
+
+	iconSet := ui.SimpleIcons
+	if mode == term.IconModeFancy {
+		iconSet = ui.FancyIcons
+	}
+	ui.SetSPUACellWidth(cellWidth)
+
+	app := ui.NewApp(t, backend, uiCfg, iconSet)
 
 	p := tea.NewProgram(appModel{app: app}, tea.WithAltScreen())
 	if _, err := p.Run(); err != nil {
