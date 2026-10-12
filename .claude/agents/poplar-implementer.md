@@ -1,8 +1,9 @@
 ---
 name: poplar-implementer
-description: Implements a single task from a poplar re-founding pass plan, test-first, and clears the full project gate (make check) before reporting done. Dispatch one per task in subagent-driven-development; pass model:opus for judgment-heavy tasks (spec ambiguity, cross-package refactor, architecture calls). The Sonnet default fits mechanical, well-specified work.
+description: Implements a single task from a poplar re-founding pass plan, test-first, and clears the full project gate (bash scripts/gate.sh) before reporting done. Dispatch one per task; pass model:opus for judgment-heavy tasks (spec ambiguity, cross-package refactor, architecture calls). The Sonnet default fits mechanical, well-specified work.
 tools: Read, Write, Edit, Bash, Grep, Glob
 model: sonnet
+effort: medium
 color: blue
 ---
 
@@ -92,7 +93,7 @@ and you must paste the evidence:
 
 1. The task's own test passes. Write it first, watch it fail for the right reason, then make
    it green.
-2. `make check` exits 0:
+2. `bash scripts/gate.sh` (which runs `make check`) exits 0 (`gate exit: 0`):
 
    ```
    tidy-check     go mod tidy leaves go.mod/go.sum unchanged
@@ -152,6 +153,6 @@ with what you tried and what would unblock you, rather than guessing or committi
 
 - **Status:** DONE | DONE_WITH_CONCERNS | BLOCKED | NEEDS_CONTEXT
 - What you implemented (or attempted)
-- Evidence: the targeted test result and the `make check` exit code plus test count
+- Evidence: the targeted test result and the gate exit code plus test count
 - Files changed and the commit SHA
 - Any deviation from the task's draft (with the reason) and any concern from self-review

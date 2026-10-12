@@ -685,6 +685,8 @@ Phase 0 outcomes:
 
 ## Next: pass 2c (real-terminal verification), then the pass 2 gate, then pass 2b
 
+Pass 2c and pass 2b re-plan under the `poplar-pass` skill and `pass-core` before they run; the resume prompt below predates both.
+
 Pass 2 closed on 2026-08-20. On 2026-08-21 the gate's first minute in
 Geoff's kitty found the help screen uncomposed, and a spike built the
 real-kitty capture harness (`scripts/kitty-shot`,

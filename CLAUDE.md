@@ -56,11 +56,8 @@ Invoke the relevant skill before writing code, including spike code.
 
 ## Conducting a pass
 
-The global CLAUDE.md "Conducting a pass" rule applies here. The conductor
-dispatches `poplar-implementer` (Sonnet) per task. The `diff-reviewer` agent
-(Opus) reads each diff against the task's acceptance criteria before the
-next dispatch. `poplar-reviewer` and `poplar-go-reviewer` (both Opus) run at
-pass end as today. The gate is `make check`.
+Load the `poplar-pass` skill, then `pass-core`, to plan, run, or close a
+pass. The gate is `bash scripts/gate.sh`.
 
 ## Human voice
 
@@ -85,8 +82,7 @@ charter at `~/.claude/docs/authoring-charter.md`. The Go comment
 audience is wired: the in-tree `.vale.ini` lints `.go` comment prose
 through the vendored `glw907` overlay in `.vale/styles/glw907`, and
 `make check` runs the Vale comment gate to block a commit on an
-error-level finding. Re-sync the overlay after a canonical change
-with `~/.dotfiles/scripts/glw907-vendor.sh ~/Projects/poplar --sync`.
+error-level finding.
 
 ## Backlog
 
