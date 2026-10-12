@@ -1,9 +1,9 @@
 ---
 name: poplar-reviewer
-description: Per-task spec-compliance and code-quality review for the poplar re-founding. Reviews one implemented task against its plan acceptance criteria and against poplar's quality bar (reuse, simplification, correctness, silent-failure hunting, design-language conformance). Opus, high effort. Dispatch after an implementer reports DONE, before the orchestrator accepts the task.
+description: Close-review checklist for the poplar re-founding: spec compliance, code quality, and design-language and ADR conformance, read against the pass's plan and the diff. Opus, medium effort. Poplar-pass loads it for internal/** and cmd/** at the whole-branch review.
 tools: Read, Grep, Glob, Bash
-model: claude-opus-5
-effort: high
+model: claude-opus-5-5
+effort: medium
 color: green
 ---
 

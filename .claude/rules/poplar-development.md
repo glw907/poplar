@@ -15,13 +15,11 @@ the STATUS is its first and non-optional step.
 The build follows the requirements' spine: six numbered passes
 (foundation; design language and shell; mail read path; compose;
 calendar; hardening). Each pass is one plan doc under
-`docs/superpowers/plans/`, authored in the pass's execution session
-from the spine and the specs, and executed subagent-driven with
-per-task review. A screen pass adds a design ritual: a text wireframe
-per screen per responsive class that changes its layout, pointer
-targets included, reviewed by Geoff before the screen's tasks
-dispatch. A pass ends with consolidation (simplify, reviewer fan-out,
-STATUS update, plan archival) and closes at a pass gate with Geoff.
+`docs/superpowers/plans/`, run under the `poplar-pass` skill (per-task
+review, consolidation, and close are there). A screen pass adds a design
+ritual: a text wireframe per screen per responsive class that changes
+its layout, pointer targets included, reviewed by Geoff before the
+screen's tasks dispatch.
 
 **A pass can be split at a logical point, and the numbered spine does
 not forbid it** (pass 1b exists because pass 1 burst). The signal to
