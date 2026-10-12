@@ -40,3 +40,18 @@ Its order against 2c's tasks 4 to 6 is decided during poplar development.
     keeps each fallback at its glyph's width
     (`2026-07-27-poplar-design-language.md:409-413`). The pass confirms that
     sentence as the rule's home rather than porting `displayCells`.
+
+### Gate and toolchain repairs
+
+Deferred by Geoff's triage of PR #1 (2026-10-11), each for a poplar session:
+
+- The four darwin `internal/uerr` log tests expect the XDG state path where
+  macOS resolves `Library/Application Support`; `master` is red until fixed.
+- The local `perf` legs fail: `TestQA2Interaction` on its 51-109ms admission
+  ceiling, and `TestQA1Startup` on the tmpfs user quota. One needs a looser or
+  disk-aware ceiling, the other a corpus copy that fits the quota.
+- Take go1.26.9 (three `net/http` advisories in the nightly `govulncheck`)
+  through `dependency-upgrade`, and add `effort` to `poplar-go-reviewer`.
+- Slim the 918-line STATUS to `pass-core`'s 60 lines.
+- Once the gate is green locally, run the adapter's end-to-end check in a fresh
+  worktree.
