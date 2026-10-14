@@ -169,7 +169,7 @@
 
 ## Medium
 
-- [ ] **#78** Gate and toolchain repairs `#improvement` `#poplar` `#initiative:poplar-refounding` *(2026-10-14, moved from ROADMAP.md)*
+- [ ] **#78** Gate and toolchain repairs `#improvement` `#poplar` `#initiative:poplar-refounding` *(2026-10-14, from the retired roadmap)*
   Deferred by Geoff's triage of PR #1 (2026-10-11), each for a poplar session:
   - The four darwin `internal/uerr` log tests expect the XDG state path where macOS resolves `Library/Application Support`; `master` is red until fixed.
   - The local `perf` legs fail: `TestQA2Interaction` on its 51-109ms admission ceiling, and `TestQA1Startup` on the tmpfs user quota. One needs a looser or disk-aware ceiling, the other a corpus copy that fits the quota.
@@ -177,7 +177,7 @@
   - Slim the 918-line STATUS to `pass-core`'s 60 lines.
   - Once the gate is green locally, run the adapter's end-to-end check in a fresh worktree.
 
-- [ ] **#77** Bubble Tea refactor pass `#improvement` `#poplar` `#ui` `#initiative:poplar-refounding` *(2026-10-14, moved from ROADMAP.md)*
+- [ ] **#77** Bubble Tea refactor pass `#improvement` `#poplar` `#ui` `#initiative:poplar-refounding` *(2026-10-14, from the retired roadmap)*
   Bring the UI to `elm-conventions` as infra sweep 2 left it: one top-level model, with components as plain structs that have imperative methods (`elm-conventions` `SKILL.md:36-72`; line 34 routes poplar's migration here). Its order against 2c's tasks 4 to 6 is decided during poplar development.
   - Convert the six nested `tea.Model` types beside `App`: `Confirm` (`confirm.go:44-199`), `HelpScreen` (`help.go:118-362`), and the four placeholders (`placeholder.go:160-375`).
   - Amend ADR-0011:17-19. Its `Screen` embeds `tea.Model` (`registry.go:20-23`) and registers into a package-level registry at init, against Rule 1's "no package-level mutable variables."
