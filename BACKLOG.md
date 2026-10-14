@@ -169,6 +169,22 @@
 
 ## Medium
 
+- [ ] **#78** Gate and toolchain repairs `#improvement` `#poplar` `#initiative:poplar-refounding` *(2026-10-14, moved from ROADMAP.md)*
+  Deferred by Geoff's triage of PR #1 (2026-10-11), each for a poplar session:
+  - The four darwin `internal/uerr` log tests expect the XDG state path where macOS resolves `Library/Application Support`; `master` is red until fixed.
+  - The local `perf` legs fail: `TestQA2Interaction` on its 51-109ms admission ceiling, and `TestQA1Startup` on the tmpfs user quota. One needs a looser or disk-aware ceiling, the other a corpus copy that fits the quota.
+  - Take go1.26.9 (three `net/http` advisories in the nightly `govulncheck`) through `dependency-upgrade`, and add `effort` to `poplar-go-reviewer`.
+  - Slim the 918-line STATUS to `pass-core`'s 60 lines.
+  - Once the gate is green locally, run the adapter's end-to-end check in a fresh worktree.
+
+- [ ] **#77** Bubble Tea refactor pass `#improvement` `#poplar` `#ui` `#initiative:poplar-refounding` *(2026-10-14, moved from ROADMAP.md)*
+  Bring the UI to `elm-conventions` as infra sweep 2 left it: one top-level model, with components as plain structs that have imperative methods (`elm-conventions` `SKILL.md:36-72`; line 34 routes poplar's migration here). Its order against 2c's tasks 4 to 6 is decided during poplar development.
+  - Convert the six nested `tea.Model` types beside `App`: `Confirm` (`confirm.go:44-199`), `HelpScreen` (`help.go:118-362`), and the four placeholders (`placeholder.go:160-375`).
+  - Amend ADR-0011:17-19. Its `Screen` embeds `tea.Model` (`registry.go:20-23`) and registers into a package-level registry at init, against Rule 1's "no package-level mutable variables."
+  - Re-home two rules from the deleted workstation doc `claude/.claude/docs/bubbletea-conventions.md` (removed in dotfiles 7d5bdd0; poplar's own copy went in 041eb329):
+    - **JoinHorizontal padding** (§2, lines 161-169). `lipgloss.JoinHorizontal` right-pads every line to its block's widest line, so a ragged child is the child's bug. The generic half now lives in `elm-conventions` Rule 6. The pass records the lipgloss fact beside poplar's size contract.
+    - **Icon width** (§8, lines 464-475, ADR-0084 on branch `legacy`). Nerd Font SPUA glyphs are undercounted, so `JoinHorizontal` is barred on SPUA rows. The re-founding design language already forbids private-use glyphs and keeps each fallback at its glyph's width (`2026-07-27-poplar-design-language.md:409-413`). The pass confirms that sentence as the rule's home rather than porting `displayCells`.
+
 - [ ] **#76** Placeholder pane composition is a per-screen-type special case, not a declared pane set `#improvement` `#poplar` `#ui` *(2026-08-20, pass 2 final fix round)*
   `internal/ui/app.go`'s `isPlaceholderScreen` type-switches on the four surface placeholders to decide `FullRegion` (spec C3's ruling: F1/F8's ratified wireframes say a placeholder owns no sidebar and no split, so `ComputeLayout`'s generic sidebar/split allocation is simply wrong for them this pass). The durable fix pass 3 owes: a `ScreenEntry` declares which panes it actually wants (a pane set alongside its keymap and pointer bindings), and `ComputeLayout` or `Render` allocates only what a screen asked for, so a screen's composition is data the registry carries rather than a type list `App.View` special-cases. Pass 3's first real content screen (the mail list, wanting a sidebar) is the natural trigger.
 
