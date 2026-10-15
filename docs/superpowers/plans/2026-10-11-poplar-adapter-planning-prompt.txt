@@ -1,0 +1,41 @@
+You are an attended planning session for poplar's `pass-core` adapter, in the poplar repo
+`~/Projects/poplar`. Geoff is present: this session designs with him, one question at a time with a
+recommendation, and does not plan or execute without his approval of the design. Infra sweep 2
+(workstation PR on `glw907/workstation`) has merged; the skills this session reads are its result.
+
+Load `pass-core` and `claude-infra`, and read `~/.dotfiles/ROADMAP.md` "Planned", "Poplar adopts
+`pass-core`" (Geoff, 2026-10-11, ruling R4). Read poplar's `CLAUDE.md` and the `dubplate` adapter
+(`~/Projects/dubplate/.claude/skills/`) as the model for a small adapter.
+
+Scope, from Anthropic, applies to every step and every dispatch:
+"Avoid over-engineering. Only make changes that are directly requested or clearly necessary. Keep
+solutions simple and focused: - Scope: Don't add features, refactor code, or make "improvements"
+beyond what was asked. A bug fix doesn't need surrounding code cleaned up. A simple feature doesn't
+need extra configurability. ... - Defensive coding: Don't add error handling, fallbacks, or
+validation for scenarios that can't happen. Trust internal code and framework guarantees. Only
+validate at system boundaries (user input, external APIs). - Abstractions: Don't create helpers,
+utilities, or abstractions for one-time operations. Don't design for hypothetical future
+requirements. The right amount of complexity is the minimum needed for the current task."
+(https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices)
+"Deliver what was asked, at the scope intended. Make routine judgment calls yourself, and check in
+only when different readings of the request would lead to materially different work. If the request
+seems mistaken or a better approach exists, say so in a sentence and continue with the task as asked
+rather than quietly narrowing, widening, or transforming it. Finish the whole task, and stop short of
+actions that are clearly beyond what was asked."
+(https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-opus-5)
+Anything beyond the design goes in the plan's "Later", never into a task.
+
+The design covers two things:
+1. Poplar's `pass-core` adapter: gate, fast lane, full-suite home, worktree setup, risk-class path
+   map, checklist globs, and close checklist. It includes replacing `poplar/CLAUDE.md`'s
+   "Conducting a pass" section, which defers to a deleted global rule, and repinning
+   `poplar-reviewer` (`claude-opus-5` at `high`) and `poplar-implementer` (no effort), per the
+   ROADMAP entry.
+2. Logging poplar's refactor to Charm's Bubble Tea model as its own pass in poplar's ROADMAP.
+   `elm-conventions`, as infra sweep 2 leaves it, is the target: one top-level model, child
+   components as plain structs with imperative methods. It also names the poplar-specific material
+   the old `docs/bubbletea-conventions.md` held (the ADR-referenced icon-width and JoinHorizontal
+   rules) that the refactor pass must re-home in poplar.
+
+Run `pass-core` Lifecycle step 1 in chat. Once Geoff approves the design, commit it and stop; the
+planning of the adapter pass follows as its own session.
