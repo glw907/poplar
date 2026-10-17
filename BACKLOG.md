@@ -171,7 +171,7 @@
 
 - [ ] **#78** Gate and toolchain repairs `#improvement` `#poplar` `#initiative:poplar-refounding` *(2026-10-14, from the retired roadmap)*
   Deferred by Geoff's triage of PR #1 (2026-10-11), each for a poplar session:
-  - The four darwin `internal/uerr` log tests expect the XDG state path where macOS resolves `Library/Application Support`; `master` is red until fixed.
+  - ~~The four darwin `internal/uerr` log tests expect the XDG state path where macOS resolves `Library/Application Support`; `master` is red until fixed.~~ Resolved 2026-10-17: `stateLogPath` (`internal/uerr/log.go`) follows the XDG layout on every OS, as ADR-0013 documents, instead of `xdg.StateFile`.
   - The local `perf` legs fail: `TestQA2Interaction` on its 51-109ms admission ceiling, and `TestQA1Startup` on the tmpfs user quota. One needs a looser or disk-aware ceiling, the other a corpus copy that fits the quota.
   - Take go1.26.9 (three `net/http` advisories in the nightly `govulncheck`) through `dependency-upgrade`, and add `effort` to `poplar-go-reviewer`.
   - Slim the 918-line STATUS to `pass-core`'s 60 lines.

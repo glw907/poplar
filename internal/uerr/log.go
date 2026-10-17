@@ -7,8 +7,6 @@ import (
 	"os"
 	"path/filepath"
 	"sync"
-
-	"github.com/adrg/xdg"
 )
 
 // level is uerr's log level. slog.LevelInfo is the default; SetLevel
@@ -80,13 +78,13 @@ func SetDefault() {
 
 // openLogWriter resolves ADR-0013's log destination,
 // $XDG_STATE_HOME/poplar/poplar.log (the existing
-// ~/.local/state/poplar/ home per ER-4). xdg.StateFile only resolves
+// ~/.local/state/poplar/ home per ER-4). stateLogPath only resolves
 // a path string, creating the containing directory if it is missing;
 // it never proves the file itself is writable, so a state directory
 // that exists but denies write (mode 0500, a read-only home, a full
 // quota) resolves happily and only reveals itself the first time
 // something tries to write. tryOpen's trial write is what catches
-// that before the fallback decision is made, not xdg.StateFile's
+// that before the fallback decision is made, not stateLogPath's
 // error alone (dispositions row 24, C2).
 //
 // When the state destination fails its trial, the fallback is a file
@@ -101,7 +99,7 @@ func SetDefault() {
 // already carries the trial's drop count with no further write
 // needed to surface it.
 func openLogWriter() io.Writer {
-	if primary, err := xdg.StateFile("poplar/poplar.log"); err == nil {
+	if primary, err := stateLogPath(); err == nil {
 		if w, ok := tryOpen(primary); ok {
 			logWriter = w
 			return w
@@ -120,6 +118,27 @@ func openLogWriter() io.Writer {
 	slog.New(slog.NewJSONHandler(w, &slog.HandlerOptions{Level: level})).Warn(
 		"uerr: state directory unavailable, logging to the temp-dir fallback", "path", fallback)
 	return w
+}
+
+// stateLogPath returns the log file under $XDG_STATE_HOME, or
+// ~/.local/state when it is unset, creating the poplar directory. It
+// follows the XDG layout on every OS, macOS included: adrg/xdg
+// resolves ~/Library/Application Support there, which ADR-0013's
+// documented home does not name.
+func stateLogPath() (string, error) {
+	base := os.Getenv("XDG_STATE_HOME")
+	if base == "" {
+		home, err := os.UserHomeDir()
+		if err != nil {
+			return "", err
+		}
+		base = filepath.Join(home, ".local", "state")
+	}
+	dir := filepath.Join(base, "poplar")
+	if err := os.MkdirAll(dir, 0o700); err != nil { //nolint:gosec // G703: dir derives from XDG_STATE_HOME or the home directory, never user input
+		return "", err
+	}
+	return filepath.Join(dir, "poplar.log"), nil
 }
 
 // tryOpen builds a rotatingWriter over path and proves it can
@@ -261,7 +280,7 @@ func (w *rotatingWriter) Write(p []byte) (int, error) {
 		}
 	}
 
-	f, err := os.OpenFile(w.path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o644) //nolint:gosec // G304: w.path comes from xdg.StateFile, its temp-dir fallback, or a test fixture, never user input
+	f, err := os.OpenFile(w.path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o644) //nolint:gosec // G304: w.path comes from stateLogPath, its temp-dir fallback, or a test fixture, never user input
 	if err != nil {
 		return w.fail(err)
 	}

@@ -8,8 +8,6 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
-
-	"github.com/adrg/xdg"
 )
 
 // captureLog redirects logger to a buffer for the test's duration and
@@ -46,8 +44,6 @@ func TestLogDefaultLocation(t *testing.T) {
 	home := t.TempDir()
 	t.Setenv("HOME", home)
 	t.Setenv("XDG_STATE_HOME", "")
-	xdg.Reload()
-	t.Cleanup(xdg.Reload)
 
 	w, ok := openLogWriter().(*rotatingWriter)
 	if !ok {
@@ -83,7 +79,7 @@ func TestLogFallsBackToTempDirWhenStateDirUnavailable(t *testing.T) {
 
 	home := t.TempDir()
 	// A file where $XDG_STATE_HOME/poplar would need to be a
-	// directory: every candidate xdg.StateFile tries fails the same
+	// directory: every candidate stateLogPath tries fails the same
 	// way an unwritable or missing state directory would.
 	if err := os.MkdirAll(filepath.Join(home, ".local"), 0o750); err != nil {
 		t.Fatalf("create the .local directory: %v", err)
@@ -93,8 +89,6 @@ func TestLogFallsBackToTempDirWhenStateDirUnavailable(t *testing.T) {
 	}
 	t.Setenv("HOME", home)
 	t.Setenv("XDG_STATE_HOME", "")
-	xdg.Reload()
-	t.Cleanup(xdg.Reload)
 
 	wantPath := filepath.Join(os.TempDir(), "poplar.log")
 	t.Cleanup(func() { _ = os.Remove(wantPath) })
@@ -128,11 +122,11 @@ func TestLogFallsBackToTempDirWhenStateDirUnavailable(t *testing.T) {
 }
 
 // TestLogFallsBackWhenStateDirIsUnwritable proves C2: a state
-// directory that resolves (xdg.StateFile succeeds; nothing is missing
+// directory that resolves (stateLogPath succeeds; nothing is missing
 // or a file where a directory belongs) but denies write, mode 0500
 // standing in for a read-only home or a filesystem at quota, still
 // falls back rather than silently dropping every line until an
-// operator notices at exit. xdg.StateFile alone cannot catch this: it
+// operator notices at exit. stateLogPath alone cannot catch this: it
 // only resolves a path string and creates the containing directory if
 // missing, never proving the file itself is writable.
 func TestLogFallsBackWhenStateDirIsUnwritable(t *testing.T) {
@@ -155,8 +149,6 @@ func TestLogFallsBackWhenStateDirIsUnwritable(t *testing.T) {
 	t.Cleanup(func() { _ = os.Chmod(stateDir, 0o700) }) //nolint:gosec // G302: stateDir is a directory; restoring 0700 so t.TempDir's cleanup can remove it
 	t.Setenv("HOME", home)
 	t.Setenv("XDG_STATE_HOME", "")
-	xdg.Reload()
-	t.Cleanup(xdg.Reload)
 
 	wantPath := filepath.Join(os.TempDir(), "poplar.log")
 	t.Cleanup(func() { _ = os.Remove(wantPath) })
@@ -194,8 +186,6 @@ func TestLogDegradedWhenBothDestinationsFail(t *testing.T) {
 	t.Setenv("HOME", home)
 	t.Setenv("XDG_STATE_HOME", "")
 	t.Setenv("TMPDIR", filepath.Join(t.TempDir(), "does-not-exist"))
-	xdg.Reload()
-	t.Cleanup(xdg.Reload)
 
 	if _, ok := openLogWriter().(*rotatingWriter); !ok {
 		t.Fatalf("openLogWriter() = %T, want *rotatingWriter", openLogWriter())
