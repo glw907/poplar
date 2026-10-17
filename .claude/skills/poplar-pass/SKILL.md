@@ -54,5 +54,5 @@ Vale must be on `PATH`, because `scripts/vale-comments.sh` hard-fails without it
 - Archive the plan to `docs/superpowers/archive/plans/`. STATUS stays at
   `docs/superpowers/specs/poplar-refounding-STATUS.md`.
 - Product touchpoints: the wireframe review before a screen task dispatches
-  (`.claude/rules/poplar-development.md`), plus `pass-core`'s design approval and PR read.
+  (`.claude/rules/poplar-development.md`), plus `pass-core`'s design approval and packet read.
 - Commit specific files only.
