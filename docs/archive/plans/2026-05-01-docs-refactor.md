@@ -19,7 +19,7 @@ them first.
   current Claude Code mechanism for conditional context loading.
   Verified against the official memory docs.
 - Path globs accept multiple unrelated patterns and non-code paths
-  (e.g. `docs/superpowers/plans/**/*.md`).
+  (e.g. `docs/plans/**/*.md`).
 - We will move component/UX invariants into a path-scoped rule,
   scoped to both code edits and planning-doc reads so brainstorming
   picks them up.
@@ -50,8 +50,8 @@ target ≤180 lines):
 description: UI/UX invariants for poplar's bubbletea layer
 paths:
   - "internal/ui/**/*.go"
-  - "docs/superpowers/plans/**/*.md"
-  - "docs/superpowers/specs/**/*.md"
+  - "docs/plans/**/*.md"
+  - "docs/specs/**/*.md"
   - "docs/poplar/wireframes.md"
   - "docs/poplar/keybindings.md"
 ---

@@ -8,9 +8,9 @@
 
 **Tech Stack:** Markdown, `go mod download`, ripgrep over `~/go/pkg/mod`, GitHub API for uncached repos. No build, no test, no `make check` — this pass produces no Go diff.
 
-**Spec source:** `docs/superpowers/specs/2026-05-08-bubble-reeval-and-eval-b.md`
+**Spec source:** `docs/specs/2026-05-08-bubble-reeval-and-eval-b.md`
 
-**Output spec:** `docs/superpowers/specs/2026-05-08-bubble-reeval-and-eval-b.md` evolves in place — candidate sections are appended to the design as the eval runs. The current document is the framing; tasks 2–11 add the verdicts.
+**Output spec:** `docs/specs/2026-05-08-bubble-reeval-and-eval-b.md` evolves in place — candidate sections are appended to the design as the eval runs. The current document is the framing; tasks 2–11 add the verdicts.
 
 ---
 
@@ -21,7 +21,7 @@ Each candidate task follows the same five-step shape:
 1. **Read library source.** The render path that previously gated adoption — typically the function calling `lipgloss.JoinHorizontal` or `lipgloss.Width`. Use the cached path when present (`~/go/pkg/mod/...`); for uncached candidates run `go mod download <module>` first or fetch via GitHub raw URL.
 2. **Read poplar consumer.** The current hand-roll. File paths listed per task.
 3. **Decide:** does ansix change the verdict? (Eval A revisits.) Or, fresh from scratch (Eval B.)
-4. **Append a candidate section** to `docs/superpowers/specs/2026-05-08-bubble-reeval-and-eval-b.md` under a new top-level heading `## <candidate>`. Section structure:
+4. **Append a candidate section** to `docs/specs/2026-05-08-bubble-reeval-and-eval-b.md` under a new top-level heading `## <candidate>`. Section structure:
    - `**Does this make poplar better?**` — lead with the answer, one paragraph.
    - `**Feature parity:**` — gap analysis vs poplar's current behavior.
    - `**Customization seams:**` — theme + keymap + domain state injection points.
@@ -43,7 +43,7 @@ Per-candidate prose budget: 300–400 words for Eval A revisits and single-libra
 **Files:**
 - Read: `internal/ansix/ansix.go`, `internal/ansix/ansix_test.go`
 - Read: `docs/poplar/decisions/0181-ansix-width-shim.md`
-- Modify: `docs/superpowers/specs/2026-05-08-bubble-reeval-and-eval-b.md` — add a `## ansix capability summary` section between `## Per-candidate process` and `## Fork-vs-accept call`.
+- Modify: `docs/specs/2026-05-08-bubble-reeval-and-eval-b.md` — add a `## ansix capability summary` section between `## Per-candidate process` and `## Fork-vs-accept call`.
 
 - [ ] **Step 1: Read ansix source.** `internal/ansix/ansix.go` and `internal/ansix/ansix_test.go`. Note every exported function (`Width`, `Truncate`, `TruncateEllipsis`, `SetSPUACellWidth`, etc.), what it does, and how it differs from `ansi.StringWidth` / `lipgloss.Width`.
 
@@ -62,7 +62,7 @@ Per-candidate prose budget: 300–400 words for Eval A revisits and single-libra
 
 - [ ] **Step 5: Commit.**
   ```bash
-  git add docs/superpowers/specs/2026-05-08-bubble-reeval-and-eval-b.md
+  git add docs/specs/2026-05-08-bubble-reeval-and-eval-b.md
   git commit -m "Pass 9w.2: ansix capability summary"
   ```
 
@@ -73,7 +73,7 @@ Per-candidate prose budget: 300–400 words for Eval A revisits and single-libra
 **Files:**
 - Read: `~/go/pkg/mod/cache/download/github.com/rmhubbert/bubbletea-overlay/...` (run `go mod download github.com/rmhubbert/bubbletea-overlay` if absent), specifically `overlay.go` and `model.go`.
 - Read: `internal/ui/uicore/overlay.go`, `internal/ui/uicore/modal_shell.go`, `internal/ui/app.go` (the cascade in `App.View`).
-- Modify: `docs/superpowers/specs/2026-05-08-bubble-reeval-and-eval-b.md`.
+- Modify: `docs/specs/2026-05-08-bubble-reeval-and-eval-b.md`.
 
 - [ ] **Step 1: Fetch the library.** If not cached:
   ```bash
@@ -105,7 +105,7 @@ Per-candidate prose budget: 300–400 words for Eval A revisits and single-libra
 **Files:**
 - Read: `~/go/pkg/mod/github.com/charmbracelet/bubbles@v1.0.0/help/help.go`
 - Read: `internal/ui/helppopover/model.go`, `internal/ui/helppopover/styles.go`
-- Modify: `docs/superpowers/specs/2026-05-08-bubble-reeval-and-eval-b.md`.
+- Modify: `docs/specs/2026-05-08-bubble-reeval-and-eval-b.md`.
 
 - [ ] **Step 1: Read `help.go`.** Find every call to `lipgloss.JoinHorizontal` and `lipgloss.Width`. Note `Styles` field shape (`FullKey`, `FullDesc`, etc.). Note `KeyMap` interface (`ShortHelp() []key.Binding`, `FullHelp() [][]key.Binding`).
 
@@ -127,7 +127,7 @@ Per-candidate prose budget: 300–400 words for Eval A revisits and single-libra
 **Files:**
 - Fetch source via `go mod download` or raw GitHub.
 - Read: `internal/ui/uicore/...` (toast — likely `internal/ui/account/toast.go` or similar; locate with `grep -rn "renderToast" internal/`).
-- Modify: `docs/superpowers/specs/2026-05-08-bubble-reeval-and-eval-b.md`.
+- Modify: `docs/specs/2026-05-08-bubble-reeval-and-eval-b.md`.
 
 - [ ] **Step 1: Locate poplar's toast.** Run:
   ```bash
@@ -158,7 +158,7 @@ Per-candidate prose budget: 300–400 words for Eval A revisits and single-libra
 **Files:**
 - Fetch: `go mod download github.com/charmbracelet/huh` then read `form.go`, `group.go`, `field.go` and the public `Field` interface.
 - Read: `internal/ui/contacts/form.go` (the contact edit form).
-- Modify: `docs/superpowers/specs/2026-05-08-bubble-reeval-and-eval-b.md`.
+- Modify: `docs/specs/2026-05-08-bubble-reeval-and-eval-b.md`.
 
 - [ ] **Step 1: Fetch huh.**
   ```bash
@@ -186,7 +186,7 @@ Per-candidate prose budget: 300–400 words for Eval A revisits and single-libra
 **Files:**
 - Fetch: `go mod download github.com/evertras/bubble-table`. Read `table/render.go` or whichever file holds `renderRowData` / `renderHeaders`.
 - Read: `internal/ui/messagelist/model.go` (renderRow + threading), `internal/ui/contacts/list.go`.
-- Modify: `docs/superpowers/specs/2026-05-08-bubble-reeval-and-eval-b.md`.
+- Modify: `docs/specs/2026-05-08-bubble-reeval-and-eval-b.md`.
 
 - [ ] **Step 1: Fetch bubble-table.**
   ```bash
@@ -214,7 +214,7 @@ Per-candidate prose budget: 300–400 words for Eval A revisits and single-libra
 **Files:**
 - Read: `~/go/pkg/mod/github.com/charmbracelet/bubbles@v1.0.0/list/list.go`, `list/defaultitem.go`, `list/keys.go`.
 - Read: `internal/ui/movepicker/model.go`, `internal/ui/reader/linkpicker.go`, `internal/ui/reader/attachpicker.go`.
-- Modify: `docs/superpowers/specs/2026-05-08-bubble-reeval-and-eval-b.md`.
+- Modify: `docs/specs/2026-05-08-bubble-reeval-and-eval-b.md`.
 
 - [ ] **Step 1: Read `bubbles/list`.** Specifically: `list.go` (Model, View, paginator integration), `defaultitem.go` (delegate pattern), `keys.go` (KeyMap). Note every `lipgloss.JoinHorizontal` and `lipgloss.Width` call. Note styling injection points.
 
@@ -245,7 +245,7 @@ Per-candidate prose budget: 300–400 words for Eval A revisits and single-libra
 - Read: `bubbles/list` (already from Task 7 — cross-reference).
 - Fetch: `go mod download github.com/treilik/bubblelister`. Read its main file.
 - Read: `internal/ui/compose/dropdown.go` (locate via `grep -rn "Dropdown" internal/ui/compose`).
-- Modify: `docs/superpowers/specs/2026-05-08-bubble-reeval-and-eval-b.md`.
+- Modify: `docs/specs/2026-05-08-bubble-reeval-and-eval-b.md`.
 
 - [ ] **Step 1: Fetch bubblelister.**
   ```bash
@@ -273,7 +273,7 @@ Per-candidate prose budget: 300–400 words for Eval A revisits and single-libra
 **Files:**
 - Read: cross-ref Task 7 for `bubbles/list`.
 - Read: `internal/ui/sidebar/model.go`, `internal/ui/sidebar/styles.go`, `internal/ui/sidebar/sidebar_column.go` (locate via `ls internal/ui/sidebar/`).
-- Modify: `docs/superpowers/specs/2026-05-08-bubble-reeval-and-eval-b.md`.
+- Modify: `docs/specs/2026-05-08-bubble-reeval-and-eval-b.md`.
 
 - [ ] **Step 1: Read poplar's sidebar.** Note the three-folder-group layout (Primary/Disposal/Custom — fixed groups, blank-line separators), nested-name flat rendering, `J/K` navigation tied to the cache's classified-folder list, `SidebarColumn` composite (account header rows + sidebar + spacer + search shelf).
 
@@ -293,7 +293,7 @@ Per-candidate prose budget: 300–400 words for Eval A revisits and single-libra
 **Files:**
 - Fetch: `go mod download github.com/knipferrc/teacup`. Read `statusbar/statusbar.go` or equivalent.
 - Read: `internal/ui/uicore/...` or `internal/ui/account/...` for the status bar (locate via `grep -rn "status_bar\|StatusBar\|renderStatusBar" internal/ui/`).
-- Modify: `docs/superpowers/specs/2026-05-08-bubble-reeval-and-eval-b.md`.
+- Modify: `docs/specs/2026-05-08-bubble-reeval-and-eval-b.md`.
 
 - [ ] **Step 1: Fetch teacup.**
   ```bash
@@ -320,7 +320,7 @@ Per-candidate prose budget: 300–400 words for Eval A revisits and single-libra
 
 **Files:**
 - Read: ADR-0002 (`docs/poplar/decisions/0002-*.md` — locate exact filename), ADR-0075 (same), ADR-0181.
-- Modify: `docs/superpowers/specs/2026-05-08-bubble-reeval-and-eval-b.md` — replace the existing `## Fork-vs-accept call` section's framing prose with the actual decision and rationale.
+- Modify: `docs/specs/2026-05-08-bubble-reeval-and-eval-b.md` — replace the existing `## Fork-vs-accept call` section's framing prose with the actual decision and rationale.
 
 - [ ] **Step 1: Locate the relevant ADRs.**
   ```bash
@@ -351,7 +351,7 @@ Per-candidate prose budget: 300–400 words for Eval A revisits and single-libra
   - **Skip ADR.** Eval is research; ADRs land at swap time.
   - Update `docs/poplar/invariants.md` only if the fork-vs-accept call **chose Fork** — that supersedes ADR-0002/0075 and needs an invariant update + new ADR. If accept, no invariant change.
   - Update `docs/poplar/STATUS.md`: mark 9w.2 done. Eval B has folded into 9w.2, so the original 9x slot is empty — promote subsequent passes one letter: 9y → 9x (Eval C lesson harvests), 9z → 9y (consolidation roadmap), 9z.1+ → 9y.1+ (swap/harvest passes). Rewrite the "current pass" line and the next starter prompt for the new 9x.
-  - Archive plan + spec via `git mv` to `docs/superpowers/archive/plans/` and `docs/superpowers/archive/specs/`.
+  - Archive plan + spec via `git mv` to `docs/archive/plans/` and `docs/archive/specs/`.
 
 - [ ] **Step 7: Commit.**
   ```bash

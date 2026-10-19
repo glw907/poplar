@@ -139,4 +139,4 @@ flowing.
 - Source: `internal/ui/layout.go`
 - Decision: `docs/poplar/decisions/0109-polish-i-msglist-layout.md`
 - Sender-name distribution data: 2000-message Fastmail sample,
-  2026-05-02 (see `docs/superpowers/specs/2026-05-02-polish-i-design.md`)
+  2026-05-02 (see `docs/specs/2026-05-02-polish-i-design.md`)

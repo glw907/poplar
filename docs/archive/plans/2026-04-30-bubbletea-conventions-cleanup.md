@@ -8,7 +8,7 @@
 
 **Tech Stack:** Go 1.26, bubbletea, bubbles (`key.Binding`, `key.Matches`), lipgloss.
 
-**Spec:** `docs/superpowers/specs/2026-04-30-bubbletea-conventions-cleanup-design.md`
+**Spec:** `docs/specs/2026-04-30-bubbletea-conventions-cleanup-design.md`
 
 ---
 
@@ -1002,8 +1002,8 @@ Edit in place (do not append). The relevant binding facts to update:
 - [ ] **Step 6: Archive plan + spec**
 
 ```bash
-git mv docs/superpowers/plans/2026-04-30-bubbletea-conventions-cleanup.md docs/superpowers/archive/plans/
-git mv docs/superpowers/specs/2026-04-30-bubbletea-conventions-cleanup-design.md docs/superpowers/archive/specs/
+git mv docs/plans/2026-04-30-bubbletea-conventions-cleanup.md docs/archive/plans/
+git mv docs/specs/2026-04-30-bubbletea-conventions-cleanup-design.md docs/archive/specs/
 ```
 
 - [ ] **Step 7: Final make check**
@@ -1014,7 +1014,7 @@ Expected: green.
 - [ ] **Step 8: Commit ritual artefacts**
 
 ```bash
-git add docs/poplar/decisions/ docs/poplar/invariants.md docs/poplar/STATUS.md docs/poplar/bubbletea-conventions.md docs/superpowers/
+git add docs/poplar/decisions/ docs/poplar/invariants.md docs/poplar/STATUS.md docs/poplar/bubbletea-conventions.md docs/
 git commit -m "$(cat <<'EOF'
 Pass 5: bubbletea conventions cleanup — close out
 

@@ -8,7 +8,7 @@
 
 **Tech Stack:** Go 1.26.1 · charmbracelet/bubbletea · charmbracelet/bubbles · charmbracelet/lipgloss · existing internal packages: `mail`, `mailjmap`, `mailimap`, `cache`, `compose`, `catkin`, `theme`, `config`.
 
-**Spec:** `docs/superpowers/specs/2026-05-06-compose-tab-design.md`
+**Spec:** `docs/specs/2026-05-06-compose-tab-design.md`
 
 ---
 
@@ -1703,8 +1703,8 @@ Confirm `invariants.md` total line count remains ≤300 (size hook gate).
 - [ ] **Step 12: Archive plan + spec**
 
 ```bash
-git mv docs/superpowers/plans/2026-05-06-compose-tab.md docs/superpowers/archive/plans/
-git mv docs/superpowers/specs/2026-05-06-compose-tab-design.md docs/superpowers/archive/specs/
+git mv docs/plans/2026-05-06-compose-tab.md docs/archive/plans/
+git mv docs/specs/2026-05-06-compose-tab-design.md docs/archive/specs/
 ```
 
 - [ ] **Step 13: Final make check + ship**

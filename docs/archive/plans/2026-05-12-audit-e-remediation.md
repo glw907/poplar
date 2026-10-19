@@ -102,7 +102,7 @@ composes naturally with `huh`.
    - Update `decisions/INDEX.md` with rows for 0226 + 0227.
    - Update `STATUS.md`: mark 38.1 done; emit Pass 39 starter
      prompt (Audit F — sharp edges + insecure defaults).
-   - Archive this plan to `docs/superpowers/archive/plans/`.
+   - Archive this plan to `docs/archive/plans/`.
    - `make check`, commit, push, `make install`.
 
 ## Pass-size budget

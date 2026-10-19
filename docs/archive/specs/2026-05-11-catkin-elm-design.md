@@ -2,7 +2,7 @@
 
 Date: 2026-05-11
 Passes: 27 + 28 (conservative split)
-Companion plan: `docs/superpowers/plans/2026-05-11-catkin-elm.md`
+Companion plan: `docs/plans/2026-05-11-catkin-elm.md`
 (to be written by writing-plans after this spec is approved)
 
 ## Goal

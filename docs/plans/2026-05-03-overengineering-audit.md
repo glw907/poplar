@@ -29,7 +29,7 @@ Agent tool for parallel review dispatch.
 **Working directory:** master branch (per project convention; no
 worktree).
 
-**Spec:** `docs/superpowers/specs/2026-05-03-overengineering-audit-design.md`
+**Spec:** `docs/specs/2026-05-03-overengineering-audit-design.md`
 
 ---
 
@@ -195,7 +195,7 @@ field detection. Add `make audit` target that runs deadcode,
 unparam, and golangci-lint and writes raw output under
 docs/poplar/audits/.
 
-Spec: docs/superpowers/specs/2026-05-03-overengineering-audit-design.md
+Spec: docs/specs/2026-05-03-overengineering-audit-design.md
 Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
 EOF
 )"
@@ -375,7 +375,7 @@ Static-analysis residue (already-applied deletions removed):
 Special lens for this agent: <SPECIAL_LENS>
 
 Spec (read this first):
-docs/superpowers/specs/2026-05-03-overengineering-audit-design.md
+docs/specs/2026-05-03-overengineering-audit-design.md
 
 Project posture (binding):
 - Pre-beta. Refactor freely. No "cross-package," "schema change,"
@@ -628,7 +628,7 @@ header:
 
 Phase C output — single-reviewer manual re-read of high-yield
 packages and named seams (per
-docs/superpowers/specs/2026-05-03-overengineering-audit-design.md).
+docs/specs/2026-05-03-overengineering-audit-design.md).
 
 ## Findings
 ```
@@ -986,9 +986,9 @@ The current Next starter prompt is for 8.4c. Replace it with the
 > ADR-0023, 0035-0037, 0042, 0044, 0054, 0088 (Elm-architecture ADRs).
 >
 > **Approach.** Brainstorm → spec at
-> docs/superpowers/specs/2026-05-03-elm-conformance-audit-design.md
+> docs/specs/2026-05-03-elm-conformance-audit-design.md
 > → plan at
-> docs/superpowers/plans/2026-05-03-elm-conformance-audit.md → execute.
+> docs/plans/2026-05-03-elm-conformance-audit.md → execute.
 > Standard pass-end checklist applies.
 ```
 

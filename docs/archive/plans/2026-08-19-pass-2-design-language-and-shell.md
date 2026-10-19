@@ -32,11 +32,11 @@ glamour v2 waits for pass 3 (the reader); gofrs/flock stays at
 v0.12.1 (v0.13.0 is a minor bump nothing needs).
 
 **Specs and inputs:**
-- Pass cursor: `docs/superpowers/specs/poplar-refounding-STATUS.md`
+- Pass cursor: `docs/specs/poplar-refounding-STATUS.md`
   (pass 2 section; this plan implements it). The 1c gate rulings are
   recorded there; none touches this pass's scope.
 - The design language,
-  `docs/superpowers/specs/2026-07-27-poplar-design-language.md`
+  `docs/specs/2026-07-27-poplar-design-language.md`
   (revision 2): the grammar, footer, undo presentation, component
   vocabulary, theme tokens, and section 9's responsive grammar. This
   plan's wireframes cite it; its amendments (decision 3) are task 1

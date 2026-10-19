@@ -14,7 +14,7 @@
 
 - [ ] **Step 0: Read the spec**
 
-Path: `docs/superpowers/specs/2026-05-01-pass-7-responsive-sidebar-design.md`. Confirm formula, label-truncation rule, 1-cell right-margin invariant, verification matrix.
+Path: `docs/specs/2026-05-01-pass-7-responsive-sidebar-design.md`. Confirm formula, label-truncation rule, 1-cell right-margin invariant, verification matrix.
 
 - [ ] **Step 0b: Confirm working tree clean**
 
@@ -1064,7 +1064,7 @@ Replace the starter prompt with the Pass 8 starter (preserve format from the `po
 > - How `Destroy` (ADR-0092) maps to IMAP UID EXPUNGE.
 >
 > **Approach.** Brainstorm the open questions, write a plan doc at
-> `docs/superpowers/plans/YYYY-MM-DD-gmail-imap.md`, then implement.
+> `docs/plans/YYYY-MM-DD-gmail-imap.md`, then implement.
 > Standard pass-end checklist applies.
 ```
 
@@ -1095,16 +1095,16 @@ EOF
 ### Task 10: Archive plan + spec
 
 **Files:**
-- Move: `docs/superpowers/plans/2026-05-01-pass-7-responsive-sidebar.md` → `docs/superpowers/archive/plans/`
-- Move: `docs/superpowers/specs/2026-05-01-pass-7-responsive-sidebar-design.md` → `docs/superpowers/archive/specs/`
+- Move: `docs/plans/2026-05-01-pass-7-responsive-sidebar.md` → `docs/archive/plans/`
+- Move: `docs/specs/2026-05-01-pass-7-responsive-sidebar-design.md` → `docs/archive/specs/`
 
 - [ ] **Step 10.1: git mv plan and spec**
 
 ```bash
-git mv docs/superpowers/plans/2026-05-01-pass-7-responsive-sidebar.md \
-       docs/superpowers/archive/plans/
-git mv docs/superpowers/specs/2026-05-01-pass-7-responsive-sidebar-design.md \
-       docs/superpowers/archive/specs/
+git mv docs/plans/2026-05-01-pass-7-responsive-sidebar.md \
+       docs/archive/plans/
+git mv docs/specs/2026-05-01-pass-7-responsive-sidebar-design.md \
+       docs/archive/specs/
 ```
 
 - [ ] **Step 10.2: Commit**

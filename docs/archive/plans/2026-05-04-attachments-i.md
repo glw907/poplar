@@ -8,7 +8,7 @@
 
 **Tech Stack:** Go 1.26, `database/sql` + `modernc.org/sqlite` (cache), `git.sr.ht/~rockorager/go-jmap` (JMAP), `github.com/emersion/go-imap/v2` + `go-message` (IMAP).
 
-**Spec:** `docs/superpowers/specs/2026-05-03-attachments-i-design.md`
+**Spec:** `docs/specs/2026-05-03-attachments-i-design.md`
 
 ---
 
@@ -1606,14 +1606,14 @@ Verify the file remains ≤ 300 lines.
 - [ ] **Step 6: Archive plan + spec**
 
 ```bash
-git mv docs/superpowers/plans/2026-05-04-attachments-i.md docs/superpowers/archive/plans/
-git mv docs/superpowers/specs/2026-05-03-attachments-i-design.md docs/superpowers/archive/specs/
+git mv docs/plans/2026-05-04-attachments-i.md docs/archive/plans/
+git mv docs/specs/2026-05-03-attachments-i-design.md docs/archive/specs/
 ```
 
 - [ ] **Step 7: Commit ADRs + invariants + STATUS + archive**
 
 ```bash
-git add docs/poplar/decisions/ docs/poplar/invariants.md docs/poplar/STATUS.md docs/superpowers/
+git add docs/poplar/decisions/ docs/poplar/invariants.md docs/poplar/STATUS.md docs/
 git commit -m "Pass 8.6: ADRs 0135-0137, invariants, archive plan/spec
 
 Co-Authored-By: Claude <noreply@anthropic.com>"

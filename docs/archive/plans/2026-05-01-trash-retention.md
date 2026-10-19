@@ -18,7 +18,7 @@ pattern of `LinkPicker` / `MovePicker`.
 emersion/go-jmap (JMAP `Email/set { destroy }`), BurntSushi/toml.
 
 **Reference:** spec at
-`docs/superpowers/specs/2026-05-01-trash-retention-design.md`.
+`docs/specs/2026-05-01-trash-retention-design.md`.
 Idiomatic-bubbletea conventions at
 `docs/poplar/bubbletea-conventions.md` (size contract, `key.Matches`
 dispatch, `WindowSizeMsg` forwarding, no parent-side clipping).

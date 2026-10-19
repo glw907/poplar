@@ -8,7 +8,7 @@
 
 **Tech Stack:** Go 1.26, bubbletea, lipgloss, `bubbles/key`, BurntSushi/toml.
 
-**Spec:** `docs/superpowers/specs/2026-05-01-triage-actions-design.md`
+**Spec:** `docs/specs/2026-05-01-triage-actions-design.md`
 
 **Working invariants:** Optimistic mutation (ADR-0086), foreground-only banner shape (ADR-0073), accessor-after-delegation (ADR-0088), modifier-free keys (ADR-0068), bubbletea conventions in `docs/poplar/bubbletea-conventions.md`.
 

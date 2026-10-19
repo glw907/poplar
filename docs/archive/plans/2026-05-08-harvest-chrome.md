@@ -167,7 +167,7 @@ this conversation):**
 
 - [ ] **Step 4.1.** Write the doc header. One paragraph naming the
   pass, the three libraries surveyed, and the companion eval at
-  `docs/superpowers/archive/specs/2026-05-08-bubble-reeval-and-eval-b.md`.
+  `docs/archive/specs/2026-05-08-bubble-reeval-and-eval-b.md`.
   State that every verdict was Keep + harvest and that the doc
   catalogs *what to keep in mind*. State the per-entry shape:
   pattern → upstream location (file:line) → why it's good →
@@ -287,8 +287,8 @@ Co-Authored-By: Claude <noreply@anthropic.com>"
 - Possibly create: `/home/glw907/Projects/poplar/docs/poplar/decisions/0182-...md`
   (only if a binding fact moved — not expected)
 - Modify: `/home/glw907/Projects/poplar/docs/poplar/STATUS.md`
-- Move: `docs/superpowers/plans/2026-05-08-harvest-chrome.md` →
-  `docs/superpowers/archive/plans/2026-05-08-harvest-chrome.md`
+- Move: `docs/plans/2026-05-08-harvest-chrome.md` →
+  `docs/archive/plans/2026-05-08-harvest-chrome.md`
 - Possibly modify: `/home/glw907/Projects/poplar/docs/poplar/invariants.md`
   (only if a binding fact moved)
 
@@ -313,8 +313,8 @@ Co-Authored-By: Claude <noreply@anthropic.com>"
 - [ ] **Step 8.4.** `git mv` the plan to the archive:
 
 ```
-git mv docs/superpowers/plans/2026-05-08-harvest-chrome.md \
-  docs/superpowers/archive/plans/2026-05-08-harvest-chrome.md
+git mv docs/plans/2026-05-08-harvest-chrome.md \
+  docs/archive/plans/2026-05-08-harvest-chrome.md
 ```
 
   (No spec to archive — research-only pass.)

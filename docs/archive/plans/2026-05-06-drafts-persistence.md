@@ -9,14 +9,14 @@
 **Tech Stack:** Go 1.26, modernc.org/sqlite, encoding/gob, bubbletea, rockorager/go-jmap, emersion/go-message.
 
 **Reference docs:**
-- Spec: `docs/superpowers/specs/2026-05-06-drafts-persistence-design.md`
+- Spec: `docs/specs/2026-05-06-drafts-persistence-design.md`
 - Cache invariants: `.claude/rules/cache-invariants.md`
 - Compose foundation ADR: 0156, 0157, 0158, 0159, 0160
 - Mandatory skills before any Go file: `go-conventions`. Before any `internal/ui/` file: `elm-conventions`.
 
 **Pre-flight (run once at start of pass):**
 
-- [ ] Read `docs/superpowers/specs/2026-05-06-drafts-persistence-design.md` end-to-end.
+- [ ] Read `docs/specs/2026-05-06-drafts-persistence-design.md` end-to-end.
 - [ ] Confirm `make check` is green on `master` before starting:
 
 ```bash
@@ -2341,7 +2341,7 @@ After all 10 tasks land green:
 - [ ] Run `/simplify` on the diff. Apply genuine wins, then proceed.
 - [ ] Idiomatic-bubbletea checklist on the compose lifecycle changes (skill `poplar-pass` step 1b).
 - [ ] Update `docs/poplar/invariants.md` — add a binding fact for drafts persistence under "Compose" or a new "Drafts" subsection. Update the decision index table to include 0164.
-- [ ] Update `docs/poplar/STATUS.md` — mark 9h.5 done; replace the starter prompt with 9h.6 (IMAP push + conflict banner). Move the spec from `docs/superpowers/specs/` to `docs/superpowers/archive/specs/` and the plan from `docs/superpowers/plans/` to `docs/superpowers/archive/plans/` via `git mv`.
+- [ ] Update `docs/poplar/STATUS.md` — mark 9h.5 done; replace the starter prompt with 9h.6 (IMAP push + conflict banner). Move the spec from `docs/specs/` to `docs/archive/specs/` and the plan from `docs/plans/` to `docs/archive/plans/` via `git mv`.
 - [ ] `make check` final.
 - [ ] Commit consolidation: `git add -A && git commit -m "Pass 9h.5 consolidation: ADR-0164, invariants, STATUS, archive"`
 - [ ] `git push && make install`.

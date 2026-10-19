@@ -21,7 +21,7 @@ the foundational swap passes (9v.1 `bubbletea-overlay`, 9v.2
 for local code reading, Write/Edit for spec doc construction. No
 runtime or build changes.
 
-**Reference spec:** `docs/superpowers/specs/2026-05-08-bubble-adoption-design.md`
+**Reference spec:** `docs/specs/2026-05-08-bubble-adoption-design.md`
 
 ---
 
@@ -58,7 +58,7 @@ naming the specific gain or loss that decided it.
 ## File structure
 
 **Created in this pass:**
-- `docs/superpowers/specs/2026-05-08-bubble-eval-a-strong-matches.md` — the eval doc, grown one section per task.
+- `docs/specs/2026-05-08-bubble-eval-a-strong-matches.md` — the eval doc, grown one section per task.
 
 **Read but not modified:**
 - `internal/ui/uicore/overlay.go` — `PlaceOverlay`
@@ -75,7 +75,7 @@ naming the specific gain or loss that decided it.
 ## Task 1: Eval `rmhubbert/bubbletea-overlay`
 
 **Files:**
-- Modify: `docs/superpowers/specs/2026-05-08-bubble-eval-a-strong-matches.md` (create on first task; append section)
+- Modify: `docs/specs/2026-05-08-bubble-eval-a-strong-matches.md` (create on first task; append section)
 
 - [ ] **Step 1: Fetch upstream README and source**
 
@@ -114,7 +114,7 @@ Mental model — write a 3-4 sentence sketch into your scratch buffer (no file o
 
 - [ ] **Step 4: Append the eval section**
 
-Append to `docs/superpowers/specs/2026-05-08-bubble-eval-a-strong-matches.md`. If the file does not exist, create it with this preamble first:
+Append to `docs/specs/2026-05-08-bubble-eval-a-strong-matches.md`. If the file does not exist, create it with this preamble first:
 
 ```markdown
 # Bubble Eval A — Strong Matches
@@ -185,7 +185,7 @@ size.]
 - [ ] **Step 5: Voice check the section**
 
 ```bash
-scripts/voice-check.sh docs/superpowers/specs/2026-05-08-bubble-eval-a-strong-matches.md
+scripts/voice-check.sh docs/specs/2026-05-08-bubble-eval-a-strong-matches.md
 ```
 
 Expected: no flagged tells. If any flag, edit inline before commit.
@@ -193,7 +193,7 @@ Expected: no flagged tells. If any flag, edit inline before commit.
 - [ ] **Step 6: Commit**
 
 ```bash
-git add docs/superpowers/specs/2026-05-08-bubble-eval-a-strong-matches.md
+git add docs/specs/2026-05-08-bubble-eval-a-strong-matches.md
 git commit -m "$(cat <<'EOF'
 Pass 9v task 1: eval bubbletea-overlay
 
@@ -211,7 +211,7 @@ EOF
 ## Task 2: Eval `bubbles/help`
 
 **Files:**
-- Modify: `docs/superpowers/specs/2026-05-08-bubble-eval-a-strong-matches.md` (append section)
+- Modify: `docs/specs/2026-05-08-bubble-eval-a-strong-matches.md` (append section)
 
 - [ ] **Step 1: Fetch upstream README and source**
 
@@ -246,12 +246,12 @@ Write a 3-4 sentence sketch:
 
 - [ ] **Step 4: Append the eval section**
 
-Append to `docs/superpowers/specs/2026-05-08-bubble-eval-a-strong-matches.md` using the same template as Task 1, with section heading `## bubbles/help`. Fill every bracketed slot from the steps above. The "Does this make poplar better?" paragraph should specifically address whether replacing the two-`Context` enum branches with two `KeyMap` impls reduces or just relocates the code.
+Append to `docs/specs/2026-05-08-bubble-eval-a-strong-matches.md` using the same template as Task 1, with section heading `## bubbles/help`. Fill every bracketed slot from the steps above. The "Does this make poplar better?" paragraph should specifically address whether replacing the two-`Context` enum branches with two `KeyMap` impls reduces or just relocates the code.
 
 - [ ] **Step 5: Voice check**
 
 ```bash
-scripts/voice-check.sh docs/superpowers/specs/2026-05-08-bubble-eval-a-strong-matches.md
+scripts/voice-check.sh docs/specs/2026-05-08-bubble-eval-a-strong-matches.md
 ```
 
 Expected: no flagged tells. Edit inline if needed.
@@ -259,7 +259,7 @@ Expected: no flagged tells. Edit inline if needed.
 - [ ] **Step 6: Commit**
 
 ```bash
-git add docs/superpowers/specs/2026-05-08-bubble-eval-a-strong-matches.md
+git add docs/specs/2026-05-08-bubble-eval-a-strong-matches.md
 git commit -m "$(cat <<'EOF'
 Pass 9v task 2: eval bubbles/help
 
@@ -275,7 +275,7 @@ EOF
 ## Task 3: Eval `daltonsw/bubbleup`
 
 **Files:**
-- Modify: `docs/superpowers/specs/2026-05-08-bubble-eval-a-strong-matches.md` (append section)
+- Modify: `docs/specs/2026-05-08-bubble-eval-a-strong-matches.md` (append section)
 
 - [ ] **Step 1: Fetch upstream README and source**
 
@@ -322,13 +322,13 @@ for one we don't need?
 - [ ] **Step 5: Voice check**
 
 ```bash
-scripts/voice-check.sh docs/superpowers/specs/2026-05-08-bubble-eval-a-strong-matches.md
+scripts/voice-check.sh docs/specs/2026-05-08-bubble-eval-a-strong-matches.md
 ```
 
 - [ ] **Step 6: Commit**
 
 ```bash
-git add docs/superpowers/specs/2026-05-08-bubble-eval-a-strong-matches.md
+git add docs/specs/2026-05-08-bubble-eval-a-strong-matches.md
 git commit -m "$(cat <<'EOF'
 Pass 9v task 3: eval bubbleup
 
@@ -344,7 +344,7 @@ EOF
 ## Task 4: Eval `charmbracelet/huh`
 
 **Files:**
-- Modify: `docs/superpowers/specs/2026-05-08-bubble-eval-a-strong-matches.md` (append section)
+- Modify: `docs/specs/2026-05-08-bubble-eval-a-strong-matches.md` (append section)
 
 - [ ] **Step 1: Fetch upstream README and source**
 
@@ -398,13 +398,13 @@ A wrong verdict here costs the most. Be specific.
 - [ ] **Step 5: Voice check**
 
 ```bash
-scripts/voice-check.sh docs/superpowers/specs/2026-05-08-bubble-eval-a-strong-matches.md
+scripts/voice-check.sh docs/specs/2026-05-08-bubble-eval-a-strong-matches.md
 ```
 
 - [ ] **Step 6: Commit**
 
 ```bash
-git add docs/superpowers/specs/2026-05-08-bubble-eval-a-strong-matches.md
+git add docs/specs/2026-05-08-bubble-eval-a-strong-matches.md
 git commit -m "$(cat <<'EOF'
 Pass 9v task 4: eval huh
 
@@ -420,7 +420,7 @@ EOF
 ## Task 5: Eval `evertras/bubble-table`
 
 **Files:**
-- Modify: `docs/superpowers/specs/2026-05-08-bubble-eval-a-strong-matches.md` (append section)
+- Modify: `docs/specs/2026-05-08-bubble-eval-a-strong-matches.md` (append section)
 
 - [ ] **Step 1: Fetch upstream README and source**
 
@@ -468,13 +468,13 @@ or each takes its own integration.
 - [ ] **Step 5: Voice check**
 
 ```bash
-scripts/voice-check.sh docs/superpowers/specs/2026-05-08-bubble-eval-a-strong-matches.md
+scripts/voice-check.sh docs/specs/2026-05-08-bubble-eval-a-strong-matches.md
 ```
 
 - [ ] **Step 6: Commit**
 
 ```bash
-git add docs/superpowers/specs/2026-05-08-bubble-eval-a-strong-matches.md
+git add docs/specs/2026-05-08-bubble-eval-a-strong-matches.md
 git commit -m "$(cat <<'EOF'
 Pass 9v task 5: eval bubble-table
 
@@ -490,12 +490,12 @@ EOF
 ## Task 6: Roadmap section — dependency graph and ranked linearization
 
 **Files:**
-- Modify: `docs/superpowers/specs/2026-05-08-bubble-eval-a-strong-matches.md` (append final section)
+- Modify: `docs/specs/2026-05-08-bubble-eval-a-strong-matches.md` (append final section)
 
 - [ ] **Step 1: Re-read every candidate's "Interacts with" subsection**
 
 ```bash
-grep -A 8 "Interacts with:" docs/superpowers/specs/2026-05-08-bubble-eval-a-strong-matches.md
+grep -A 8 "Interacts with:" docs/specs/2026-05-08-bubble-eval-a-strong-matches.md
 ```
 
 Capture: every dependency edge between Eval A candidates, plus
@@ -554,8 +554,8 @@ candidate is **Adopt-with-fork**, note the fork target inline.)
 - [ ] **Step 4: Read the whole doc top to bottom**
 
 ```bash
-cat docs/superpowers/specs/2026-05-08-bubble-eval-a-strong-matches.md | wc -w
-cat docs/superpowers/specs/2026-05-08-bubble-eval-a-strong-matches.md
+cat docs/specs/2026-05-08-bubble-eval-a-strong-matches.md | wc -w
+cat docs/specs/2026-05-08-bubble-eval-a-strong-matches.md
 ```
 
 Expected: ~1500-2000 words. Each candidate has every rubric
@@ -569,7 +569,7 @@ the roadmap, fix it now.
 - [ ] **Step 5: Voice check the whole doc**
 
 ```bash
-scripts/voice-check.sh docs/superpowers/specs/2026-05-08-bubble-eval-a-strong-matches.md
+scripts/voice-check.sh docs/specs/2026-05-08-bubble-eval-a-strong-matches.md
 ```
 
 Expected: no flagged tells.
@@ -577,7 +577,7 @@ Expected: no flagged tells.
 - [ ] **Step 6: Commit**
 
 ```bash
-git add docs/superpowers/specs/2026-05-08-bubble-eval-a-strong-matches.md
+git add docs/specs/2026-05-08-bubble-eval-a-strong-matches.md
 git commit -m "$(cat <<'EOF'
 Pass 9v task 6: swap roadmap and dependency graph
 
@@ -661,17 +661,17 @@ update, and plan archival. For this pass:
   swap passes do. Skip the ADR step.
 - **No invariants update.** No code changed.
 - **Plan archival.** Move
-  `docs/superpowers/plans/2026-05-08-pass-9v-bubble-eval-a.md`
-  to `docs/superpowers/archive/plans/`.
+  `docs/plans/2026-05-08-pass-9v-bubble-eval-a.md`
+  to `docs/archive/plans/`.
 
 ```bash
-mkdir -p docs/superpowers/archive/plans/
-git mv docs/superpowers/plans/2026-05-08-pass-9v-bubble-eval-a.md docs/superpowers/archive/plans/
+mkdir -p docs/archive/plans/
+git mv docs/plans/2026-05-08-pass-9v-bubble-eval-a.md docs/archive/plans/
 git add -u docs/poplar/STATUS.md
 git commit -m "$(cat <<'EOF'
 Pass 9v: archive plan + STATUS to 9v.1
 
-Eval A done; triage spec at docs/superpowers/specs/. Foundational
+Eval A done; triage spec at docs/specs/. Foundational
 swap 9v.1 (bubbletea-overlay) authorized for next pass.
 
 Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
@@ -684,7 +684,7 @@ git push
 
 ## Self-review
 
-Spec coverage check (against `docs/superpowers/specs/2026-05-08-bubble-adoption-design.md`):
+Spec coverage check (against `docs/specs/2026-05-08-bubble-adoption-design.md`):
 
 - ✅ Eval A covers `bubbletea-overlay`, `bubbles/help`, `bubbleup`, `huh`, `bubble-table` — Tasks 1-5.
 - ✅ Per-candidate process: read upstream, read poplar, sketch, write — Steps 1-4 of each task.

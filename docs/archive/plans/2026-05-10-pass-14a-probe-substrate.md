@@ -4,10 +4,10 @@
 rides on, plus the standalone fixes from BACKLOG #29.
 
 **Master plan + spec.** Detailed task steps live in
-`docs/superpowers/plans/2026-05-09-pass-14-firstrun.md` (tasks
+`docs/plans/2026-05-09-pass-14-firstrun.md` (tasks
 1, 2, 3, 4, 5, 8, 9 — Pre-task setup steps 0.1–0.4 apply to 14b;
 skip them here, no huh dep yet). Design rationale lives in
-`docs/superpowers/specs/2026-05-09-pass-14-firstrun-design.md`
+`docs/specs/2026-05-09-pass-14-firstrun-design.md`
 (read the "Architecture > Extensions to existing packages",
 "Error handling", and "Config writing" sections).
 
@@ -78,7 +78,7 @@ moving to the next.
      `config.AccountConfig.Name` from required to "defaults to
      `Email` when empty."
 4. `docs/poplar/decisions/INDEX.md` — add the new ADR row.
-5. `git mv docs/superpowers/plans/2026-05-10-pass-14a-probe-substrate.md docs/superpowers/archive/plans/`.
+5. `git mv docs/plans/2026-05-10-pass-14a-probe-substrate.md docs/archive/plans/`.
    (Master plan + spec stay in place — 14b and 14c still need
    them.)
 6. STATUS.md — flip 14a to `done`, pivot starter prompt to 14b.

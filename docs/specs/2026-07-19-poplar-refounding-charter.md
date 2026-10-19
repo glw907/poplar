@@ -213,7 +213,7 @@ Gate: Geoff approves the machine design; thereafter, per-pass gates.
   handoff; anything load-bearing lives in a committed artifact, never
   only in a conversation.
 - Artifacts: charter, vision, requirements, and design live under
-  `docs/superpowers/specs/`; corpus notes, spike reports, and the
+  `docs/specs/`; corpus notes, spike reports, and the
   verdict live under `docs/poplar/research/`.
 
 ## Next action
@@ -223,7 +223,7 @@ of the re-founding"):
 
 ```
 Run Phase 0 of the poplar re-founding. Read
-docs/superpowers/specs/2026-07-19-poplar-refounding-charter.md first.
+docs/specs/2026-07-19-poplar-refounding-charter.md first.
 Execute the Phase 0 checklist: create poplar-refounding-STATUS.md with
 the phase cursor and the Phase 1 starter prompt, mark the two old
 STATUS docs superseded, rewrite the CLAUDE.md banner and

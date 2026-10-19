@@ -12,9 +12,9 @@ without re-litigating verdicts.
 - `docs/poplar/research/2026-05-08-bubbles-list-patterns.md` (9x.1)
 - `docs/poplar/research/2026-05-08-chrome-family-patterns.md` (9x.2)
 - `docs/poplar/research/2026-05-08-table-form-patterns.md` (9x.3)
-- `docs/superpowers/specs/2026-05-08-bubble-eval-a-strong-matches.md`
+- `docs/specs/2026-05-08-bubble-eval-a-strong-matches.md`
   (Eval A — five candidates, all Keep + harvest)
-- `docs/superpowers/archive/specs/2026-05-08-bubble-reeval-and-eval-b.md`
+- `docs/archive/specs/2026-05-08-bubble-reeval-and-eval-b.md`
   (Eval A re-eval post-ansix + Eval B — four more candidates, all
   Keep)
 
@@ -105,10 +105,10 @@ verdict to flip.
 5. **Update the decision index** (`docs/poplar/decisions/INDEX.md`)
    with the new ADR row in the "Bubbletea conventions" theme.
 6. **Resolve the Eval A path discrepancy.** Move
-   `docs/superpowers/specs/2026-05-08-bubble-eval-a-strong-matches.md`
-   to `docs/superpowers/archive/specs/` so the starter prompt's
+   `docs/specs/2026-05-08-bubble-eval-a-strong-matches.md`
+   to `docs/archive/specs/` so the starter prompt's
    reference path matches reality. Same for
-   `docs/superpowers/specs/2026-05-08-bubble-adoption-design.md`
+   `docs/specs/2026-05-08-bubble-adoption-design.md`
    — its roadmap is now closed; archive it.
 7. **Standard pass-end checklist.** `/simplify` (no Go diff this
    pass — voice lens applies to docs), `make check`, commit, push,

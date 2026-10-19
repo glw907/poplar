@@ -11,7 +11,7 @@ changed a decision are reflected in the ADRs.
 constraints C1-C11 govern every decision here).
 **Survey:** `docs/poplar/research/2026-07-27-phase4-library-survey.md`
 (the C9 evidence base; versions cited there are not repeated here).
-**ADRs:** `docs/superpowers/specs/adr/` holds one record per major
+**ADRs:** `docs/specs/adr/` holds one record per major
 decision with alternatives considered.
 **Companion artifacts:** the design language
 (`2026-07-27-poplar-design-language.md`, the UX-3 deliverable) and

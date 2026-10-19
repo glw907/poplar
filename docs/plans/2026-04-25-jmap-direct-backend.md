@@ -28,7 +28,7 @@ this pass), `golang.org/x/sync/singleflight` (transitive), bubbletea
 existing content pipeline). Config TOML is already on
 `BurntSushi/toml`.
 
-**Spec:** `docs/superpowers/specs/2026-04-25-jmap-direct-backend-design.md`
+**Spec:** `docs/specs/2026-04-25-jmap-direct-backend-design.md`
 
 **Required reading before starting:**
 - Invoke `go-conventions` skill before writing any Go file.
@@ -1922,7 +1922,7 @@ mark Pass 3 done with known regressions.
 - Create: `docs/poplar/decisions/0077-jmap-direct-implementation.md` (and any further ADRs for individual decisions made during implementation that diverge from the spec)
 - Modify: `docs/poplar/invariants.md` (in place)
 - Modify: `docs/poplar/STATUS.md`
-- Move: this plan and the spec to `docs/superpowers/archive/`
+- Move: this plan and the spec to `docs/archive/`
 
 Run the `poplar-pass` skill's pass-end consolidation ritual:
 
@@ -1938,7 +1938,7 @@ Run the `poplar-pass` skill's pass-end consolidation ritual:
 - [ ] **Step 4: Update `STATUS.md` — mark Pass 3 done, write the
   Pass 6 (or whichever is next) starter prompt.**
 - [ ] **Step 5: `git mv` plan + spec into
-  `docs/superpowers/archive/`.**
+  `docs/archive/`.**
 - [ ] **Step 6: `make check` green; commit; push; `make install`.**
 
 ---

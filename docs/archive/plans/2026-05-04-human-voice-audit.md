@@ -44,7 +44,7 @@ review dispatch, tmux for live UI verification.
 **Working directory:** master branch (per project convention; no
 worktree).
 
-**Spec:** `docs/superpowers/specs/2026-05-04-human-voice-audit-design.md`
+**Spec:** `docs/specs/2026-05-04-human-voice-audit-design.md`
 
 ---
 
@@ -402,8 +402,8 @@ verify is green.
 
 ### Task 6.2 — Archive plan + spec + audit
 
-- [ ] Move spec → `docs/superpowers/archive/specs/`.
-- [ ] Move plan → `docs/superpowers/archive/plans/`.
+- [ ] Move spec → `docs/archive/specs/`.
+- [ ] Move plan → `docs/archive/plans/`.
 - [ ] Move audit findings → `docs/poplar/audits/archive/`.
 
 ### Task 6.3 — Ship (Pass 8.9)

@@ -1,7 +1,7 @@
 # Pass 9b — Catkin markdown commands
 
 **Date:** 2026-05-05
-**Spec:** `docs/superpowers/specs/2026-05-04-compose-design.md` § Catkin internals → Command dispatch + Smart Enter + Tab/Shift-Tab + QoL #11 (WS cleanup) + § Word + char count.
+**Spec:** `docs/specs/2026-05-04-compose-design.md` § Catkin internals → Command dispatch + Smart Enter + Tab/Shift-Tab + QoL #11 (WS cleanup) + § Word + char count.
 **Status:** in progress.
 
 Pure implementation pass — all design questions are settled in the
@@ -76,4 +76,4 @@ rune-offset semantics (the buffer wrapper's `RuneOffset` /
 - STATUS.md reconciliation: collapse the stale Pass 9.5 row,
   insert 9b/9c/9d/9e/9f/9g/9h/9i per the compose-design spec
   passes table, and a fresh starter prompt for 9c.
-- Archive this plan to `docs/superpowers/archive/plans/`.
+- Archive this plan to `docs/archive/plans/`.

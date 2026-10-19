@@ -8,7 +8,7 @@
 
 **Tech Stack:** Markdown (YAML frontmatter), Claude Code skill format
 
-**Spec:** `docs/superpowers/specs/2026-04-10-bubbletea-design-skill-design.md`
+**Spec:** `docs/specs/2026-04-10-bubbletea-design-skill-design.md`
 
 ---
 
@@ -36,7 +36,7 @@ mkdir -p ~/.claude/skills/bubbletea-design
 
 - [ ] **Step 2: Write the SKILL.md**
 
-Write the complete file with this structure. The spec at `docs/superpowers/specs/2026-04-10-bubbletea-design-skill-design.md` has the full content for each section — transform it into the skill's voice (direct, opinionated, concise).
+Write the complete file with this structure. The spec at `docs/specs/2026-04-10-bubbletea-design-skill-design.md` has the full content for each section — transform it into the skill's voice (direct, opinionated, concise).
 
 **Frontmatter:**
 

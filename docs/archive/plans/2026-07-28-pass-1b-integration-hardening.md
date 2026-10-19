@@ -5,7 +5,7 @@
 MUST from the requirements' spine; it discharges the ones pass 1
 claimed.
 **Binding inputs:** the pass 1b scope in
-`docs/superpowers/specs/poplar-refounding-STATUS.md`, the technical
+`docs/specs/poplar-refounding-STATUS.md`, the technical
 design revision 2 and its ADRs (revision blocks override ADR
 bodies), the requirements revision 4, and four research documents
 dated 2026-07-28 under `docs/poplar/research/`: the JMAP test
@@ -265,7 +265,7 @@ SSE id is an optimization.
   a fake that honors the header and JT-22's fallback against a
   fake that ignores it.
 - A stream longer than 64 KB in one event is delivered intact.
-- ADR-0018 committed under `docs/superpowers/specs/adr/`.
+- ADR-0018 committed under `docs/specs/adr/`.
 
 **Boundaries.** The sync engine keeps owning poll fallback policy;
 this client only reports stream state, it does not decide when to

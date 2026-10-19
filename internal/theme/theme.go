@@ -1,5 +1,5 @@
 // Package theme compiles the poplar design language's tokens
-// (docs/superpowers/specs/2026-07-27-poplar-design-language.md) as
+// (docs/specs/2026-07-27-poplar-design-language.md) as
 // Go values: color roles, glyphs, spacing, type roles, border sets,
 // and spinner frames. The UX-3 styling analyzer exempts this
 // package and internal/catkin; every other package styles only

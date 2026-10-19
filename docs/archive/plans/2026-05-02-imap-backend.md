@@ -8,7 +8,7 @@
 
 **Tech Stack:** Go 1.26, `github.com/emersion/go-imap` v1, `github.com/emersion/go-sasl`, `github.com/BurntSushi/toml`, `github.com/spf13/cobra`. Unit tests use a fake IMAP client interface; integration tests opt-in against local Dovecot (`docker run -d -p 1143:143 dovecot/dovecot`).
 
-**Reference:** Spec at `docs/superpowers/specs/2026-05-01-imap-backend-design.md`. Mirror patterns from `internal/mailjmap/` (especially `jmap.go` Connect-phase ordering, `push.go` reconnect loop, `fake_test.go` client interface). Conform to `go-conventions` skill — no unnecessary interfaces, errors wrapped with `%w`, table-driven tests.
+**Reference:** Spec at `docs/specs/2026-05-01-imap-backend-design.md`. Mirror patterns from `internal/mailjmap/` (especially `jmap.go` Connect-phase ordering, `push.go` reconnect loop, `fake_test.go` client interface). Conform to `go-conventions` skill — no unnecessary interfaces, errors wrapped with `%w`, table-driven tests.
 
 ---
 
@@ -2266,7 +2266,7 @@ via `emersion/go-imap`. UIDPLUS required; MOVE / SPECIAL-USE / IDLE
 used opportunistically. Two physical connections per backend
 (command + idle).
 
-See `docs/superpowers/specs/2026-05-01-imap-backend-design.md`.
+See `docs/specs/2026-05-01-imap-backend-design.md`.
 
 ## Tests
 
@@ -2448,8 +2448,8 @@ end-of-pass consolidation:
    "Fastmail JMAP + Gmail IMAP" to the four-way taxonomy.
 5. Update `docs/poplar/STATUS.md`: mark Pass 8 done, write Pass 8.1
    starter prompt (Gmail support).
-6. Archive `docs/superpowers/plans/2026-05-02-imap-backend.md` and
-   `docs/superpowers/specs/2026-05-01-imap-backend-design.md` to
+6. Archive `docs/plans/2026-05-02-imap-backend.md` and
+   `docs/specs/2026-05-01-imap-backend-design.md` to
    their `archive/` subdirectories with `git mv`.
 7. `make check`, commit, push, `make install`.
 

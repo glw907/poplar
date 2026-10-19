@@ -14,7 +14,7 @@ account feeds a readability standard (hand-authored ideal renders plus
 a principles doc), a five-arm throwaway spike (lynx, w3m, the legacy
 pipeline, an iterated deterministic arm, an LLM-in-the-loop arm), a
 four-grade judging pass, and a verdict doc. The charter's Phase 1
-section (`docs/superpowers/specs/2026-07-19-poplar-refounding-charter.md`)
+section (`docs/specs/2026-07-19-poplar-refounding-charter.md`)
 is the spec.
 
 **Tech Stack:** Go (root module, reusing `internal/mailjmap` and
@@ -303,7 +303,7 @@ on disk; audit agreement recorded; driver committed.
 
 **Files:**
 - Create: `docs/poplar/research/2026-07-19-rendering-bet-verdict.md`
-- Modify: `docs/superpowers/specs/poplar-refounding-STATUS.md`
+- Modify: `docs/specs/poplar-refounding-STATUS.md`
 
 **Requirements:**
 - The verdict covers, per the charter: per-class feasibility from the

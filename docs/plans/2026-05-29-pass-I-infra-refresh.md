@@ -1,9 +1,9 @@
 # Pass I: Claude Infrastructure Refresh
 
 **Track:** Poplar rebuild (greenfield, spec-first). Charter:
-`docs/superpowers/specs/2026-05-29-poplar-rebuild-charter.md` §9.
+`docs/specs/2026-05-29-poplar-rebuild-charter.md` §9.
 Research: `docs/poplar/research/2026-05-29-infra-refresh-research.md`.
-STATUS: `docs/superpowers/specs/poplar-rebuild-STATUS.md`.
+STATUS: `docs/specs/poplar-rebuild-STATUS.md`.
 
 Pass I is tooling, not poplar feature code. It re-derives the
 agents, model pinning, the Go-idiom gate, and the orchestration
@@ -26,7 +26,7 @@ process":
   `claude-opus-4-8` in `settings.json`.
 - **Artifact home.** Rebuild agents land in this repo's
   `.claude/agents/`. The gate is authored as drop-in reference
-  artifacts under `docs/superpowers/specs/rebuild-gate/`. The
+  artifacts under `docs/specs/rebuild-gate/`. The
   greenfield tree location stays deferred to the spec-to-build
   boundary per charter §11. The agents and gate are usable now
   regardless of where the tree lands.
@@ -84,7 +84,7 @@ working, not a regression.
    go-conventions skill, scoped to the /simplify voice lens. They
    are too semantic for grep.
 7. **Author the rebuild `.golangci.yml`** (golangci-lint v2 schema)
-   under `docs/superpowers/specs/rebuild-gate/`: carry errcheck,
+   under `docs/specs/rebuild-gate/`: carry errcheck,
    govet, ineffassign, staticcheck, unused, unparam; add `iface`,
    `containedctx`, `contextcheck`, `nonamedreturns`, `godot`.
    Install golangci-lint v2 and gofumpt and validate the config
@@ -127,7 +127,7 @@ What landed:
    `poplar-reviewer`, `poplar-go-reviewer`. The plan named four reviewers;
    built three agents total, merging spec and quality into one Opus reviewer
    per the research role table (spec + quality is one role).
-4. Gate artifacts in `docs/superpowers/specs/rebuild-gate/`: `Makefile.gate`,
+4. Gate artifacts in `docs/specs/rebuild-gate/`: `Makefile.gate`,
    `.golangci.yml` (verified with `golangci-lint config verify`, v2.12.2),
    `README.md`. Installed golangci-lint v2.12.2 and gofumpt v0.10.0.
 5. Catalogue: T41 (SPDX, narrating the existing gate tag), T42, T43 added to

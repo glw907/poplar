@@ -123,7 +123,7 @@ Standard `poplar-pass` ritual:
 - `docs/poplar/STATUS.md` — mark 6.7 done, write Pass 6.9 starter
   prompt (if recommended) or roll forward to Pass 7 (popover
   narrow-terminal polish).
-- Archive this plan to `docs/superpowers/archive/plans/`.
+- Archive this plan to `docs/archive/plans/`.
 - `make check`.
 - Commit, push, install.
 

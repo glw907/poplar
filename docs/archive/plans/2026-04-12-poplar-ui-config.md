@@ -17,7 +17,7 @@ example TOML and the doc set.
 
 **Tech Stack:** Go 1.26, bubbletea, lipgloss, BurntSushi/toml, cobra.
 
-**Spec:** `docs/superpowers/specs/2026-04-12-poplar-ui-config-design.md`
+**Spec:** `docs/specs/2026-04-12-poplar-ui-config-design.md`
 
 ---
 

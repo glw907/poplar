@@ -2,15 +2,15 @@
 
 > **Superseded (2026-07-19).** This track is closed under the
 > re-founding charter
-> (`docs/superpowers/specs/2026-07-19-poplar-refounding-charter.md`).
+> (`docs/specs/2026-07-19-poplar-refounding-charter.md`).
 > The functional spec and gap analysis it produced are research
 > inputs; nothing here binds. The active tracker is
-> `docs/superpowers/specs/poplar-refounding-STATUS.md`. This document
+> `docs/specs/poplar-refounding-STATUS.md`. This document
 > is retained as a record.
 
-**Track:** Greenfield spec-first rebuild. The sole active track. Charter: `docs/superpowers/specs/2026-05-29-poplar-rebuild-charter.md`. The old dogfood client is archived at tag `poplar-legacy` and branch `legacy`; its tracker `docs/poplar/STATUS.md` is retired reference.
+**Track:** Greenfield spec-first rebuild. The sole active track. Charter: `docs/specs/2026-05-29-poplar-rebuild-charter.md`. The old dogfood client is archived at tag `poplar-legacy` and branch `legacy`; its tracker `docs/poplar/STATUS.md` is retired reference.
 
-**Canonical functional spec:** `docs/superpowers/specs/2026-05-29-poplar-rebuild-functional-spec.md`. Domain passes append sections; Pass 8 consolidates.
+**Canonical functional spec:** `docs/specs/2026-05-29-poplar-rebuild-functional-spec.md`. Domain passes append sections; Pass 8 consolidates.
 
 ## Pass-end ritual
 
@@ -29,12 +29,12 @@ This runs by default at every pass close ("ship pass", "finish pass", or a compl
 Pass 0 (Charter), Pass I (Claude infrastructure refresh), Pass 1 (Accounts, protocols, sync), Pass 2 (Organization, threading, automation), Pass 3 (Reading, triage, navigation), Pass 4 (Message rendering), Pass 5 (Compose and sending), Pass 6 (Search), Pass 7 (Contacts, calendar, security), and Pass 8 (Consolidation) complete.
 
 Pass 0 artifacts:
-- Charter: `docs/superpowers/specs/2026-05-29-poplar-rebuild-charter.md`.
+- Charter: `docs/specs/2026-05-29-poplar-rebuild-charter.md`.
 - Gap analysis: `docs/poplar/research/2026-05-29-mail-client-gap-analysis.md`.
 - Infra-refresh research: `docs/poplar/research/2026-05-29-infra-refresh-research.md`.
 
 Pass I outcomes:
-- `CLAUDE_CODE_SUBAGENT_MODEL` set to `inherit`; rebuild agents in `.claude/agents/` (`poplar-implementer`, `poplar-reviewer`, `poplar-go-reviewer`); gate artifacts in `docs/superpowers/specs/rebuild-gate/`; Go-idiom catalogue extended (T42, T43). Record: `docs/superpowers/plans/2026-05-29-pass-I-infra-refresh.md`.
+- `CLAUDE_CODE_SUBAGENT_MODEL` set to `inherit`; rebuild agents in `.claude/agents/` (`poplar-implementer`, `poplar-reviewer`, `poplar-go-reviewer`); gate artifacts in `docs/specs/rebuild-gate/`; Go-idiom catalogue extended (T42, T43). Record: `docs/plans/2026-05-29-pass-I-infra-refresh.md`.
 - Orchestration default: `subagent-driven-development` for domain passes; Workflow for wide fan-out.
 
 Pass 1 outcomes (functional spec §1, 15 acceptance scenarios):
@@ -268,7 +268,7 @@ Pass 8 outcomes (functional spec §8, 10 acceptance scenarios):
 
 ## Next: build plans (post-spec)
 
-Before the build plans, a three-pass spec-hardening review runs: a gap hunt, a critique, then an integrate-and-reformat pass. Its tracker and starter prompts are `docs/superpowers/specs/spec-hardening-STATUS.md`. The build-plan starter prompt below applies once that review completes.
+Before the build plans, a three-pass spec-hardening review runs: a gap hunt, a critique, then an integrate-and-reformat pass. Its tracker and starter prompts are `docs/specs/spec-hardening-STATUS.md`. The build-plan starter prompt below applies once that review completes.
 
 Spec phase is complete. The canonical functional spec is locked pending Geoff's
 review at the consolidation gate. Next comes the phase that turns the locked spec
@@ -278,8 +278,8 @@ Starter prompt (paste after /clear, or say "start the build-plan phase"):
 
 ```
 Start the build-plan phase of the poplar rebuild. The spec is locked. Read
-docs/superpowers/specs/2026-05-29-poplar-rebuild-functional-spec.md end to end
-and the charter docs/superpowers/specs/2026-05-29-poplar-rebuild-charter.md
+docs/specs/2026-05-29-poplar-rebuild-functional-spec.md end to end
+and the charter docs/specs/2026-05-29-poplar-rebuild-charter.md
 (§3 method, §5 seams, §9 plan sequence, §10 conventions).
 
 Draft the numbered build-plan roadmap from the locked spec, then write the first

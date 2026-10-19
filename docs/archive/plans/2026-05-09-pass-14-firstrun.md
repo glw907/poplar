@@ -8,7 +8,7 @@
 
 **Tech Stack:** Go 1.26, bubbletea, charm.land/huh/v2 (new dep), lipgloss, charmbracelet/bubbles. Existing: `internal/config`, `internal/theme`, `internal/mailimap`, `internal/mailjmap`, `internal/uicore`.
 
-**Spec:** `docs/superpowers/specs/2026-05-09-pass-14-firstrun-design.md` — read before starting.
+**Spec:** `docs/specs/2026-05-09-pass-14-firstrun-design.md` — read before starting.
 
 **Skills to invoke:**
 - `go-conventions` before any Go file edit.
@@ -64,7 +64,7 @@
 
 - [ ] **Step 0.1: Read the spec**
 
-Read `docs/superpowers/specs/2026-05-09-pass-14-firstrun-design.md` end-to-end. Read `docs/poplar/invariants.md` (relevant sections: Architecture > Repo & libraries, Architecture > Elm architecture & idiomatic bubbletea, Config & theming, Mail model). Read `docs/poplar/bubbletea-conventions.md`.
+Read `docs/specs/2026-05-09-pass-14-firstrun-design.md` end-to-end. Read `docs/poplar/invariants.md` (relevant sections: Architecture > Repo & libraries, Architecture > Elm architecture & idiomatic bubbletea, Config & theming, Mail model). Read `docs/poplar/bubbletea-conventions.md`.
 
 - [ ] **Step 0.2: Verify clean working tree**
 
@@ -3088,8 +3088,8 @@ Mark Pass 14 done. Replace starter prompt with Pass 14.1 (OAuth) per the format 
 - [ ] **Step 16.4: Archive plan + spec**
 
 ```bash
-git mv docs/superpowers/plans/2026-05-09-pass-14-firstrun.md docs/superpowers/archive/plans/
-git mv docs/superpowers/specs/2026-05-09-pass-14-firstrun-design.md docs/superpowers/archive/specs/
+git mv docs/plans/2026-05-09-pass-14-firstrun.md docs/archive/plans/
+git mv docs/specs/2026-05-09-pass-14-firstrun-design.md docs/archive/specs/
 ```
 
 - [ ] **Step 16.5: Final make check + commit + push + install**

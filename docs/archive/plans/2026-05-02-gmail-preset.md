@@ -8,7 +8,7 @@
 
 **Tech Stack:** Go 1.26, `emersion/go-imap` v2, `BurntSushi/toml`. Existing `internal/mailauth/xoauth2.go` SASL client unchanged.
 
-**Spec:** `docs/superpowers/specs/2026-05-02-gmail-preset-design.md`.
+**Spec:** `docs/specs/2026-05-02-gmail-preset-design.md`.
 
 ---
 
@@ -1060,10 +1060,10 @@ Verify ≤ 60 lines (`wc -l docs/poplar/STATUS.md`).
 
 ```bash
 cd /home/glw907/Projects/poplar
-git mv docs/superpowers/plans/2026-05-02-gmail-preset.md \
-       docs/superpowers/archive/plans/2026-05-02-gmail-preset.md
-git mv docs/superpowers/specs/2026-05-02-gmail-preset-design.md \
-       docs/superpowers/archive/specs/2026-05-02-gmail-preset-design.md
+git mv docs/plans/2026-05-02-gmail-preset.md \
+       docs/archive/plans/2026-05-02-gmail-preset.md
+git mv docs/specs/2026-05-02-gmail-preset-design.md \
+       docs/archive/specs/2026-05-02-gmail-preset-design.md
 ```
 
 - [ ] **Step 8: `make check`**

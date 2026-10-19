@@ -51,7 +51,7 @@ fixes are file-local; no cross-package changes.
 ## Approach
 
 Brainstorm, plan at
-`docs/superpowers/plans/YYYY-MM-DD-content-filter-cleanup.md`,
+`docs/plans/YYYY-MM-DD-content-filter-cleanup.md`,
 implement. Standard pass-end checklist applies.
 
 For #23, capture before/after diffs of two real email fixtures

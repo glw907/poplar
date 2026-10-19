@@ -82,7 +82,7 @@ Each subagent gets:
 ## Phase 2 — Consolidation
 
 The audit document is written to
-`docs/superpowers/specs/2026-05-03-elm-conformance-audit-design.md`
+`docs/specs/2026-05-03-elm-conformance-audit-design.md`
 (this file) under a "Findings" section appended after Phase 1
 completes. Structure:
 
@@ -146,7 +146,7 @@ Standard `poplar-pass` end-of-pass checklist:
 - `STATUS.md`: flip 8.5b → done; queue 8.4c (already drafted) as
   next.
 - Archive plan + spec via `git mv` to
-  `docs/superpowers/archive/{plans,specs}/`.
+  `docs/archive/{plans,specs}/`.
 - `make check` → commit → push → `make install`.
 
 ## Success criteria
@@ -158,7 +158,7 @@ Standard `poplar-pass` end-of-pass checklist:
   (queued in STATUS with a starter prompt), or declined (with
   one-line rationale in the audit doc).
 - `make check` green.
-- The audit doc, archived under `docs/superpowers/archive/specs/`,
+- The audit doc, archived under `docs/archive/specs/`,
   stands as the historical record of the pass's findings.
 
 ## Non-goals

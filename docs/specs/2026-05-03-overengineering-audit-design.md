@@ -342,7 +342,7 @@ Elm-conformance items previously folded into 8.5:
    self-guarded by `clipPane`; renderers ignoring `width`).
 
 Pass 8.5b gets its own design spec at
-`docs/superpowers/specs/2026-05-03-elm-conformance-audit-design.md`,
+`docs/specs/2026-05-03-elm-conformance-audit-design.md`,
 written after 8.5 lands so it can incorporate any structural changes
 8.5 produces. It is mentioned here only so 8.5's authors and
 reviewers know the Elm work is queued and not lost.
@@ -379,4 +379,4 @@ None. All design decisions resolved in brainstorming.
 
 After this spec is approved by the user, transition to the
 `writing-plans` skill to produce the executable plan at
-`docs/superpowers/plans/2026-05-03-overengineering-audit.md`.
+`docs/plans/2026-05-03-overengineering-audit.md`.

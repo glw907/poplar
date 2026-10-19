@@ -18,7 +18,7 @@ functions.
 
 **Tech Stack:** Go, lipgloss, html-to-markdown, goldmark, cobra
 
-**Spec:** `docs/superpowers/specs/2026-04-10-mailrender-lipgloss-design.md`
+**Spec:** `docs/specs/2026-04-10-mailrender-lipgloss-design.md`
 
 ---
 

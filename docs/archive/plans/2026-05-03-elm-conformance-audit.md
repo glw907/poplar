@@ -18,7 +18,7 @@ severity order, with a go/no-go gate before refactor execution.
 **Tech Stack:** Go 1.26.1, bubbletea, lipgloss, the
 elm-conventions skill, `Explore` subagents, `make check`.
 
-**Spec:** `docs/superpowers/specs/2026-05-03-elm-conformance-audit-design.md`
+**Spec:** `docs/specs/2026-05-03-elm-conformance-audit-design.md`
 
 ---
 
@@ -109,7 +109,7 @@ output is not a project artifact; the consolidated audit doc is.
 ## Task 2: Consolidate findings into the spec doc
 
 **Files:**
-- Modify: `docs/superpowers/specs/2026-05-03-elm-conformance-audit-design.md`
+- Modify: `docs/specs/2026-05-03-elm-conformance-audit-design.md`
 
 **Goal:** Append a "Findings" section to the spec doc that merges
 all four subagent outputs, deduplicates, resolves conflicts by
@@ -145,7 +145,7 @@ resolution in the audit doc only if non-obvious.
 - [ ] **Step 3: Commit the findings**
 
 ```bash
-git add docs/superpowers/specs/2026-05-03-elm-conformance-audit-design.md
+git add docs/specs/2026-05-03-elm-conformance-audit-design.md
 git commit -m "Pass 8.5b D-1: audit findings — consolidated discovery output
 
 Four parallel Explore subagents produced findings against the
@@ -271,7 +271,7 @@ make check
 ## Task 6: Refactor proposals — present and gate
 
 **Files:**
-- Modify: `docs/superpowers/specs/2026-05-03-elm-conformance-audit-design.md`
+- Modify: `docs/specs/2026-05-03-elm-conformance-audit-design.md`
 
 **Goal:** Present the refactor proposal list to the user with
 recommendations; receive go/no-go per proposal; record dispositions
@@ -297,7 +297,7 @@ reason>`.
 - [ ] **Step 3: Commit the disposition update**
 
 ```bash
-git add docs/superpowers/specs/2026-05-03-elm-conformance-audit-design.md
+git add docs/specs/2026-05-03-elm-conformance-audit-design.md
 git commit -m "Pass 8.5b R-0: refactor proposals — dispositions
 
 Per pre-beta posture, all proposals reviewed; dispositions
@@ -475,10 +475,10 @@ Co-Authored-By: Claude <noreply@anthropic.com>"
 ## Task 11: Archive plan + spec
 
 **Files:**
-- Move: `docs/superpowers/plans/2026-05-03-elm-conformance-audit.md`
-  → `docs/superpowers/archive/plans/2026-05-03-elm-conformance-audit.md`
-- Move: `docs/superpowers/specs/2026-05-03-elm-conformance-audit-design.md`
-  → `docs/superpowers/archive/specs/2026-05-03-elm-conformance-audit-design.md`
+- Move: `docs/plans/2026-05-03-elm-conformance-audit.md`
+  → `docs/archive/plans/2026-05-03-elm-conformance-audit.md`
+- Move: `docs/specs/2026-05-03-elm-conformance-audit-design.md`
+  → `docs/archive/specs/2026-05-03-elm-conformance-audit-design.md`
 
 **Goal:** Preserve git history while moving the pass artifacts to
 the archive.
@@ -486,10 +486,10 @@ the archive.
 - [ ] **Step 1: git mv the plan and spec**
 
 ```bash
-git mv docs/superpowers/plans/2026-05-03-elm-conformance-audit.md \
-       docs/superpowers/archive/plans/2026-05-03-elm-conformance-audit.md
-git mv docs/superpowers/specs/2026-05-03-elm-conformance-audit-design.md \
-       docs/superpowers/archive/specs/2026-05-03-elm-conformance-audit-design.md
+git mv docs/plans/2026-05-03-elm-conformance-audit.md \
+       docs/archive/plans/2026-05-03-elm-conformance-audit.md
+git mv docs/specs/2026-05-03-elm-conformance-audit-design.md \
+       docs/archive/specs/2026-05-03-elm-conformance-audit-design.md
 ```
 
 - [ ] **Step 2: Commit**

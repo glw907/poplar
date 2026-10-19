@@ -8,7 +8,7 @@
 
 **Tech Stack:** Go 1.26.x, lipgloss, bubbletea (existing toolchain). No new dependencies.
 
-**Spec:** [`docs/superpowers/specs/2026-04-29-viewer-header-redesign-design.md`](../specs/2026-04-29-viewer-header-redesign-design.md)
+**Spec:** [`docs/specs/2026-04-29-viewer-header-redesign-design.md`](../specs/2026-04-29-viewer-header-redesign-design.md)
 
 ---
 

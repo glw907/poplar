@@ -79,7 +79,7 @@ ADR-0195 codifies this as an accepted deviation. ADR-0194's pattern ("each picke
 - [ ] Idiomatic-bubbletea §10 checklist against the diff and a live tmux capture at 120×40 with the picker open over a compose draft.
 - [ ] `make check`.
 - [ ] Update `docs/poplar/STATUS.md`: mark 15a.5 done, write the 15b starter prompt (sidebar folder hierarchy on a v2 tree component).
-- [ ] Archive this plan to `docs/superpowers/archive/plans/`.
+- [ ] Archive this plan to `docs/archive/plans/`.
 - [ ] Commit, push, install.
 
 ---

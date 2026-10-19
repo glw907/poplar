@@ -8,7 +8,7 @@ Audit D can run.
 ## Scope
 
 Two findings from
-`docs/superpowers/archive/plans/2026-05-13-audit-c.md`:
+`docs/archive/plans/2026-05-13-audit-c.md`:
 
 - **A.** SMTP `smtpAuth` lacks `ForceRefresh`-on-`ErrAuth` retry —
   stale cached access token within the 5-minute Token cushion

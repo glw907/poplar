@@ -81,7 +81,7 @@ const (
 )
 
 // Contact is the value rendered by every surface in this package.
-// It mirrors the schema in docs/superpowers/specs/2026-05-06-addressbook-design.md
+// It mirrors the schema in docs/specs/2026-05-06-addressbook-design.md
 // minus the storage columns (id, source, account, external_id, rev,
 // updated_at) — those land in 9.2 alongside the SQLite layer.
 type Contact struct {
@@ -1042,7 +1042,7 @@ Lock the **9.2 wiring contract** explicitly:
 
 - [ ] **Step 5: Run pass-end ritual**
 
-Invoke the `poplar-pass` skill. It handles invariants update (add the Address Book section + ADR-0166 row to the decision index), STATUS flip (Pass 9.1 → done; populate Pass 9.2 starter prompt from spec), `/simplify` review of the diff, plan archival (`docs/superpowers/plans/2026-05-07-address-book-mockups.md` → `docs/superpowers/archive/plans/`), commit + push + `make install`.
+Invoke the `poplar-pass` skill. It handles invariants update (add the Address Book section + ADR-0166 row to the decision index), STATUS flip (Pass 9.1 → done; populate Pass 9.2 starter prompt from spec), `/simplify` review of the diff, plan archival (`docs/plans/2026-05-07-address-book-mockups.md` → `docs/archive/plans/`), commit + push + `make install`.
 
 - [ ] **Step 6: Verify install**
 
@@ -1065,7 +1065,7 @@ Confirm: `i` works in mail mode (match + no-match), `C` enters Contacts mode, `n
 
 ## Execution Handoff
 
-Plan complete and saved to `docs/superpowers/plans/2026-05-07-address-book-mockups.md`. Two execution options:
+Plan complete and saved to `docs/plans/2026-05-07-address-book-mockups.md`. Two execution options:
 
 **1. Subagent-Driven (recommended)** — I dispatch a fresh subagent per task, review between tasks, fast iteration. Recommended given the task count and the breadth of touched packages.
 

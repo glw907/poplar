@@ -24,7 +24,7 @@ unchanged (ADR-0174).
 `emersion/go-webdav v0.6+`, `emersion/go-vcard v0.0.0-...`,
 `nyaruka/phonenumbers`, bubbletea v1.x.
 
-**Spec:** `docs/superpowers/specs/2026-05-07-carddav-ingest-design.md`
+**Spec:** `docs/specs/2026-05-07-carddav-ingest-design.md`
 
 ---
 
@@ -2250,17 +2250,17 @@ Add a row pointing the relevant binding facts to ADR-0175.
 > ETag round-trip across local edits; deletion UI in the Form.
 >
 > **Approach.** Brainstorm, write
-> `docs/superpowers/plans/YYYY-MM-DD-carddav-writeback.md`,
+> `docs/plans/YYYY-MM-DD-carddav-writeback.md`,
 > implement. Standard pass-end ritual.
 ```
 
 - [ ] **Step 7: Archive plan + spec**
 
 ```bash
-git mv docs/superpowers/plans/2026-05-07-carddav-ingest.md \
-       docs/superpowers/archive/plans/
-git mv docs/superpowers/specs/2026-05-07-carddav-ingest-design.md \
-       docs/superpowers/archive/specs/
+git mv docs/plans/2026-05-07-carddav-ingest.md \
+       docs/archive/plans/
+git mv docs/specs/2026-05-07-carddav-ingest-design.md \
+       docs/archive/specs/
 ```
 
 - [ ] **Step 8: `make check`**

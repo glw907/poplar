@@ -8,7 +8,7 @@
 
 **Tech Stack:** Go 1.26, `charm.land/lipgloss/v2`, `charm.land/bubbles/v2/key`, `internal/ansix`. No new dependencies.
 
-**Spec:** [`docs/superpowers/specs/2026-05-10-sidebar-tree-design.md`](../specs/2026-05-10-sidebar-tree-design.md)
+**Spec:** [`docs/specs/2026-05-10-sidebar-tree-design.md`](../specs/2026-05-10-sidebar-tree-design.md)
 
 ---
 
@@ -1165,7 +1165,7 @@ If a visual issue appears (selection bar misaligns, prefix bleeds, count badge c
 **Files:**
 - Create: `docs/poplar/decisions/0197-sidebar-tree.md`
 - Modify: `docs/poplar/decisions/INDEX.md`, `.claude/rules/ui-invariants.md`, `docs/poplar/styling.md`, `docs/poplar/STATUS.md`, `BACKLOG.md`
-- Move: `docs/superpowers/plans/2026-05-10-sidebar-tree.md` → `archive/plans/`, `docs/superpowers/specs/2026-05-10-sidebar-tree-design.md` → `archive/specs/`
+- Move: `docs/plans/2026-05-10-sidebar-tree.md` → `archive/plans/`, `docs/specs/2026-05-10-sidebar-tree-design.md` → `archive/specs/`
 
 - [ ] **Step 1: Write ADR 0197**
 
@@ -1308,7 +1308,7 @@ Mark 17a `done` in the pass table. Rewrite the "Next starter prompt" for Pass 17
 > or stays on `Model`.
 >
 > **Approach.** Brainstorm the open questions, write a plan doc
-> at `docs/superpowers/plans/YYYY-MM-DD-messagelist-list.md`,
+> at `docs/plans/YYYY-MM-DD-messagelist-list.md`,
 > then implement. Standard pass-end checklist applies.
 ```
 
@@ -1321,8 +1321,8 @@ Find #45 in BACKLOG.md and strike-through item (4) in its body (the sidebar bull
 - [ ] **Step 7: Archive plan + spec**
 
 ```bash
-git mv docs/superpowers/plans/2026-05-10-sidebar-tree.md docs/superpowers/archive/plans/
-git mv docs/superpowers/specs/2026-05-10-sidebar-tree-design.md docs/superpowers/archive/specs/
+git mv docs/plans/2026-05-10-sidebar-tree.md docs/archive/plans/
+git mv docs/specs/2026-05-10-sidebar-tree-design.md docs/archive/specs/
 ```
 
 - [ ] **Step 8: Commit, push, install**
@@ -1334,7 +1334,7 @@ make check
 Expected: green.
 
 ```bash
-git add docs/poplar/decisions/0197-sidebar-tree.md docs/poplar/decisions/INDEX.md .claude/rules/ui-invariants.md docs/poplar/styling.md docs/poplar/STATUS.md BACKLOG.md docs/superpowers/archive/
+git add docs/poplar/decisions/0197-sidebar-tree.md docs/poplar/decisions/INDEX.md .claude/rules/ui-invariants.md docs/poplar/styling.md docs/poplar/STATUS.md BACKLOG.md docs/archive/
 git commit -m "Pass 17a close: ADR-0197, sidebar tree invariant, STATUS to 17b"
 git push
 make install

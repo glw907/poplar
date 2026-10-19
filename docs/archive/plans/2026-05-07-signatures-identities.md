@@ -1608,5 +1608,5 @@ After Task 9 lands, invoke the `poplar-pass` skill for the consolidation ritual:
 - Update `docs/poplar/invariants.md` per the spec's *Invariants delta* section: replace the JMAP single-identity cache fact with the per-email map; add the `[[account.identity]]` decode rules to *Config & theming*; the reader sentinel-dim fact is already correct (`internal/content` + `theme.Signature` predates this pass).
 - Update `docs/poplar/decisions/INDEX.md` with an ADR-0177 row.
 - Update `STATUS.md`: mark 9n done; replace the starter prompt with Pass 9o (Claude Tidy implementation).
-- `git mv` this plan and the spec into `docs/superpowers/archive/plans/` and `docs/superpowers/archive/specs/`.
+- `git mv` this plan and the spec into `docs/archive/plans/` and `docs/archive/specs/`.
 - `make check` → commit → push → `make install`.

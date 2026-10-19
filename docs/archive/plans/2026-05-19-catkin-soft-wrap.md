@@ -8,7 +8,7 @@
 
 **Tech Stack:** Go 1.26, `github.com/charmbracelet/x/ansi@v0.11.7` (`ansi.Wrap`), `charm.land/lipgloss/v2`. No new dependencies.
 
-**Spec:** `docs/superpowers/specs/2026-05-19-catkin-soft-wrap-design.md`
+**Spec:** `docs/specs/2026-05-19-catkin-soft-wrap-design.md`
 
 ---
 
@@ -900,8 +900,8 @@ In `docs/poplar/STATUS.md`:
 - [ ] **Step 6: Archive plan + spec**
 
 ```bash
-git mv docs/superpowers/plans/2026-05-19-catkin-soft-wrap.md docs/superpowers/archive/plans/
-git mv docs/superpowers/specs/2026-05-19-catkin-soft-wrap-design.md docs/superpowers/archive/specs/
+git mv docs/plans/2026-05-19-catkin-soft-wrap.md docs/archive/plans/
+git mv docs/specs/2026-05-19-catkin-soft-wrap-design.md docs/archive/specs/
 ```
 
 - [ ] **Step 7: make check**

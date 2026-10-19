@@ -1,12 +1,12 @@
 # Pass 9d.2a — Invariants compaction plan
 
-Spec: `docs/superpowers/specs/2026-05-05-invariants-compaction-design.md`.
+Spec: `docs/specs/2026-05-05-invariants-compaction-design.md`.
 
 ## Steps
 
 1. **Create `.claude/rules/cache-invariants.md`.** Frontmatter
    paths: `internal/cache/**/*.go`, `cmd/poplar/cache*.go`,
-   `docs/superpowers/plans/**/*.md`, `docs/superpowers/specs/**/*.md`.
+   `docs/plans/**/*.md`, `docs/specs/**/*.md`.
    Body = the entire `## Cache` section from `invariants.md`,
    verbatim, with a one-line preamble.
 
@@ -44,7 +44,7 @@ Spec: `docs/superpowers/specs/2026-05-05-invariants-compaction-design.md`.
    steps if needed.
 
 8. **Archive plan + spec.** `git mv` both files into
-   `docs/superpowers/archive/{plans,specs}/`.
+   `docs/archive/{plans,specs}/`.
 
 9. **`make check`.** Must be green.
 

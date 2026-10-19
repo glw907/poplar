@@ -8,7 +8,7 @@
 
 **Tech Stack:** Go, bubbletea, lipgloss, bubbles/help, bubbles/spinner
 
-**Spec:** `docs/superpowers/specs/2026-04-11-poplar-chrome-redesign-design.md`
+**Spec:** `docs/specs/2026-04-11-poplar-chrome-redesign-design.md`
 **Keybindings:** `docs/poplar/keybindings.md`
 
 ---

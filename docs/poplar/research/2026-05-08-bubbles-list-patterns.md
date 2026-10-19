@@ -2,7 +2,7 @@
 
 Patterns harvested from `bubbles/list@v1.0.0` during Pass 9x.1, the
 list-family lesson-harvest sweep. Companion to the eval at
-`docs/superpowers/archive/specs/2026-05-08-bubble-reeval-and-eval-b.md`,
+`docs/archive/specs/2026-05-08-bubble-reeval-and-eval-b.md`,
 which decided every list-shaped surface stays hand-rolled. This doc
 captures *what to keep in mind* from the library's design, organized
 by pattern rather than by surface.

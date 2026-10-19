@@ -321,9 +321,9 @@ Non-destructive. Old `architecture.md` stays until Phase 7.
         append without considering what to remove.
      5. Update `STATUS.md`: mark pass done in table, replace the
         current starter prompt with the next one.
-     6. Move this pass's plan + spec from `docs/superpowers/plans/`
-        and `docs/superpowers/specs/` to
-        `docs/superpowers/archive/{plans,specs}/`.
+     6. Move this pass's plan + spec from `docs/plans/`
+        and `docs/specs/` to
+        `docs/archive/{plans,specs}/`.
      7. `make check` → commit → push → `make install`.
    - **ADR template** (context / decision / consequences /
      supersedes).
@@ -348,7 +348,7 @@ Intentionally left for later phases:
 
 Non-destructive.
 
-1. `mkdir -p docs/superpowers/archive/plans docs/superpowers/archive/specs`.
+1. `mkdir -p docs/archive/plans docs/archive/specs`.
 2. `git mv` 12 completed plan files to `archive/plans/`.
 3. `git mv` 12 completed spec files to `archive/specs/`.
 4. Leave the 1 active pair (`2026-04-12-poplar-ui-config*`) and
@@ -487,7 +487,7 @@ each):
 2. **(b) new poplar docs + ADRs + skill** — `docs/poplar/{invariants,system-map}.md`,
    `docs/poplar/decisions/*`, `.claude/skills/poplar-pass/`,
    trimmed `STATUS.md`. Old `architecture.md` still present.
-3. **(c) archive** — `docs/superpowers/archive/{plans,specs}/`
+3. **(c) archive** — `docs/archive/{plans,specs}/`
    populated.
 4. **(d) delete CLIs and internals** — Phase 6 deletions.
 5. **(e) delete configs, human docs, old architecture.md** —

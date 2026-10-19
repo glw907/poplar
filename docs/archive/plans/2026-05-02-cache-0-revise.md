@@ -4,8 +4,8 @@
 **Type:** revision pass (edits spec + ADRs; produces revised spec
 and the starter brief for Pass 8.4a)
 **Inputs:**
-- `docs/superpowers/specs/2026-05-02-cache-0-design.md` (current spec)
-- `docs/superpowers/reviews/2026-05-02-cache-0-review.md` (findings)
+- `docs/specs/2026-05-02-cache-0-design.md` (current spec)
+- `docs/reviews/2026-05-02-cache-0-review.md` (findings)
 - ADR-0110, ADR-0111, ADR-0112
 
 ## Goal
@@ -41,7 +41,7 @@ output.
 
 For each must-fix finding:
 
-- Edit `docs/superpowers/specs/2026-05-02-cache-0-design.md` inline
+- Edit `docs/specs/2026-05-02-cache-0-design.md` inline
   (preserve overall structure).
 - If the change reverses or substantively modifies one of the three
   ADRs (0110/0111/0112):
@@ -53,7 +53,7 @@ For each must-fix finding:
 - Update the spec's "Status" line at the top from `unreviewed` to
   `reviewed (YYYY-MM-DD)` and add a "Review notes" section near
   the top pointing at:
-  - `docs/superpowers/reviews/2026-05-02-cache-0-review.md`
+  - `docs/reviews/2026-05-02-cache-0-review.md`
   - Any new ADRs written this pass.
 
 ### Step 3: Apply should-fix changes (or defer with backlog entry)
@@ -67,7 +67,7 @@ For each should-fix finding:
 
 ### Step 4: Write the Pass 8.4a starter brief
 
-Create `docs/superpowers/plans/<TODAY>-cache-i-implementation.md`
+Create `docs/plans/<TODAY>-cache-i-implementation.md`
 covering:
 
 - **Goal.** Implement Cache I (schema + envelope/header cache +
@@ -129,11 +129,11 @@ In the pass-end commit message, include a line:
 
 ## Outputs
 
-- Revised `docs/superpowers/specs/2026-05-02-cache-0-design.md`.
+- Revised `docs/specs/2026-05-02-cache-0-design.md`.
 - New ADR(s) if any decision reversed (next available number).
-- New `docs/superpowers/plans/<TODAY>-cache-i-implementation.md`
+- New `docs/plans/<TODAY>-cache-i-implementation.md`
   (the brief for Pass 8.4a).
-- This plan (`docs/superpowers/plans/2026-05-02-cache-0-revise.md`)
+- This plan (`docs/plans/2026-05-02-cache-0-revise.md`)
   archived at pass-end.
 
 ## Hand-off

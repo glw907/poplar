@@ -8,7 +8,7 @@
 
 **Tech Stack:** Go 1.26, `charm.land/bubbletea/v2`, `modernc.org/sqlite`, `slog`. Project conventions in `go-conventions` + `elm-conventions` skills; pre-beta stance in `CLAUDE.md`.
 
-**Spec:** `docs/superpowers/specs/2026-05-17-async-backend-connect-design.md`
+**Spec:** `docs/specs/2026-05-17-async-backend-connect-design.md`
 
 ---
 
@@ -1424,7 +1424,7 @@ Invoke the `poplar-pass` skill for the consolidation ritual:
 - Confirm `make check` green.
 - Run `/simplify` on the cumulative diff (vs `master`'s pre-pass tip).
 - Update `docs/poplar/STATUS.md` with the next starter prompt.
-- Archive the plan under `docs/superpowers/archive/plans/`.
+- Archive the plan under `docs/archive/plans/`.
 - Push to origin.
 - `make install` and one final live-tmux verification with the freshly-installed binary.
 

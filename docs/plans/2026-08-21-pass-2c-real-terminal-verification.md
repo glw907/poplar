@@ -21,7 +21,7 @@ teatest, and tmux-check.
 remote control, xdotool, ImageMagick `import`.
 
 **Specs:** the pass 2 plan
-(`docs/superpowers/archive/plans/2026-08-19-pass-2-design-language-and-shell.md`,
+(`docs/archive/plans/2026-08-19-pass-2-design-language-and-shell.md`,
 wireframes F1-F8 and decisions 1-13), the design language revision 3,
 the pinned exemplar (`docs/poplar/design/2026-08-19-shell-exemplar/`),
 the build machine design (`2026-07-27-poplar-build-machine.md`), and

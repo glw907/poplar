@@ -11,9 +11,9 @@ theme; stubs for contacts/signatures/tidy), and the
 `config.ConfigError`, `config.Render` must all exist.
 
 **Master plan + spec.** Detailed task steps in
-`docs/superpowers/plans/2026-05-09-pass-14-firstrun.md` (Pre-task
+`docs/plans/2026-05-09-pass-14-firstrun.md` (Pre-task
 setup steps 0.1–0.4; tasks 6, 7, 10, 11, 12, 14). Design rationale
-in `docs/superpowers/specs/2026-05-09-pass-14-firstrun-design.md`
+in `docs/specs/2026-05-09-pass-14-firstrun-design.md`
 (Architecture > New packages; Wizard flow; Wireframes).
 
 **Skills.** Invoke `go-conventions` before any Go file;
@@ -74,7 +74,7 @@ in `docs/superpowers/specs/2026-05-09-pass-14-firstrun-design.md`
 5. `docs/poplar/bubbletea-conventions.md` — note huh's idioms
    if 14b surfaces new patterns the conventions doc should
    codify.
-6. `git mv docs/superpowers/plans/2026-05-10-pass-14b-wizard-ui.md docs/superpowers/archive/plans/`.
+6. `git mv docs/plans/2026-05-10-pass-14b-wizard-ui.md docs/archive/plans/`.
 7. STATUS.md — flip 14b to `done`, pivot to 14c.
 8. `make install`, commit, push.
 

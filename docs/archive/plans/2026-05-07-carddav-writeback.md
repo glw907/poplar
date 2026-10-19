@@ -14,7 +14,7 @@ mirror mail-outbox semantics (If-Match → 412 → revert + conflicted state).
 **Tech Stack:** `github.com/emersion/go-vcard`, `github.com/emersion/go-webdav`,
 modernc.org/sqlite, bubbles/bubbletea, the existing cache drainer.
 
-**Spec:** `docs/superpowers/specs/2026-05-07-carddav-writeback-design.md`.
+**Spec:** `docs/specs/2026-05-07-carddav-writeback-design.md`.
 
 ---
 
@@ -1800,10 +1800,10 @@ Mark Pass 9m.1 done. Replace the starter prompt with the next pass
 - [ ] **Step 6: Archive plan + spec**
 
 ```bash
-git mv docs/superpowers/plans/2026-05-07-carddav-writeback.md \
-       docs/superpowers/archive/plans/
-git mv docs/superpowers/specs/2026-05-07-carddav-writeback-design.md \
-       docs/superpowers/archive/specs/
+git mv docs/plans/2026-05-07-carddav-writeback.md \
+       docs/archive/plans/
+git mv docs/specs/2026-05-07-carddav-writeback-design.md \
+       docs/archive/specs/
 ```
 
 - [ ] **Step 7: make check + commit + push + install**

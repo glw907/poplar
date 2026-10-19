@@ -9,7 +9,7 @@ and 120×40 (the verification 9h.1 deferred).
 Pure structural refactor. No behavior change. Runs `make check` after
 each task.
 
-**Spec / parent plan:** `docs/superpowers/archive/plans/2026-05-06-core-reorg.md`
+**Spec / parent plan:** `docs/archive/plans/2026-05-06-core-reorg.md`
 (Tasks 7 + 8 of the original plan; 9h.1 landed Tasks 1–6).
 
 ---
@@ -302,5 +302,5 @@ EOF
   decision-index row for ADRs 0161–0163.
 - Update `docs/poplar/STATUS.md` — mark 9h.2 done; replace starter
   prompt with the next pass per the queue (9h.5 drafts persistence).
-- `git mv` plan + spec into `docs/superpowers/archive/`.
+- `git mv` plan + spec into `docs/archive/`.
 - `make check`, commit, push, `make install`.

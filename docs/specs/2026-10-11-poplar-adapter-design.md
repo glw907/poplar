@@ -1,12 +1,12 @@
 # Design: poplar adopts `pass-core`
 
 For Geoff's approval, 2026-10-11, with his rulings of that day folded in (below). Source: `~/.dotfiles/ROADMAP.md:59-63` (ruling R4) and the
-planning prompt `docs/superpowers/plans/2026-10-11-poplar-adapter-planning-prompt.txt`.
+planning prompt `docs/plans/2026-10-11-poplar-adapter-planning-prompt.txt`.
 
 ## Risk checked first: pass 2c
 
 Pass 2c (real-terminal verification and the help screen, plan
-`docs/superpowers/plans/2026-08-21-pass-2c-real-terminal-verification.md`) is paused, not running.
+`docs/plans/2026-08-21-pass-2c-real-terminal-verification.md`) is paused, not running.
 Tasks 1-3 landed on `master` on 2026-08-21 (63d02b1 through 32afa8f), and tasks 4-6 wait on Geoff's
 23 rulings and the help popover wireframe (STATUS:706-714). No session is live in poplar, and
 nothing has been committed since bcb2fd6. The resume prompt (STATUS:718-736) cannot run as written.
@@ -61,8 +61,8 @@ in poplar's ROADMAP as its own pass.
 - **Close checklist**: CI green on the head. When a painted screen changed, run `tui-visual-verify`
   through `scripts/gate-captures` and do one `make tmux-check` (`CLAUDE.md:46-50`,
   `Makefile:189-196`). Read gallery churn (`Makefile:50-58`). Record the `deadcode ./...` count in
-  the PR body (STATUS:19-23). Archive the plan to `docs/superpowers/archive/plans/`. STATUS stays at
-  `docs/superpowers/specs/poplar-refounding-STATUS.md`. The product touchpoints are the wireframe
+  the PR body (STATUS:19-23). Archive the plan to `docs/archive/plans/`. STATUS stays at
+  `docs/specs/poplar-refounding-STATUS.md`. The product touchpoints are the wireframe
   review before a screen task dispatches (`.claude/rules/poplar-development.md:20-23`), plus
   `pass-core`'s design approval and PR read.
 

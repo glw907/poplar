@@ -8,7 +8,7 @@
 
 **Tech Stack:** Go, charmbracelet/bubbletea, charmbracelet/bubbles/key, charmbracelet/lipgloss.
 
-**Spec:** `docs/superpowers/specs/2026-05-01-move-picker-design.md`.
+**Spec:** `docs/specs/2026-05-01-move-picker-design.md`.
 
 **Conventions:**
 - Invoke `go-conventions` skill before writing any Go.
@@ -1753,8 +1753,8 @@ Expected: ≤ 300 lines (enforced by `.claude/hooks/claude-md-size.sh`).
 - [ ] **Step 6: Archive plan + spec**
 
 ```
-git mv docs/superpowers/plans/2026-05-01-move-picker.md docs/superpowers/archive/plans/
-git mv docs/superpowers/specs/2026-05-01-move-picker-design.md docs/superpowers/archive/specs/
+git mv docs/plans/2026-05-01-move-picker.md docs/archive/plans/
+git mv docs/specs/2026-05-01-move-picker-design.md docs/archive/specs/
 ```
 
 - [ ] **Step 7: `make check`**

@@ -2,7 +2,7 @@
 
 **Status:** In progress. Assembled across the domain passes (charter §9),
 consolidated at Pass 8.
-**Provenance:** Charter `docs/superpowers/specs/2026-05-29-poplar-rebuild-charter.md`;
+**Provenance:** Charter `docs/specs/2026-05-29-poplar-rebuild-charter.md`;
 field survey `docs/poplar/research/2026-05-29-mail-client-gap-analysis.md`.
 
 This document locks behavior, the stack, the load-bearing seams, and the

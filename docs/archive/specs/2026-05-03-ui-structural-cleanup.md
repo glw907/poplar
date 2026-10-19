@@ -60,5 +60,5 @@ performance.
 Capture golden-output tests for all four overlays at 80×24 and
 120×40 BEFORE refactoring; verify byte-for-byte equality after
 extraction. Brainstorm the open questions, write a plan doc at
-`docs/superpowers/plans/YYYY-MM-DD-ui-structural-cleanup.md`, then
+`docs/plans/YYYY-MM-DD-ui-structural-cleanup.md`, then
 implement. Standard pass-end checklist applies.

@@ -8,7 +8,7 @@
 
 **Tech Stack:** Vale, Make, bash, markdown.
 
-**Spec:** `docs/superpowers/specs/2026-05-07-doc-voice-design.md`
+**Spec:** `docs/specs/2026-05-07-doc-voice-design.md`
 
 **Predecessor:** `2026-05-07-doc-voice-pass-a-gate.md`. Pass A must be merged before this one starts (`docs/poplar/STYLE.md`, the Vale ruleset, ADR-0174, and the narrow `make check` gate are prerequisites).
 
@@ -20,7 +20,7 @@
 - `Makefile` (widen `VALE_PATHS` once per sweep task)
 - `CLAUDE.md`, `.claude/rules/*.md`, `.claude/skills/poplar-pass/*.md`, `.claude/docs/*.md`
 - `docs/poplar/decisions/*.md`
-- `docs/superpowers/plans/*.md`, `docs/superpowers/specs/*.md`
+- `docs/plans/*.md`, `docs/specs/*.md`
 - `~/.claude/docs/go-comment-voice.md` (trim catalogue, cross-reference STYLE.md)
 - Global poplar-related skill files (locate via `find`)
 - The `/simplify` skill's voice review agent brief
@@ -200,20 +200,20 @@ EOF
 
 ---
 
-## Task 3: Widen to docs/superpowers/; sweep active plans and specs
+## Task 3: Widen to docs/; sweep active plans and specs
 
-Skip `docs/superpowers/archive/` (archived plans are immutable).
+Skip `docs/archive/` (archived plans are immutable).
 
 **Files:**
 - Modify: `Makefile`
-- Modify: `docs/superpowers/plans/*.md`, `docs/superpowers/specs/*.md` (per Vale findings)
+- Modify: `docs/plans/*.md`, `docs/specs/*.md` (per Vale findings)
 
 - [ ] **Step 1: Widen VALE_PATHS**
 
 ```make
 VALE_PATHS := docs/poplar internal cmd \
               CLAUDE.md .claude/rules .claude/skills .claude/docs \
-              docs/superpowers/plans docs/superpowers/specs
+              docs/plans docs/specs
 ```
 
 (Drop the explicit `docs/poplar/decisions` if Step 1 of Task 2 confirmed redundancy. Keep otherwise.)
@@ -221,7 +221,7 @@ VALE_PATHS := docs/poplar internal cmd \
 - [ ] **Step 2: Run Vale, capture findings**
 
 ```bash
-vale --minAlertLevel=error --output=line docs/superpowers/plans docs/superpowers/specs > /tmp/vale-superpowers.txt 2>&1 || true
+vale --minAlertLevel=error --output=line docs/plans docs/specs > /tmp/vale-superpowers.txt 2>&1 || true
 cat /tmp/vale-superpowers.txt
 ```
 
@@ -234,7 +234,7 @@ Same triage as Task 1.
 - [ ] **Step 4: Verify clean**
 
 ```bash
-vale --minAlertLevel=error docs/superpowers/plans docs/superpowers/specs
+vale --minAlertLevel=error docs/plans docs/specs
 ```
 
 Expected: no findings.
@@ -250,9 +250,9 @@ Expected: green.
 - [ ] **Step 6: Commit**
 
 ```bash
-git add Makefile docs/superpowers/
+git add Makefile docs/
 git commit -m "$(cat <<'EOF'
-Widen VALE_PATHS to docs/superpowers/; sweep active plans/specs
+Widen VALE_PATHS to docs/; sweep active plans/specs
 
 Em dashes and signposting removed across the active superpowers
 tree. Archived plans untouched.

@@ -8,7 +8,7 @@
 
 **Tech Stack:** Go 1.26, `charm.land/bubbletea/v2`, `charm.land/bubbles/v2/list`, `charm.land/lipgloss/v2`. Existing `internal/ansix`, `internal/ui/uicore`, `internal/theme`.
 
-**Spec:** `docs/superpowers/specs/2026-05-10-bubbles-list-pickers-design.md`.
+**Spec:** `docs/specs/2026-05-10-bubbles-list-pickers-design.md`.
 
 ---
 
@@ -21,7 +21,7 @@
 - **Modify:** `internal/ui/movepicker/model.go`, `internal/ui/movepicker/model_test.go`, `internal/ui/movepicker/styles.go`
 - **Modify (pass end):** `docs/poplar/invariants.md`, `docs/poplar/STATUS.md`, `docs/poplar/decisions/INDEX.md`
 - **Create (pass end):** `docs/poplar/decisions/0194-bubbles-v2-list-adoption.md`
-- **Move (pass end):** plan + spec to `docs/superpowers/archive/plans/` and `archive/specs/`
+- **Move (pass end):** plan + spec to `docs/archive/plans/` and `archive/specs/`
 
 ---
 
@@ -1523,15 +1523,15 @@ Starter prompt for 15a.5 (drop into STATUS.md verbatim):
 >
 > **Still open — brainstorm these:** how to layer multi-select on top of filepicker's single-select API (own a parallel `selected map[string]bool`, intercept Space before dispatching to filepicker, render selected chips above the file list?); whether the async readDir + id-guard contract still applies or filepicker handles it; whether `.` (hidden toggle) is exposed by filepicker or stays poplar-side; whether the partial fit warrants an ADR'd deviation instead of full adoption.
 >
-> **Approach.** Brainstorm the open questions, write a plan doc at `docs/superpowers/plans/YYYY-MM-DD-bubbles-filepicker-attach.md`, then implement. Standard pass-end checklist applies.
+> **Approach.** Brainstorm the open questions, write a plan doc at `docs/plans/YYYY-MM-DD-bubbles-filepicker-attach.md`, then implement. Standard pass-end checklist applies.
 ```
 
 - [ ] **Step 5.7: Archive plan + spec**
 
 Run:
 ```bash
-git mv docs/superpowers/plans/2026-05-10-bubbles-list-pickers.md docs/superpowers/archive/plans/
-git mv docs/superpowers/specs/2026-05-10-bubbles-list-pickers-design.md docs/superpowers/archive/specs/
+git mv docs/plans/2026-05-10-bubbles-list-pickers.md docs/archive/plans/
+git mv docs/specs/2026-05-10-bubbles-list-pickers-design.md docs/archive/specs/
 ```
 
 - [ ] **Step 5.8: make check**

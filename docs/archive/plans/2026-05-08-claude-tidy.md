@@ -8,7 +8,7 @@
 
 **Tech Stack:** Go, bubbletea, lipgloss, internal/tidy (existing), internal/catkin (existing), Anthropic messages API.
 
-**Spec:** `docs/superpowers/specs/2026-05-08-claude-tidy-design.md`.
+**Spec:** `docs/specs/2026-05-08-claude-tidy-design.md`.
 
 ---
 
@@ -1487,8 +1487,8 @@ Mark Pass 9o `done`. Replace the starter prompt with Pass 9p.
 - [ ] **Step 8: Archive plan + spec**
 
 ```bash
-git mv docs/superpowers/plans/2026-05-08-claude-tidy.md docs/superpowers/archive/plans/
-git mv docs/superpowers/specs/2026-05-08-claude-tidy-design.md docs/superpowers/archive/specs/
+git mv docs/plans/2026-05-08-claude-tidy.md docs/archive/plans/
+git mv docs/specs/2026-05-08-claude-tidy-design.md docs/archive/specs/
 ```
 
 - [ ] **Step 9: Final commit, push, install**

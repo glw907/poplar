@@ -8,7 +8,7 @@
 
 **Tech Stack:** Go 1.26.1, `charmbracelet/bubbletea`, `charmbracelet/bubbles/textarea`, `charmbracelet/lipgloss`, `muesli/reflow`. No new direct dependencies.
 
-**Spec reference:** `docs/superpowers/specs/2026-05-04-compose-design.md` §Architecture, §Catkin internals, §Right-sized passes (Pass 9 row).
+**Spec reference:** `docs/specs/2026-05-04-compose-design.md` §Architecture, §Catkin internals, §Right-sized passes (Pass 9 row).
 
 **Out of scope for this plan (later sub-passes):** live markdown styling (9a), markdown commands `Ctrl+B/I/K/L/Q` + smart Enter + Tab indent (9b), undo/redo + find/replace + auto-pair + smart paste + bracket match + typewriter + focus mode (9c), annotations + spellcheck (9d), compose package + AssembleMIME (9e), mail backend Send/Append (9f), cache outbox (9g), ComposeTab UI (9h), Claude Tidy impl (9i).
 
@@ -1592,7 +1592,7 @@ git commit -m "Pass 9 task 7: catkin scroll-off (3 lines top + bottom)"
 - Edit: `docs/poplar/STATUS.md`
 - Edit: `docs/poplar/invariants.md`
 - Create: `docs/poplar/decisions/0144-catkin-renderer-ownership.md`
-- Move: `docs/superpowers/plans/2026-05-04-catkin-core.md` → `docs/superpowers/archive/plans/2026-05-04-catkin-core.md`
+- Move: `docs/plans/2026-05-04-catkin-core.md` → `docs/archive/plans/2026-05-04-catkin-core.md`
 
 Per the `poplar-pass` skill consolidation ritual.
 
@@ -1679,7 +1679,7 @@ Mark Pass 9 done, add the next starter prompt for Pass 9a (live markdown renderi
 - [ ] **Step 5: Archive plan**
 
 ```
-git mv docs/superpowers/plans/2026-05-04-catkin-core.md docs/superpowers/archive/plans/
+git mv docs/plans/2026-05-04-catkin-core.md docs/archive/plans/
 ```
 
 - [ ] **Step 6: Run final check**

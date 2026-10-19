@@ -8,7 +8,7 @@
 
 **Tech Stack:** Go 1.26, `golang.org/x/oauth2`, `emersion/go-imap/v2`, `emersion/go-smtp`, existing `mailauth` package.
 
-Spec: `docs/superpowers/specs/2026-05-11-native-oauth-design.md`.
+Spec: `docs/specs/2026-05-11-native-oauth-design.md`.
 
 ---
 

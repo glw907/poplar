@@ -144,6 +144,6 @@ means the guard was load-bearing and the deletion needs revisit.
    to mention strict decoding. Update `INDEX.md` with the new ADR.
 4. Update `STATUS.md` — mark 26.1 done, promote Pass 27 to
    next-up (its starter prompt is already in STATUS).
-5. Archive this plan to `docs/superpowers/archive/plans/`.
+5. Archive this plan to `docs/archive/plans/`.
 6. `make check`.
 7. Commit, push, `make install`.

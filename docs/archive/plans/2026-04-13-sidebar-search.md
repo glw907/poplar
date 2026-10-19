@@ -8,7 +8,7 @@
 
 **Tech Stack:** Go 1.25, bubbletea, lipgloss, `github.com/charmbracelet/bubbles/textinput` (already transitively in `go.mod` via the top-level `bubbles` dep).
 
-**Spec:** `docs/superpowers/specs/2026-04-13-sidebar-search-design.md`
+**Spec:** `docs/specs/2026-04-13-sidebar-search-design.md`
 
 ---
 
@@ -3167,7 +3167,7 @@ sidebar shelf.
 > state if viewer opens into a filtered list.
 >
 > **Approach.** Brainstorm, write spec + plan under
-> `docs/superpowers/{specs,plans}/`, implement via
+> `docs/{specs,plans}/`, implement via
 > `subagent-driven-development`. Pass-end via `poplar-pass`.
 ```
 

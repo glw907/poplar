@@ -674,7 +674,7 @@ version that was current when this plan was written.
 - [ ] **Step 5: Update STATUS.md** — mark pass done, write next
   starter prompt
 - [ ] **Step 6: Archive plan + spec** to
-  `docs/superpowers/archive/`
+  `docs/archive/`
 - [ ] **Step 7: `make check`** green
 - [ ] **Step 8: Commit, push, install**
 

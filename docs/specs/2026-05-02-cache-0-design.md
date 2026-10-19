@@ -6,7 +6,7 @@
 
 ## Review notes
 
-Pass 8.4-review (`docs/superpowers/reviews/2026-05-02-cache-0-review.md`)
+Pass 8.4-review (`docs/reviews/2026-05-02-cache-0-review.md`)
 flagged 12 must-fix and 10 should-fix findings. Pass 8.4-revise applied
 all must-fixes and most should-fixes inline. Decisions that reversed
 or substantively narrowed ADRs 0110 / 0111 / 0112 produced new ADRs:
@@ -916,7 +916,7 @@ The pre-revise spec listed five open questions. Pass 8.4-review +
 8.4-revise resolved each:
 
 1. **Unified write path migration cost** — resolved. Pass 8.4a's
-   plan (`docs/superpowers/plans/2026-05-02-cache-i-implementation.md`)
+   plan (`docs/plans/2026-05-02-cache-i-implementation.md`)
    prescribes a strangler-fig order: cache writes first (with
    `MessageList.Apply*` and old backend Cmds still alive), then
    cache-backed reads, then deletion of the legacy paths. The

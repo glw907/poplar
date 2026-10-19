@@ -6,7 +6,7 @@ status: ready
 
 ## Source spec
 
-`docs/superpowers/specs/2026-05-10-pass-13-2a-charm-v2-substrate-design.md`.
+`docs/specs/2026-05-10-pass-13-2a-charm-v2-substrate-design.md`.
 This plan is the execution shape; rationale lives in the spec.
 
 ## Why this is 13.2a, not 13.2

@@ -19,7 +19,7 @@ the configured download dir with collision suffixing. Config gains
 **Tech Stack:** Go 1.26, bubbletea, lipgloss, bubbles/viewport,
 modernc.org/sqlite via `internal/cache`.
 
-**Spec:** `docs/superpowers/specs/2026-05-04-attachments-ii-design.md`
+**Spec:** `docs/specs/2026-05-04-attachments-ii-design.md`
 
 ---
 
@@ -1670,5 +1670,5 @@ row placement, picker key + shape, download dir resolution),
 updates `docs/poplar/invariants.md` with the new bindings (Viewer
 state, Overlays cascade), updates `STATUS.md` (Pass 8.7 → done,
 draft Pass 9 starter prompt), archives the plan + spec under
-`docs/superpowers/archive/`, runs `make check`, commits, pushes,
+`docs/archive/`, runs `make check`, commits, pushes,
 installs.

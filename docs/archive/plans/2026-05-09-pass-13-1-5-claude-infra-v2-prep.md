@@ -18,7 +18,7 @@ entry.
 ## Pre-execution context
 
 Pass 13.2 is the charm.land/v2 migration. Spec at
-`docs/superpowers/specs/2026-05-09-pass-13-2-charm-v2-design.md`.
+`docs/specs/2026-05-09-pass-13-2-charm-v2-design.md`.
 The migration's three architectural reframes (declarative chrome,
 cursor hoist, drop AdaptiveColor) plus three coherence moves
 (cursored-children-return-tea.View, PasteMsg in compose, native
@@ -26,7 +26,7 @@ clipboard) need to be encoded as conventions before code lands.
 
 Read these in full before executing this plan, in this order:
 
-1. `docs/superpowers/specs/2026-05-09-pass-13-2-charm-v2-design.md`
+1. `docs/specs/2026-05-09-pass-13-2-charm-v2-design.md`
 2. `~/.claude/skills/elm-conventions/SKILL.md`
 3. `docs/poplar/bubbletea-conventions.md`
 4. `.claude/skills/poplar-pass/SKILL.md`
@@ -333,7 +333,7 @@ git add ~/.claude/skills/elm-conventions/SKILL.md \
         docs/poplar/research/2026-04-26-bubbletea-norms.md \
         docs/poplar/research/2026-04-26-reference-apps.md \
         docs/poplar/STATUS.md \
-        docs/superpowers/plans/2026-05-09-pass-13-1-5-claude-infra-v2-prep.md
+        docs/plans/2026-05-09-pass-13-1-5-claude-infra-v2-prep.md
 
 git commit -m "$(cat <<'EOF'
 Pass 13.1.5: Claude infrastructure v2 prep
@@ -357,7 +357,7 @@ Descriptive docs (invariants.md, ui-invariants.md, styling.md,
 system-map.md) are unchanged this pass — they describe current
 v1 reality and update during Pass 13.2's pass-end ritual.
 
-Plan: docs/superpowers/plans/2026-05-09-pass-13-1-5-claude-infra-v2-prep.md
+Plan: docs/plans/2026-05-09-pass-13-1-5-claude-infra-v2-prep.md
 
 Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
 EOF
@@ -373,8 +373,8 @@ No `make install` (no binary changes).
 After commit lands, archive the plan via `git mv`:
 
 ```
-git mv docs/superpowers/plans/2026-05-09-pass-13-1-5-claude-infra-v2-prep.md \
-       docs/superpowers/archive/plans/
+git mv docs/plans/2026-05-09-pass-13-1-5-claude-infra-v2-prep.md \
+       docs/archive/plans/
 git commit -m "Archive Pass 13.1.5 plan
 
 Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>"
@@ -421,7 +421,7 @@ revert that change before committing.
 - The pass is mechanical. No design decisions remain — all settled
   in the conversation that produced this plan and in the Pass 13.2
   spec.
-- Read the Pass 13.2 spec (`docs/superpowers/specs/2026-05-09-pass-13-2-charm-v2-design.md`)
+- Read the Pass 13.2 spec (`docs/specs/2026-05-09-pass-13-2-charm-v2-design.md`)
   before starting — it's the source of truth for what v2 patterns
   the conventions doc describes.
 - This pass does NOT trigger `poplar-pass` end ritual. No ADR (the

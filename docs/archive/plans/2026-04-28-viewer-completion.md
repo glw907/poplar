@@ -8,7 +8,7 @@
 
 **Tech Stack:** Go 1.26, `bubbletea`, `bubbles/key`, `lipgloss`, table-driven tests, no assertion libraries. Conventions: `go-conventions` skill for every file, `elm-conventions` for `internal/ui/`, `bubbletea-conventions.md` §10 review at pass end.
 
-**Spec:** `docs/superpowers/specs/2026-04-28-viewer-completion-design.md`
+**Spec:** `docs/specs/2026-04-28-viewer-completion-design.md`
 
 ---
 
@@ -1615,10 +1615,10 @@ Update the decision-index table at the bottom with the three new ADR numbers.
 - [ ] **Step 6: Archive plan + spec**
 
 ```bash
-git mv docs/superpowers/plans/2026-04-28-viewer-completion.md \
-       docs/superpowers/archive/plans/2026-04-28-viewer-completion.md
-git mv docs/superpowers/specs/2026-04-28-viewer-completion-design.md \
-       docs/superpowers/archive/specs/2026-04-28-viewer-completion-design.md
+git mv docs/plans/2026-04-28-viewer-completion.md \
+       docs/archive/plans/2026-04-28-viewer-completion.md
+git mv docs/specs/2026-04-28-viewer-completion-design.md \
+       docs/archive/specs/2026-04-28-viewer-completion-design.md
 ```
 
 - [ ] **Step 7: Final `make check`, commit, push, install**

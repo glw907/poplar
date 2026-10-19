@@ -8,7 +8,7 @@
 
 **Tech Stack:** Go 1.26, charm.land bubbletea/v2, charm.land huh/v2, internal/catkin (markdown editor), internal/theme.
 
-**Spec:** `docs/superpowers/specs/2026-05-11-wizard-signature-design.md`.
+**Spec:** `docs/specs/2026-05-11-wizard-signature-design.md`.
 
 ---
 

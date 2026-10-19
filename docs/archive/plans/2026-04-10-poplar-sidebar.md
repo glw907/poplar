@@ -8,7 +8,7 @@
 
 **Tech Stack:** Go, bubbletea, lipgloss, bubbles/key
 
-**Spec:** Wireframes at `docs/poplar/wireframes.md` section 3, chrome shell spec at `docs/superpowers/specs/2026-04-10-poplar-chrome-shell-design.md`.
+**Spec:** Wireframes at `docs/poplar/wireframes.md` section 3, chrome shell spec at `docs/specs/2026-04-10-poplar-chrome-shell-design.md`.
 
 ---
 

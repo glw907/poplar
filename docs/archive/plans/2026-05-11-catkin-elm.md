@@ -8,7 +8,7 @@
 
 **Tech Stack:** Go 1.26.1, `charm.land/bubbletea/v2`, `charm.land/bubbles/v2/textarea`, table-driven tests, `make check` as commit gate.
 
-**Companion spec:** `docs/superpowers/specs/2026-05-11-catkin-elm-design.md`
+**Companion spec:** `docs/specs/2026-05-11-catkin-elm-design.md`
 
 ---
 
@@ -751,7 +751,7 @@ Follow `.claude/docs/tmux-testing.md` to capture compose body + wizard signature
 
 - [ ] **Step 6: Commit, run check, install**
 
-The spec and plan stay in `docs/superpowers/{specs,plans}/` through Pass 27 — Pass 28 uses the same documents and archives both at its end.
+The spec and plan stay in `docs/{specs,plans}/` through Pass 27 — Pass 28 uses the same documents and archives both at its end.
 
 ```bash
 git add docs/poplar/decisions/0212-catkin-all-value-path.md \
@@ -1051,8 +1051,8 @@ Capture compose body at 120×40. Output must be byte-identical (modulo timestamp
 - [ ] **Step 8: Archive the spec and plan**
 
 ```bash
-git mv docs/superpowers/specs/2026-05-11-catkin-elm-design.md docs/superpowers/archive/specs/
-git mv docs/superpowers/plans/2026-05-11-catkin-elm.md docs/superpowers/archive/plans/
+git mv docs/specs/2026-05-11-catkin-elm-design.md docs/archive/specs/
+git mv docs/plans/2026-05-11-catkin-elm.md docs/archive/plans/
 ```
 
 - [ ] **Step 9: Commit, check, push, install**
@@ -1063,8 +1063,8 @@ git add docs/poplar/decisions/0213-compose-holds-catkin-directly.md \
         docs/poplar/invariants.md \
         docs/poplar/decisions/INDEX.md \
         docs/poplar/STATUS.md \
-        docs/superpowers/archive/specs/2026-05-11-catkin-elm-design.md \
-        docs/superpowers/archive/plans/2026-05-11-catkin-elm.md
+        docs/archive/specs/2026-05-11-catkin-elm-design.md \
+        docs/archive/plans/2026-05-11-catkin-elm.md
 make check
 git commit -m "$(cat <<'EOF'
 Pass 28: Delete Editor wrapper, compose holds catkin directly
@@ -1093,4 +1093,4 @@ Both passes ship when:
 - ADR-0212 + ADR-0213 written; ADR-0033 Consequences updated
 - `docs/poplar/invariants.md` + `.claude/rules/catkin-invariants.md` reflect the new shape
 - tmux capture at 120×40 shows compose body + wizard signature section rendering identically to pre-pass behavior
-- Plan + spec archived under `docs/superpowers/archive/`
+- Plan + spec archived under `docs/archive/`

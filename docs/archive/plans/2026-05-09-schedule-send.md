@@ -16,7 +16,7 @@ view instead of `messagelist.Model`.
 **Tech Stack:** Go 1.26, modernc.org/sqlite, bubbletea, bubbles,
 lipgloss. No new third-party dependencies.
 
-**Spec:** `docs/superpowers/specs/2026-05-09-schedule-send-design.md`.
+**Spec:** `docs/specs/2026-05-09-schedule-send-design.md`.
 
 ---
 
@@ -1849,8 +1849,8 @@ Invoke the `poplar-pass` skill's pass-end checklist:
 6. Update `STATUS.md`: mark Pass 10b done; replace starter prompt
    with Pass 11 (List-Unsubscribe).
 7. Archive plan + spec via `git mv` to
-   `docs/superpowers/archive/plans/` and
-   `docs/superpowers/archive/specs/`.
+   `docs/archive/plans/` and
+   `docs/archive/specs/`.
 8. `make check` — green before commit.
 9. Commit, push, `make install`.
 

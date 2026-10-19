@@ -20,8 +20,8 @@ dimensions, and behavior.
 **Deliverable:** `docs/poplar/wireframes.md` — reviewed and approved.
 
 **Reference docs:**
-- UI design spec: `docs/superpowers/specs/2026-04-10-poplar-ui-wireframing-design.md`
-- Design spec: `docs/superpowers/specs/2026-04-09-poplar-design.md`
+- UI design spec: `docs/specs/2026-04-10-poplar-ui-wireframing-design.md`
+- Design spec: `docs/specs/2026-04-09-poplar-design.md`
 - Architecture: `docs/poplar/architecture.md`
 - Styling: `docs/styling.md`
 - aerc setup: `~/.claude/docs/aerc-setup.md`
@@ -72,7 +72,7 @@ Reference wireframes for every UI element in the poplar interface
 inventory. Each wireframe defines layout, proportions, and
 information density for the bubbletea prototype (Pass 2.5b).
 
-See `docs/superpowers/specs/2026-04-10-poplar-ui-wireframing-design.md`
+See `docs/specs/2026-04-10-poplar-ui-wireframing-design.md`
 for the complete interface inventory and design rationale.
 
 ## Conventions

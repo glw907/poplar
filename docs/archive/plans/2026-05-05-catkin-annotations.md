@@ -8,7 +8,7 @@
 
 **Tech Stack:** Go 1.26, bubbletea, bubbles, lipgloss, charmbracelet/x/ansi, alecthomas/chroma/v2 (already vendored). No new third-party deps — SymSpell is hand-rolled. Wordlists embed via `//go:embed`.
 
-**Spec:** `docs/superpowers/specs/2026-05-05-catkin-annotations-design.md`.
+**Spec:** `docs/specs/2026-05-05-catkin-annotations-design.md`.
 
 ---
 
@@ -2867,7 +2867,7 @@ git commit -m "Pass 9d: popover auto-closes on cursor leaving range"
 
 **Files:**
 
-- None (capture-only). Captures land under `docs/superpowers/captures/2026-05-05-catkin-annotations/` per project convention.
+- None (capture-only). Captures land under `docs/captures/2026-05-05-catkin-annotations/` per project convention.
 
 - [ ] **Step 1: Build and install**
 
@@ -2923,7 +2923,7 @@ Per `.claude/docs/tmux-testing.md`:
 ```bash
 tmux new-session -d -s catkin -x 80 -y 24 "/tmp/catkin-demo/demo"
 sleep 1.5
-tmux capture-pane -t catkin -p > docs/superpowers/captures/2026-05-05-catkin-annotations/01-squiggle-80x24.txt
+tmux capture-pane -t catkin -p > docs/captures/2026-05-05-catkin-annotations/01-squiggle-80x24.txt
 tmux kill-session -t catkin
 ```
 
@@ -2937,7 +2937,7 @@ sleep 1.5
 # Move cursor onto "tradeof" — depends on default cursor; send right-arrows.
 tmux send-keys -t catkin "Right Right Right Right Right Right Right Right" "" "C-;"
 sleep 0.5
-tmux capture-pane -t catkin -p > docs/superpowers/captures/2026-05-05-catkin-annotations/02-popover-below-120x40.txt
+tmux capture-pane -t catkin -p > docs/captures/2026-05-05-catkin-annotations/02-popover-below-120x40.txt
 tmux kill-session -t catkin
 ```
 
@@ -2962,7 +2962,7 @@ tmux new-session -d -s catkin -x 80 -y 24 "/tmp/catkin-demo/demo"
 sleep 1.5
 tmux send-keys -t catkin "C-;"
 sleep 0.5
-tmux capture-pane -t catkin -p > docs/superpowers/captures/2026-05-05-catkin-annotations/03-popover-zero-80x24.txt
+tmux capture-pane -t catkin -p > docs/captures/2026-05-05-catkin-annotations/03-popover-zero-80x24.txt
 tmux kill-session -t catkin
 ```
 
@@ -2978,7 +2978,7 @@ CATKIN_WL=$WL tmux new-session -d -s catkin -x 80 -y 24 "/tmp/catkin-demo/demo"
 sleep 1.5
 tmux send-keys -t catkin "C-;" "a"
 sleep 0.5
-tmux capture-pane -t catkin -p > docs/superpowers/captures/2026-05-05-catkin-annotations/04-add-roundtrip-80x24.txt
+tmux capture-pane -t catkin -p > docs/captures/2026-05-05-catkin-annotations/04-add-roundtrip-80x24.txt
 tmux kill-session -t catkin
 cat "$WL"
 ```
@@ -2988,7 +2988,7 @@ Verify the captured file shows the squiggle gone after `a`, and `$WL` contains t
 - [ ] **Step 8: Commit captures**
 
 ```bash
-git add docs/superpowers/captures/2026-05-05-catkin-annotations/
+git add docs/captures/2026-05-05-catkin-annotations/
 git commit -m "Pass 9d: tmux captures (squiggle, popover above/below/zero, add round-trip)"
 ```
 
@@ -3035,8 +3035,8 @@ Edit the Catkin section of `docs/poplar/invariants.md`. Add the annotation + spe
 - [ ] **Step 7: Archive plan + spec**
 
 ```bash
-git mv docs/superpowers/plans/2026-05-05-catkin-annotations.md docs/superpowers/archive/plans/
-git mv docs/superpowers/specs/2026-05-05-catkin-annotations-design.md docs/superpowers/archive/specs/
+git mv docs/plans/2026-05-05-catkin-annotations.md docs/archive/plans/
+git mv docs/specs/2026-05-05-catkin-annotations-design.md docs/archive/specs/
 ```
 
 - [ ] **Step 8: Commit, push, install**

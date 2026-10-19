@@ -10,7 +10,7 @@
 
 **Mandatory conventions:** Read and follow `~/.claude/docs/go-conventions.md` and `~/.claude/docs/elm-conventions.md` before writing any code.
 
-**Design spec:** `docs/superpowers/specs/2026-04-10-poplar-chrome-shell-design.md`
+**Design spec:** `docs/specs/2026-04-10-poplar-chrome-shell-design.md`
 
 ---
 
@@ -1852,7 +1852,7 @@ Next starter prompt:
 
 > Start Pass 2.5b-2: sidebar prototype. Read the wireframes at
 > `docs/poplar/wireframes.md`, the chrome shell design spec at
-> `docs/superpowers/specs/2026-04-10-poplar-chrome-shell-design.md`,
+> `docs/specs/2026-04-10-poplar-chrome-shell-design.md`,
 > and the architecture doc at `docs/poplar/architecture.md`. Write a
 > plan first, then build the sidebar: folder groups, selection,
 > unread badges, and g-prefix jumps.

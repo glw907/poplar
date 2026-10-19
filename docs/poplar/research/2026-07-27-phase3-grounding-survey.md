@@ -2,7 +2,7 @@
 
 **Date:** 2026-07-27
 **Phase:** Re-founding Phase 3 (requirements). Charter:
-`docs/superpowers/specs/2026-07-19-poplar-refounding-charter.md`.
+`docs/specs/2026-07-19-poplar-refounding-charter.md`.
 **Purpose:** Ground the requirements spec in observed practice before
 drafting it, per the Phase 3 directive: Protonmail as the polished
 incumbent, the actively used TUI clients for the terminal state of the
@@ -17,7 +17,7 @@ reviews; no findings from model memory alone), plus a live JMAP probe
 of the target Fastmail account. Two dispatches mined the archived
 2026-05-29 functional spec and the 2026-04/05 research corpus. This
 document distills the decision-relevant findings; the requirements
-spec (`docs/superpowers/specs/2026-07-27-poplar-requirements.md`)
+spec (`docs/specs/2026-07-27-poplar-requirements.md`)
 consumes them.
 
 ## The competitive picture
@@ -215,4 +215,4 @@ backend contract) are session artifacts; their load-bearing claims
 and URLs are reproduced above and in the requirements spec. The
 committed prior corpus remains under `docs/poplar/research/` (the
 2026-05-29 gap analysis and the 2026-04/05 norm surveys) and
-`docs/superpowers/specs/` (the 2026-05-29 functional spec).
+`docs/specs/` (the 2026-05-29 functional spec).

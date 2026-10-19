@@ -20,7 +20,7 @@ in v1). Three new style fields on `Styles` (`HelpTitle`, `HelpGroupHeader`,
 `go-conventions` and `elm-conventions` skills (mandatory for any code
 in `internal/ui/`).
 
-**Spec:** `docs/superpowers/specs/2026-04-25-help-popover-design.md`
+**Spec:** `docs/specs/2026-04-25-help-popover-design.md`
 
 **Existing references in codebase:**
 - `internal/ui/app.go:102` — current `?` stub (replace in Task 7)
@@ -1193,8 +1193,8 @@ phrases: "ship pass", "finish pass"). It will:
 3. Update `docs/poplar/invariants.md` with the new binding facts.
 4. Update `docs/poplar/STATUS.md` (mark 2.5b-5 done, replace
    starter prompt with 2.5b-6).
-5. Archive this plan to `docs/superpowers/archive/plans/` and the
-   spec to `docs/superpowers/archive/specs/`.
+5. Archive this plan to `docs/archive/plans/` and the
+   spec to `docs/archive/specs/`.
 6. `make check`, commit, push, `make install`.
 7. Add BACKLOG entries:
    - Background dim for popover overlay.

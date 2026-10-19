@@ -48,7 +48,7 @@ splits design from validation:
    pattern), unified write path (Mailspring pattern), enqueue-order
    replay with no coalescing (Mailspring), apply-ours conflicts
    (OSS majority), `executing` state for crash recovery (FairEmail).
-5. Wrote spec (`docs/superpowers/specs/2026-05-02-cache-0-design.md`).
+5. Wrote spec (`docs/specs/2026-05-02-cache-0-design.md`).
 6. Wrote three ADRs:
    - **ADR-0110** — storage architecture (SQLite per account).
    - **ADR-0111** — unified write path (`cache.QueueOp` as single
@@ -76,6 +76,6 @@ Pass-end ritual writes:
   binding facts.
 - STATUS.md marked 8.4 done; 8.4-review queued with detailed starter
   prompt; 8.4-revise queued; 8.4a/b/c blocked behind 8.4-revise.
-- Plan archived to `docs/superpowers/archive/plans/`.
+- Plan archived to `docs/archive/plans/`.
 - No code changes, so `/simplify` skipped; `make install` is a
   no-op; commit + push.

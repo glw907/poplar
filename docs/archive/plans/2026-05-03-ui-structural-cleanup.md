@@ -1,7 +1,7 @@
 # Pass 8.5c — UI structural cleanup (plan)
 
 **Date:** 2026-05-03
-**Spec:** `docs/superpowers/specs/2026-05-03-ui-structural-cleanup.md`
+**Spec:** `docs/specs/2026-05-03-ui-structural-cleanup.md`
 **Predecessor:** Pass 8.5b (Elm conformance audit; ADR-0128)
 
 ## Settled open questions

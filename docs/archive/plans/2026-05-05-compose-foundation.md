@@ -2,7 +2,7 @@
 
 **Date:** 2026-05-05
 **Pass:** 9e
-**Spec:** `docs/superpowers/specs/2026-05-04-compose-design.md`
+**Spec:** `docs/specs/2026-05-04-compose-design.md`
 
 ## Scope
 

@@ -2,7 +2,7 @@
 # here or does not exist (build-machine design, section 2). Tool
 # binaries build from tools/go.mod, an isolated module so the
 # product go.mod stays dependency-free of the tooling; see
-# docs/superpowers/specs/2026-07-27-poplar-build-machine.md.
+# docs/specs/2026-07-27-poplar-build-machine.md.
 
 BINARY := poplar
 GOLANGCI := tools/bin/golangci-lint

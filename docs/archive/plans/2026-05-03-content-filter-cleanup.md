@@ -2,7 +2,7 @@
 
 **Date:** 2026-05-03
 **Status:** active
-**Spec:** `docs/superpowers/specs/2026-05-03-content-filter-cleanup.md`
+**Spec:** `docs/specs/2026-05-03-content-filter-cleanup.md`
 
 ## State of the spec
 

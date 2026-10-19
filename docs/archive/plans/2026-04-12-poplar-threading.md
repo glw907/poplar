@@ -8,7 +8,7 @@
 
 **Tech Stack:** Go 1.26.1, bubbletea, lipgloss, the existing `internal/mail`, `internal/ui`, `internal/config`, `internal/theme` packages.
 
-**Spec:** `docs/superpowers/specs/2026-04-13-poplar-threading-design.md`
+**Spec:** `docs/specs/2026-04-13-poplar-threading-design.md`
 
 **Conventions to invoke before touching files:**
 - Before any Go code: `go-conventions` skill.

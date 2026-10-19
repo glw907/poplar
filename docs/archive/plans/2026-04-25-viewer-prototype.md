@@ -1,6 +1,6 @@
 # Pass 2.5b-4 — Message Viewer Prototype: Execution Plan
 
-Companion to spec `docs/superpowers/specs/2026-04-14-viewer-prototype-design.md`.
+Companion to spec `docs/specs/2026-04-14-viewer-prototype-design.md`.
 The spec resolved every open question from the STATUS starter prompt
 (async fetch with spinner; link picker out / `1`-`9` inline in;
 auto-mark-read in; search keys inert while viewer open + filter

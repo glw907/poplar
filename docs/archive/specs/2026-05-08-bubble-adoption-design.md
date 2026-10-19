@@ -122,7 +122,7 @@ evertras/bubble-table  ──>  (independent — messagelist + contacts/List
 ```
 
 **Output format:** triage spec under
-`docs/superpowers/specs/YYYY-MM-DD-bubble-eval-<tier>.md`. No ADR
+`docs/specs/YYYY-MM-DD-bubble-eval-<tier>.md`. No ADR
 from an eval pass — eval is research, not architectural decision.
 ADRs land when swap passes commit code.
 
@@ -155,7 +155,7 @@ One swap pass per adopted bubble, sometimes batched when seams
 are shared (e.g., the three pickers consuming `bubbles/list` with
 the same delegate likely become one pass).
 
-**Plan:** under `docs/superpowers/plans/`, 8–12 tasks.
+**Plan:** under `docs/plans/`, 8–12 tasks.
 
 **Tasks shape:**
 

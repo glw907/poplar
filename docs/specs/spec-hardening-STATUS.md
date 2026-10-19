@@ -2,18 +2,18 @@
 
 > **Superseded (2026-07-19).** Passes B and C are cancelled under the
 > re-founding charter
-> (`docs/superpowers/specs/2026-07-19-poplar-refounding-charter.md`);
+> (`docs/specs/2026-07-19-poplar-refounding-charter.md`);
 > their critique energy spends inside each re-founding phase's
 > adversarial review. Pass A's gap analysis remains a research input.
 > The active tracker is
-> `docs/superpowers/specs/poplar-refounding-STATUS.md`.
+> `docs/specs/poplar-refounding-STATUS.md`.
 
 A three-pass quality gate that runs after Pass 8 (consolidation) locks the
 canonical functional spec and before the numbered build plans begin. The goal is
 a spec that is complete, correct, and structured for a Claude-first build.
 
-Canonical spec: `docs/superpowers/specs/2026-05-29-poplar-rebuild-functional-spec.md`.
-Charter: `docs/superpowers/specs/2026-05-29-poplar-rebuild-charter.md`.
+Canonical spec: `docs/specs/2026-05-29-poplar-rebuild-functional-spec.md`.
+Charter: `docs/specs/2026-05-29-poplar-rebuild-charter.md`.
 
 Each pass runs in its own cleared context. Paste its starter prompt, or say
 "start hardening Pass A/B/C". Passes A and B write no spec edits; they commit a
@@ -50,11 +50,11 @@ Goal: find what the locked functional spec is MISSING, by cataloging the feature
 surface of the major mail clients and diffing it against the spec.
 
 Read first: the canonical spec
-docs/superpowers/specs/2026-05-29-poplar-rebuild-functional-spec.md end to end,
-the charter docs/superpowers/specs/2026-05-29-poplar-rebuild-charter.md, and the
+docs/specs/2026-05-29-poplar-rebuild-functional-spec.md end to end,
+the charter docs/specs/2026-05-29-poplar-rebuild-charter.md, and the
 prior field survey docs/poplar/research/2026-05-29-mail-client-gap-analysis.md.
 Go deeper than that survey and diff against the now-complete spec rather than
-repeating it. Also read docs/superpowers/specs/spec-hardening-STATUS.md.
+repeating it. Also read docs/specs/spec-hardening-STATUS.md.
 
 Method:
 - Catalog the feature surface of the major clients, weighting Thunderbird, Apple
@@ -98,7 +98,7 @@ decisions that look defensible but are likely wrong for the audience.
 
 Read first: the canonical spec end to end, the charter, Pass A's gap report
 docs/poplar/research/2026-05-30-spec-gap-analysis.md for context, this tracker
-docs/superpowers/specs/spec-hardening-STATUS.md, and the relevant RFCs and
+docs/specs/spec-hardening-STATUS.md, and the relevant RFCs and
 library docs when checking a technical claim.
 
 Method:
@@ -136,8 +136,8 @@ Spec-hardening Pass C of the poplar rebuild: integrate and reformat. Max effort.
 This pass edits the canonical spec.
 
 Read first: the canonical spec
-docs/superpowers/specs/2026-05-29-poplar-rebuild-functional-spec.md end to end,
-the charter, this tracker docs/superpowers/specs/spec-hardening-STATUS.md, and
+docs/specs/2026-05-29-poplar-rebuild-functional-spec.md end to end,
+the charter, this tracker docs/specs/spec-hardening-STATUS.md, and
 BOTH reports: docs/poplar/research/2026-05-30-spec-gap-analysis.md (Pass A) and
 docs/poplar/research/2026-05-30-spec-critique.md (Pass B).
 

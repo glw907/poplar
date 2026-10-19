@@ -8,7 +8,7 @@
 
 **Tech Stack:** Go 1.26.1, `modernc.org/sqlite`, `bubbletea` v1, existing `internal/cache/`, `internal/ui/`, `internal/mail/`.
 
-**Spec:** `docs/superpowers/specs/2026-05-09-pass-13-backfill-design.md`
+**Spec:** `docs/specs/2026-05-09-pass-13-backfill-design.md`
 
 **Research:**
 - `docs/poplar/research/2026-05-09-mail-client-search-survey.md`
@@ -1264,7 +1264,7 @@ After Task 10 lands and `make check` is green:
 4. Update `docs/poplar/invariants.md` — replace the lazy-only body-fetch language with the new backfill behavior; add the status-bar segment to the cache and chrome sections; update the `max-size` default reference.
 5. Update `docs/poplar/decisions/INDEX.md` with the new ADR.
 6. Update `STATUS.md` — Pass 13 done; advance to Pass 13.1 starter prompt (search).
-7. Archive the plan + spec via `git mv` to `docs/superpowers/archive/`.
+7. Archive the plan + spec via `git mv` to `docs/archive/`.
 8. `make check`, `make install`, commit, push.
 
 ---

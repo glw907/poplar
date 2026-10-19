@@ -3,7 +3,7 @@
 Patterns harvested from two table/form-family libraries during Pass 9x.3:
 `charmbracelet/huh` (form builder) and `evertras/bubble-table` (interactive
 table). Companion to the Eval B verdicts at
-`docs/superpowers/archive/specs/2026-05-08-bubble-reeval-and-eval-b.md`.
+`docs/archive/specs/2026-05-08-bubble-reeval-and-eval-b.md`.
 Both verdicts were Keep + harvest: poplar's contacts/form and messagelist
 stay hand-rolled; this doc catalogs what to keep in mind.
 

@@ -2,7 +2,7 @@
 title: Pass 12 — `.ics` calendar invite viewer
 status: in-progress
 date: 2026-05-09
-spec: docs/superpowers/specs/2026-05-09-ics-viewer-design.md
+spec: docs/specs/2026-05-09-ics-viewer-design.md
 ---
 
 ## Goal

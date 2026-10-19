@@ -8,7 +8,7 @@
 
 **Tech Stack:** Go 1.26, bubbletea v1, `bubbles/key`, `lipgloss`, `internal/ui/uicore` (ModalShell, DisplayCells), `internal/humanize`, `internal/compose` (Draft.Attachments + AssembleMIME multipart/mixed).
 
-**Spec:** `docs/superpowers/specs/2026-05-08-compose-attach-picker-design.md`
+**Spec:** `docs/specs/2026-05-08-compose-attach-picker-design.md`
 
 ## File map
 
@@ -1791,7 +1791,7 @@ After Task 13 completes:
 4. Update `.claude/rules/ui-invariants.md`: add the footer-hint sentence to the modal cascade section (~line 244).
 5. Update `docs/poplar/invariants.md` with one line about the compose attach picker, and add ADR-0179 to `docs/poplar/decisions/INDEX.md`.
 6. Update `docs/poplar/keybindings.md` Compose table: `^O` row.
-7. Move the spec to `docs/superpowers/archive/specs/`, this plan to `docs/superpowers/archive/plans/`, via `git mv`.
+7. Move the spec to `docs/archive/specs/`, this plan to `docs/archive/plans/`, via `git mv`.
 8. Update `docs/poplar/STATUS.md`: mark Pass 9p `done`, write the Pass 9q starter prompt (outbox delivery controls — undo + schedule send, #35).
 9. `make check` green. `git push`. `make install`.
 

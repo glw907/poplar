@@ -8,7 +8,7 @@
 
 **Tech Stack:** Go 1.26, bubbletea, lipgloss, stdlib `net/http` + `net/textproto` + `net/url` + `net/mail`. No new third-party deps.
 
-**Spec:** `docs/superpowers/specs/2026-05-09-list-unsubscribe-design.md`
+**Spec:** `docs/specs/2026-05-09-list-unsubscribe-design.md`
 
 **Pass-end ritual:** Standard. Invoke `poplar-pass` skill at the end (ADR-0185, invariants edits, plan/spec archive, `make check`, commit/push/install).
 
@@ -1350,8 +1350,8 @@ Per `docs/poplar/wireframes.md` conventions, capture the confirm modal at 80×24
 Invoke the `poplar-pass` skill for archival, commit/push/install. Plan archive:
 
 ```bash
-git mv docs/superpowers/plans/2026-05-09-list-unsubscribe.md docs/superpowers/archive/plans/
-git mv docs/superpowers/specs/2026-05-09-list-unsubscribe-design.md docs/superpowers/archive/specs/
+git mv docs/plans/2026-05-09-list-unsubscribe.md docs/archive/plans/
+git mv docs/specs/2026-05-09-list-unsubscribe-design.md docs/archive/specs/
 ```
 
 ---

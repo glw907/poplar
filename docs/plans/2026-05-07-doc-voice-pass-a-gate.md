@@ -8,7 +8,7 @@
 
 **Tech Stack:** Vale, Make, bash, markdown.
 
-**Spec:** `docs/superpowers/specs/2026-05-07-doc-voice-design.md`
+**Spec:** `docs/specs/2026-05-07-doc-voice-design.md`
 
 **Pass split rationale:** Plan was 12 tasks with two subsystems (build the gate, drain the backlog). Pass A is architecture; Pass B is mechanical sweep. Reduces per-task review fatigue and keeps cross-task drift bounded.
 
@@ -1166,7 +1166,7 @@ enforcement. Findings:
 1. Voice policy extends from Go source to all repo prose:
    `docs/poplar/`, `CLAUDE.md`, `.claude/rules/`,
    `.claude/skills/`, `.claude/docs/`, active
-   `docs/superpowers/plans/` and `specs/`. Archived plans stay
+   `docs/plans/` and `specs/`. Archived plans stay
    immutable.
 2. The catalogue moves to one source of truth:
    `docs/poplar/STYLE.md §4` (human-readable) and
@@ -1217,7 +1217,7 @@ trims the global catalogue, and updates the `/simplify` brief.
   only in Go scope. Reinstated as a warning-level Vale rule for
   prose.
 - `docs/poplar/STYLE.md`: the human-readable companion.
-- `docs/superpowers/specs/2026-05-07-doc-voice-design.md`: the
+- `docs/specs/2026-05-07-doc-voice-design.md`: the
   design spec.
 ```
 

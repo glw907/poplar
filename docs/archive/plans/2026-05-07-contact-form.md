@@ -11,8 +11,8 @@ centered modal over dimmed mail chrome (popover "no match" → `n`), or
 right-pane replacement in Contacts mode (`n`/`e` from the list).
 
 Reference:
-- Spec §"Contact edit form" (`docs/superpowers/specs/2026-05-06-addressbook-design.md`).
-- Archived plan Task 8 (`docs/superpowers/archive/plans/2026-05-07-address-book-mockups.md`).
+- Spec §"Contact edit form" (`docs/specs/2026-05-06-addressbook-design.md`).
+- Archived plan Task 8 (`docs/archive/plans/2026-05-07-address-book-mockups.md`).
 - ADR-0166 locks package shape and Msg contracts.
 
 # Files

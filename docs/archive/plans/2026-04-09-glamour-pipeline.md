@@ -8,7 +8,7 @@
 
 **Tech Stack:** `html-to-markdown/v2`, `glamour`, `goldmark` (transitive via glamour, used directly for to-html)
 
-**Spec:** `docs/superpowers/specs/2026-04-09-glamour-pipeline-design.md`
+**Spec:** `docs/specs/2026-04-09-glamour-pipeline-design.md`
 
 ---
 

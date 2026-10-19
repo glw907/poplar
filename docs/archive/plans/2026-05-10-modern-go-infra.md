@@ -147,7 +147,7 @@ Expected: working tree clean (or only the modernization + sidebar-tree plan/spec
 - [ ] **10.1** Invoke the `poplar-pass` skill (end-of-pass branch). It covers:
   - Verify ADR is in place and indexed.
   - Verify invariants.md updated.
-  - Move this plan to `docs/superpowers/archive/plans/2026-05-10-modern-go-infra.md`.
+  - Move this plan to `docs/archive/plans/2026-05-10-modern-go-infra.md`.
   - `make check` — must pass (or warn cleanly if the new script is soft).
   - Commit with the standard footer; the commit touches the three skill files (which live outside the poplar repo — committed separately to `~/.dotfiles` via the `claude` stow package), the new script, Makefile, ADR, invariants, CLAUDE.md, STATUS, and the archived plan.
   - `git push` poplar; `cd ~/.dotfiles && git add claude/.claude/skills/go-conventions/SKILL.md claude/.claude/skills/simplify/SKILL.md && git commit && git push` for the skill changes.

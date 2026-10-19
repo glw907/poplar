@@ -3,7 +3,7 @@
 Patterns harvested from three chrome-family libraries during Pass 9x.2:
 `bubbles/help@v1.0.0`, `mistakenelf/teacup` statusbar, and
 `daltonsw/bubbleup`. Companion to the Eval B verdicts at
-`docs/superpowers/archive/specs/2026-05-08-bubble-reeval-and-eval-b.md`.
+`docs/archive/specs/2026-05-08-bubble-reeval-and-eval-b.md`.
 Every Eval B verdict was Keep + harvest; this doc catalogs what to keep
 in mind rather than proposing wholesale replacement.
 

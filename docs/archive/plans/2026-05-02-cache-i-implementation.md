@@ -3,11 +3,11 @@
 **Pass:** 8.4a
 **Type:** implementation pass — first of three (Cache I → II → III)
 **Inputs:**
-- `docs/superpowers/specs/2026-05-02-cache-0-design.md` (revised, status: reviewed 2026-05-02)
+- `docs/specs/2026-05-02-cache-0-design.md` (revised, status: reviewed 2026-05-02)
 - ADR-0110 (narrowed by 0114, 0115), ADR-0111 (parts superseded by 0117),
   ADR-0112 (superseded in part by 0113, 0116; narrowed by 0114),
   ADR-0113, ADR-0114, ADR-0115, ADR-0116, ADR-0117
-- Pass 8.4-review findings (`docs/superpowers/reviews/2026-05-02-cache-0-review.md`)
+- Pass 8.4-review findings (`docs/reviews/2026-05-02-cache-0-review.md`)
 
 ## Goal
 

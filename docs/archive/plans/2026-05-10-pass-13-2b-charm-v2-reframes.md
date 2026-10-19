@@ -6,7 +6,7 @@ status: pending (blocked on 13.2a)
 
 ## Source spec
 
-`docs/superpowers/specs/2026-05-10-pass-13-2b-charm-v2-reframes-design.md`.
+`docs/specs/2026-05-10-pass-13-2b-charm-v2-reframes-design.md`.
 This plan is the execution shape; rationale lives in the spec.
 
 ## Starting state

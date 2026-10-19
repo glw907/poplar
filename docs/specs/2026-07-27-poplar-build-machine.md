@@ -69,7 +69,7 @@ re-founding commit onward. The ritual, in order:
    binding spec points at a deleted path), `BACKLOG.md` (the
    live tracker; its pre-re-founding entries stay caveated as
    CLAUDE.md already states), and the archived plans under
-   `docs/superpowers/plans/` (immutable by standing rule; new
+   `docs/plans/` (immutable by standing rule; new
    pass plans are dated and coexist). `scripts/skipcheck` and
    `scripts/vale-comments.sh` survive as named salvage, the
    latter amended per section 2.
@@ -296,7 +296,7 @@ screen-pass gates rather than a bespoke agent.
 The build follows the requirements' spine: six numbered passes
 (foundation; design language and shell; mail read path; compose;
 calendar; hardening). Each pass is one plan doc under
-`docs/superpowers/plans/`, authored in the pass's execution
+`docs/plans/`, authored in the pass's execution
 session from the spine and the specs, and executed
 subagent-driven with per-task review.
 

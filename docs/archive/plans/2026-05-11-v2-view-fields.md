@@ -8,7 +8,7 @@
 
 **Tech Stack:** Go 1.26.1, `charm.land/bubbletea/v2` v2.0.6, `charm.land/lipgloss/v2`, `charm.land/bubbles/v2`, SQLite via `cache.Account`, BurntSushi/toml.
 
-**Spec:** `docs/superpowers/specs/2026-05-11-v2-view-fields-design.md`
+**Spec:** `docs/specs/2026-05-11-v2-view-fields-design.md`
 
 ---
 
@@ -1448,8 +1448,8 @@ Move `v2-view-fields` to the Done section. Note deferred consumers (`IsRepeat` f
 - [ ] **Step 11: Archive plan + spec**
 
 ```bash
-git mv docs/superpowers/plans/2026-05-11-v2-view-fields.md docs/superpowers/archive/plans/
-git mv docs/superpowers/specs/2026-05-11-v2-view-fields-design.md docs/superpowers/archive/specs/
+git mv docs/plans/2026-05-11-v2-view-fields.md docs/archive/plans/
+git mv docs/specs/2026-05-11-v2-view-fields-design.md docs/archive/specs/
 ```
 
 - [ ] **Step 12: make check**

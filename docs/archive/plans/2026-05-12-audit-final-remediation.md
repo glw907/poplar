@@ -8,7 +8,7 @@ re-skim returns empty and beta soak opens.
 ## Scope
 
 Mechanical fixes from
-`docs/superpowers/archive/plans/2026-05-12-audit-final.md` findings
+`docs/archive/plans/2026-05-12-audit-final.md` findings
 table.
 
 ## Tasks

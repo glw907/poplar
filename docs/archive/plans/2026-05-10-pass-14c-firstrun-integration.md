@@ -8,7 +8,7 @@ auto-launches it; add `--repair=<name>` and the two opt-outs
 --interactive` works as a standalone subcommand.
 
 **Master plan + spec.** Master plan §Task 13 (line ~2736).
-Design rationale in `docs/superpowers/specs/2026-05-09-pass-14-firstrun-design.md`
+Design rationale in `docs/specs/2026-05-09-pass-14-firstrun-design.md`
 ("Error handling" section, "Cancel mid-wizard").
 
 ## Tasks
@@ -39,8 +39,8 @@ Design rationale in `docs/superpowers/specs/2026-05-09-pass-14-firstrun-design.m
      with the auto-launch behavior + opt-out env/flag. Note
      `--repair=<name>` entry point.
 4. `docs/poplar/decisions/INDEX.md` — add ADR-0192.
-5. `git mv docs/superpowers/plans/2026-05-10-pass-14c-firstrun-integration.md docs/superpowers/archive/plans/`.
-6. `git mv docs/superpowers/plans/2026-05-09-pass-14-firstrun.md docs/superpowers/archive/plans/` — master plan retires here.
-7. `git mv docs/superpowers/specs/2026-05-09-pass-14-firstrun-design.md docs/superpowers/archive/specs/`.
+5. `git mv docs/plans/2026-05-10-pass-14c-firstrun-integration.md docs/archive/plans/`.
+6. `git mv docs/plans/2026-05-09-pass-14-firstrun.md docs/archive/plans/` — master plan retires here.
+7. `git mv docs/specs/2026-05-09-pass-14-firstrun-design.md docs/archive/specs/`.
 8. STATUS.md — flip 14c to `done`, pivot to 14.1 (OAuth) or 15.
 9. `make install`, commit, push.

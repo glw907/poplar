@@ -8,7 +8,7 @@
 
 **Tech Stack:** `charm.land/bubbles/v2/list@v2.1.0`, `charm.land/bubbletea/v2`, `charm.land/lipgloss/v2`, Go 1.26.1, `iter.Seq2` (stdlib).
 
-**Spec:** `docs/superpowers/specs/2026-05-10-messagelist-list-design.md`
+**Spec:** `docs/specs/2026-05-10-messagelist-list-design.md`
 
 ---
 
@@ -29,8 +29,8 @@
 | `docs/poplar/decisions/0199-pass-17b-messagelist-on-bubbles-list.md` | Create | ADR for the migration + iter.Seq2 walk + ADR-0130 scope extension |
 | `docs/poplar/decisions/INDEX.md` | Modify | Index row for ADR-0199 |
 | `docs/poplar/STATUS.md` | Modify | Pass 17b done; next prompt = 17c |
-| `docs/superpowers/archive/specs/2026-05-10-messagelist-list-design.md` | Move | Archive spec at pass end |
-| `docs/superpowers/archive/plans/2026-05-10-messagelist-list.md` | Move | Archive this plan at pass end |
+| `docs/archive/specs/2026-05-10-messagelist-list-design.md` | Move | Archive spec at pass end |
+| `docs/archive/plans/2026-05-10-messagelist-list.md` | Move | Archive this plan at pass end |
 
 ---
 
@@ -1647,10 +1647,10 @@ EOF
 
 **Files:**
 - Modify: `docs/poplar/STATUS.md`
-- Move: `docs/superpowers/specs/2026-05-10-messagelist-list-design.md`
-  → `docs/superpowers/archive/specs/`
-- Move: `docs/superpowers/plans/2026-05-10-messagelist-list.md`
-  → `docs/superpowers/archive/plans/`
+- Move: `docs/specs/2026-05-10-messagelist-list-design.md`
+  → `docs/archive/specs/`
+- Move: `docs/plans/2026-05-10-messagelist-list.md`
+  → `docs/archive/plans/`
 
 - [ ] **Step 1: Update STATUS.md**
 
@@ -1706,7 +1706,7 @@ Polish II.
 > non-consumer) gets an ADR or stays implicit.
 >
 > **Approach.** Brainstorm the open questions, write a plan doc at
-> `docs/superpowers/plans/YYYY-MM-DD-help-bubbles-audit.md`, then
+> `docs/plans/YYYY-MM-DD-help-bubbles-audit.md`, then
 > implement. Standard pass-end checklist applies.
 
 ## Notes for the 16-series (modernization)
@@ -1727,8 +1727,8 @@ Trim if over.
 - [ ] **Step 2: Archive spec + plan**
 
 ```bash
-git mv docs/superpowers/specs/2026-05-10-messagelist-list-design.md docs/superpowers/archive/specs/
-git mv docs/superpowers/plans/2026-05-10-messagelist-list.md docs/superpowers/archive/plans/
+git mv docs/specs/2026-05-10-messagelist-list-design.md docs/archive/specs/
+git mv docs/plans/2026-05-10-messagelist-list.md docs/archive/plans/
 ```
 
 - [ ] **Step 3: Verify worktree state**

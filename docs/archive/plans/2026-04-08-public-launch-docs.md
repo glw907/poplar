@@ -12,7 +12,7 @@
 
 **Tech Stack:** Markdown, INI (aerc config), Lua (nvim-mail), TOML (kitty)
 
-**Spec:** `docs/superpowers/specs/2026-04-08-public-launch-docs-design.md`
+**Spec:** `docs/specs/2026-04-08-public-launch-docs-design.md`
 
 ---
 

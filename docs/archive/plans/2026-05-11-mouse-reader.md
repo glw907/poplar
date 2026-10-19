@@ -1,6 +1,6 @@
 # Plan — Pass 33: mouse support (reader)
 
-Spec: `docs/superpowers/specs/2026-05-11-mouse-reader-design.md`.
+Spec: `docs/specs/2026-05-11-mouse-reader-design.md`.
 
 ## Tasks
 

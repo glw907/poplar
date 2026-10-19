@@ -8,7 +8,7 @@
 
 **Tech Stack:** Go 1.26.1, bubbletea/lipgloss/bubbles, gofmt + `go vet` + table-driven tests gated by `make check`.
 
-**Spec:** `docs/superpowers/specs/2026-05-06-core-reorg-design.md`.
+**Spec:** `docs/specs/2026-05-06-core-reorg-design.md`.
 
 **Note on TDD:** This is a pure-refactor pass. No new behavior, no new tests. The "test first" loop is replaced by `make check` after each move — the existing test suite is the regression net. If `make check` regresses, the move is wrong; revert and retry.
 
@@ -793,7 +793,7 @@ After Task 8 commits, invoke the `poplar-pass` skill's pass-end ritual:
    - **ADR-0162** — Naming + Msg-namespace policy. Drops `Tab` suffix; mandates `package.Model`; documents the `internal/compose` / `internal/ui/compose` namespace overlap and `uicompose` import alias; codifies per-package Msg exports with the `Msg` suffix preserved.
 4. Update `docs/poplar/invariants.md` — narrow or rewrite the "Elm architecture & idiomatic bubbletea" and "Repo & libraries" sections to mention the new subpackage tree and the per-package Msg policy. Update the decision index with ADRs 0161, 0162.
 5. Update `docs/poplar/STATUS.md` — mark 9h.1 done; replace starter prompt with Pass 9h.5 (drafts persistence) per the queue.
-6. Archive `docs/superpowers/plans/2026-05-06-core-reorg.md` and `docs/superpowers/specs/2026-05-06-core-reorg-design.md` via `git mv` to `docs/superpowers/archive/plans/` and `docs/superpowers/archive/specs/`.
+6. Archive `docs/plans/2026-05-06-core-reorg.md` and `docs/specs/2026-05-06-core-reorg-design.md` via `git mv` to `docs/archive/plans/` and `docs/archive/specs/`.
 7. `make check`, commit, push, `make install`.
 
 ---

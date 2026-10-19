@@ -3,7 +3,7 @@
 **Pass:** 8.4-review
 **Type:** review pass (no code; produces findings doc)
 **Inputs:**
-- `docs/superpowers/specs/2026-05-02-cache-0-design.md` (spec)
+- `docs/specs/2026-05-02-cache-0-design.md` (spec)
 - `docs/poplar/decisions/0110-cache-storage-architecture.md`
 - `docs/poplar/decisions/0111-cache-unified-write-path.md`
 - `docs/poplar/decisions/0112-outbox-state-machine-and-conflict-policy.md`
@@ -125,7 +125,7 @@ Brief:
 
 ### Step 3: Synthesize
 
-Produce `docs/superpowers/reviews/2026-05-02-cache-0-review.md` with
+Produce `docs/reviews/2026-05-02-cache-0-review.md` with
 this structure:
 
 ```
@@ -167,8 +167,8 @@ so the diff produced by 8.4-revise is auditable.
 
 ## Outputs
 
-- `docs/superpowers/reviews/2026-05-02-cache-0-review.md` (commit).
-- This plan archived to `docs/superpowers/archive/plans/`.
+- `docs/reviews/2026-05-02-cache-0-review.md` (commit).
+- This plan archived to `docs/archive/plans/`.
 
 ## Hand-off
 
@@ -179,6 +179,6 @@ Pass-end ritual:
   ADRs change in 8.4-revise based on findings).
 - Update `docs/poplar/STATUS.md`: mark 8.4-review done; current
   pass becomes 8.4-revise (its plan already exists at
-  `docs/superpowers/plans/2026-05-02-cache-0-revise.md`).
+  `docs/plans/2026-05-02-cache-0-revise.md`).
 - Archive this plan.
 - Commit + push. No `make install` (no code change).

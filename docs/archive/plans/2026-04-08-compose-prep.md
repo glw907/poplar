@@ -8,7 +8,7 @@
 
 **Tech Stack:** Go 1.25+, cobra, go-runewidth, net/mail (stdlib)
 
-**Spec:** `docs/superpowers/specs/2026-04-08-compose-prep-design.md`
+**Spec:** `docs/specs/2026-04-08-compose-prep-design.md`
 
 **Go conventions:** Read and follow `~/.claude/docs/go-conventions.md` for all Go code. Key rules: no unnecessary interfaces, flags in a struct, `SilenceUsage: true`, `fmt.Errorf("context: %w", err)`, table-driven tests, no assertion libraries, `make check` must pass.
 

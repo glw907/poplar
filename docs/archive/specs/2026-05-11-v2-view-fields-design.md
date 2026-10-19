@@ -325,7 +325,7 @@ Per the `poplar-pass` consolidation ritual:
    Done section; note deferred consumers (`IsRepeat` for held-key
    accel, server-side IDLE pause).
 9. **Archive** this spec and the implementation plan to
-   `docs/superpowers/archive/`.
+   `docs/archive/`.
 10. `make check` green; commit; push; `make install`.
 
 ## Pass shape

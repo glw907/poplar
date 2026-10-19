@@ -202,7 +202,7 @@ this pass writes.
       `STATUS.md` (mark 9j done; set 9k as next with a starter
       prompt for the file-by-file comment sweep), update
       `invariants.md` decision index for ADR 0168 + 0169,
-      archive this plan to `docs/superpowers/archive/plans/`,
+      archive this plan to `docs/archive/plans/`,
       run `/simplify` on the diff (the new agent prompt eats
       its own dogfood here), commit, push, `make install`.
 

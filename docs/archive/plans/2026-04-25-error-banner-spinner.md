@@ -8,7 +8,7 @@
 
 **Tech Stack:** Go 1.26, bubbletea, lipgloss, bubbles/spinner. Existing repo conventions in `go-conventions` and `elm-conventions` skills.
 
-**Spec:** `docs/superpowers/specs/2026-04-25-error-banner-spinner-design.md`
+**Spec:** `docs/specs/2026-04-25-error-banner-spinner-design.md`
 
 ---
 
@@ -731,7 +731,7 @@ After all five tasks land, the `poplar-pass` skill runs:
    - `00NN-spinner-shared-style.md` (NewSpinner helper, no wrapper)
 3. `invariants.md` — add facts about `ErrorMsg` (the canonical Cmd error type, App-owned `lastErr`, banner above status bar, last-write-wins, no dismiss key in v1) and the spinner constructor. Update the decision-index table with the new ADR numbers.
 4. STATUS.md — mark Pass 2.5b-6 done; write the Pass 3 starter prompt.
-5. Archive plan + spec under `docs/superpowers/archive/`.
+5. Archive plan + spec under `docs/archive/`.
 6. `make check`, commit, push, `make install`.
 
 ---

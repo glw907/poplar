@@ -5,7 +5,7 @@
 Land eight QoL features inside `internal/catkin/`. Library-purity
 preserved — no poplar imports, no host-side wiring this pass.
 
-Spec: `docs/superpowers/specs/2026-05-04-compose-design.md` §
+Spec: `docs/specs/2026-05-04-compose-design.md` §
 "Catkin QoL additions" items #1–#4, #7, #9, #10, plus the `Ctrl+\`
 mode-cycle key. Items #5 (word nav), #6 (scroll-off), #8 (task
 lists), #11 (trailing-whitespace) already shipped in 9 / 9b.

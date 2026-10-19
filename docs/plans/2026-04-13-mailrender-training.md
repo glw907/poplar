@@ -31,7 +31,7 @@ triage pass.
 HTML minimizer; small, stdlib-adjacent), TOML via the existing
 `github.com/BurntSushi/toml` already pulled by config.
 
-**Spec:** `docs/superpowers/specs/2026-04-12-mailrender-training-design.md`
+**Spec:** `docs/specs/2026-04-12-mailrender-training-design.md`
 
 **Required reading before starting:**
 - Invoke `go-conventions` skill before writing any Go file.
@@ -787,7 +787,7 @@ import (
 
 // Meta is the per-capture sidecar persisted as meta.toml. All
 // fields are documented in the design spec
-// (docs/superpowers/specs/2026-04-12-mailrender-training-design.md).
+// (docs/specs/2026-04-12-mailrender-training-design.md).
 type Meta struct {
 	CreatedAt    time.Time `toml:"created_at"`
 	SourceKind   string    `toml:"source_kind"` // "html" | "plain" | "rendered-only"
@@ -3371,7 +3371,7 @@ section.
 
 - [ ] **Step 1: Write the reference**
 
-Use the spec at `docs/superpowers/specs/2026-04-12-mailrender-training-design.md`
+Use the spec at `docs/specs/2026-04-12-mailrender-training-design.md`
 section "`.claude/skills/fix-corpus/well-crafted-markdown.md` (new
 — normative reference)" as the source of truth. Reproduce the
 full content of that section (§1 Principles, §2 Structural
@@ -4006,7 +4006,7 @@ git push
 
 ## Cross-references
 
-- **Spec:** `docs/superpowers/specs/2026-04-12-mailrender-training-design.md`
+- **Spec:** `docs/specs/2026-04-12-mailrender-training-design.md`
 - **ADR (created in Task 22):** `docs/poplar/decisions/0059-training-capture-system.md`
 - **Reference doc (created in Task 18):** `.claude/skills/fix-corpus/well-crafted-markdown.md`
 - **Existing pipeline:** `internal/filter/`, `internal/content/`

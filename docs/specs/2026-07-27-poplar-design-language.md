@@ -272,7 +272,7 @@ cairn rule: a gap that forces improvisation is a defect).
   visibility toggles. Collapsible; never focused by default.
 - **Status line**: one row at the top edge (amended by the pass 2
   plan's decision 1,
-  `docs/superpowers/plans/2026-08-19-pass-2-design-language-and-shell.md`,
+  `docs/plans/2026-08-19-pass-2-design-language-and-shell.md`,
   ruled by Geoff at the wireframe review: pine's title-bar instinct,
   since 98% of time is spent in mail and the row is high-value
   space). The origin holds the compact surface cluster: the active
@@ -340,7 +340,7 @@ runtime capability resolver (technical design section 12).
 
 **Color roles** (the inventory; values land with the Phase 5
 theme build, amended by pass 2 decision 6,
-`docs/superpowers/plans/2026-08-19-pass-2-design-language-and-shell.md`):
+`docs/plans/2026-08-19-pass-2-design-language-and-shell.md`):
 `bg`, `bgPanel`, `fg`, `fgMuted`, `fgSubtle`, `accent`, `unread`,
 `selectedBg`, `border`, `focusedBorder`, `error`, `warn`,
 `success`, `link`, `codeBg`, `quote`, `diffAdd`, `diffDel`,
@@ -371,7 +371,7 @@ NO_COLOR because the two states are different glyphs, not
 different colors, unlike a border color), error = the `!` gutter
 marker alone. The UX-7 golden asserts no two states share a
 marker. Amended by the pass 2 review's ruling I1
-(`docs/superpowers/plans/2026-08-19-pass-2-design-language-and-shell.md`):
+(`docs/plans/2026-08-19-pass-2-design-language-and-shell.md`):
 reverse video is selection's exclusive channel; the original
 wording also assigned it to error, an internal contradiction the
 review caught (a row that is both selected and in error would
@@ -430,7 +430,7 @@ to text), `padPane 1` (pane edge to content), `padModal 2/1`
 adds `padBand 2` (chrome band inset) and `padCard 2` (card inset).
 Task 3's fix round 1 adds `gapPane 2` (pane to neighboring pane),
 the same plan-defect class as the divider token (ruling M3,
-`docs/superpowers/plans/2026-08-19-pass-2-design-language-and-shell.md`):
+`docs/plans/2026-08-19-pass-2-design-language-and-shell.md`):
 LayoutMode's rail-clearance and list/reader gutter are both this
 role, not a locally reinvented literal. Task 4's fix round 1 adds
 `gapHint 3` (footer hint to its neighbor, and to the pinned help
@@ -440,7 +440,7 @@ locally reinvented literal. Task 7's fix round 1 adds `gapPin 6`
 (the footer's reserve before the pinned help hint) and narrows
 `gapHint`'s scope to the inter-hint gap alone: the pinned exemplar's
 `PIN_GAP` won the conflict between the two values (ruling F1,
-`docs/superpowers/plans/2026-08-19-pass-2-design-language-and-shell.md`),
+`docs/plans/2026-08-19-pass-2-design-language-and-shell.md`),
 so `gapHint` no longer also governs the pinned hint's gap.
 Markup-level literals are forbidden by the analyzer; a screen
 reaches spacing only through roles.
@@ -576,7 +576,7 @@ reference for every later screen. Help, config, calendar,
 contacts, and compose design from its ground grammar, hint atom,
 edge-bar vocabulary, card anatomy, and copy register before
 consulting the rules above, the way a cairn site designs from the
-cairn system (`docs/superpowers/plans/2026-08-19-pass-2-design-language-and-shell.md`,
+cairn system (`docs/plans/2026-08-19-pass-2-design-language-and-shell.md`,
 decision 13).
 
 Amendments to the grammar, the exemption list, the exception

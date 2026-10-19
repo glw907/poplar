@@ -36,7 +36,7 @@ with a tool the OSS world already standardizes on.
 - **Scope.** Everything voice-load-bearing in the poplar context:
   `docs/poplar/**`, `CLAUDE.md`, `.claude/rules/`,
   `.claude/skills/poplar-pass/`, `.claude/docs/`, active
-  `docs/superpowers/plans/` and `specs/`. Archived plans and
+  `docs/plans/` and `specs/`. Archived plans and
   research docs are not rewritten. The catalogue extraction in
   `~/.claude/docs/go-comment-voice.md` is in scope because it's
   voice-load-bearing for this project even though it lives global.
@@ -237,7 +237,7 @@ When a flagged term has a legitimate use:
 
 ```make
 VALE := vale
-VALE_PATHS := docs/poplar docs/superpowers/plans docs/superpowers/specs \
+VALE_PATHS := docs/poplar docs/plans docs/specs \
               CLAUDE.md .claude/rules .claude/skills internal cmd
 
 vale:
@@ -296,9 +296,9 @@ findings on the in-scope tree. One-time backlog drain.
 - Em-dash sweep across the same tree: fixed.
 - ADRs in `docs/poplar/decisions/`: fixed for errors. ADRs are
   edited in spirit only when revisiting; warnings deferred.
-- Archived plans (`docs/superpowers/archive/`): not touched
+- Archived plans (`docs/archive/`): not touched
   (archived plans are immutable).
-- Active `docs/superpowers/plans/` and `specs/`: fixed for
+- Active `docs/plans/` and `specs/`: fixed for
   errors. These trees are in `VALE_PATHS` going forward, so
   every new spec and plan ships under the same gate as the rest
   of the repo. The spec you are reading now is a working example:
@@ -343,7 +343,7 @@ One pass, twelve tasks (right at the budget ceiling):
 7. Sweep `docs/poplar/` for `error`-severity findings.
 8. Sweep `CLAUDE.md`, `.claude/rules/`,
    `.claude/skills/poplar-pass/`, `.claude/docs/`.
-9. Sweep ADRs (errors only) and active `docs/superpowers/`
+9. Sweep ADRs (errors only) and active `docs/`
    plans/specs.
 10. Trim the catalogue from `~/.claude/docs/go-comment-voice.md`;
     cross-reference STYLE.md.

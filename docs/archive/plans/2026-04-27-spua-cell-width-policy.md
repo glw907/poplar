@@ -8,7 +8,7 @@
 
 **Tech Stack:** Go 1.26, bubbletea, lipgloss. New dep: `github.com/adrg/sysfont` (MIT). Vendored snippet: ~50 LOC adapted from `github.com/hymkor/go-cursorposition` (MIT) into `internal/term/probe.go`. Test-only: `github.com/creack/pty` (MIT).
 
-**Spec:** `docs/superpowers/specs/2026-04-27-spua-cell-width-policy-design.md`
+**Spec:** `docs/specs/2026-04-27-spua-cell-width-policy-design.md`
 
 **Workflow rules:**
 - Invoke `go-conventions` before writing/modifying any Go file.
@@ -2146,7 +2146,7 @@ The skill will:
 - Verify ADRs land in `docs/poplar/decisions/`.
 - Verify `invariants.md` reflects the new state.
 - Update `STATUS.md` with the next pass's starter prompt.
-- Archive this plan under `docs/superpowers/plans/archive/` (or per project convention).
+- Archive this plan under `docs/plans/archive/` (or per project convention).
 - Run `make install` and verify the binary lands in `~/.local/bin/`.
 - Commit + push.
 

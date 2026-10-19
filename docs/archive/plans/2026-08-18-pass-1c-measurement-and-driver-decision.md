@@ -18,7 +18,7 @@ ncruces/go-sqlite3 (challenger), SQLite FTS5, Stalwart v0.16.15 via
 podman for conformance.
 
 **Specs and inputs:**
-- Pass cursor: `docs/superpowers/specs/poplar-refounding-STATUS.md`
+- Pass cursor: `docs/specs/poplar-refounding-STATUS.md`
   (pass 1c section; this plan implements it).
 - Task briefs, carried from pass 1b's ratified split, all under
   `.superpowers/sdd/2026-07-28-pass-1b-integration-hardening/`:

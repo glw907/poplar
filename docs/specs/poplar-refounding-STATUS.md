@@ -1,7 +1,7 @@
 # Poplar Re-founding: STATUS
 
 **Track:** The re-founding. The sole active track. Charter:
-`docs/superpowers/specs/2026-07-19-poplar-refounding-charter.md`. It
+`docs/specs/2026-07-19-poplar-refounding-charter.md`. It
 supersedes the 2026-05-29 rebuild spec track; the rebuild's functional
 spec and gap analysis are research inputs, and the dogfood client
 stays archived at tag `poplar-legacy` and branch `legacy`.
@@ -450,7 +450,7 @@ Phase 5 boundary outcomes (2026-07-27), commits 041eb32 through
   example also lost its skip-quietly lint guard, the pattern
   that let poplar's linter sit broken and green for months.
 - The pass 1 plan is authored and committed
-  (`docs/superpowers/plans/2026-07-27-pass-1-foundation.md`),
+  (`docs/plans/2026-07-27-pass-1-foundation.md`),
   thirteen tasks. It settles five questions the specs left open;
   the load-bearing one is that pass 1 ships a real JMAP read
   path rather than validating the sync engine against the fake
@@ -569,7 +569,7 @@ Phase 4 outcomes:
 
 Phase 3 outcomes:
 - Requirements spec approved and committed:
-  `docs/superpowers/specs/2026-07-27-poplar-requirements.md`
+  `docs/specs/2026-07-27-poplar-requirements.md`
   (revision 3). It binds Phases 4 and 5: ten constraints plus C11,
   ~95 prioritized requirements with acceptance criteria, measured
   quality attributes, explicit scope rulings, and the Phase 5
@@ -607,7 +607,7 @@ Phase 3 outcomes:
 
 Phase 2 outcomes:
 - Vision doc approved and committed:
-  `docs/superpowers/specs/2026-07-27-poplar-vision.md`. It binds
+  `docs/specs/2026-07-27-poplar-vision.md`. It binds
   Phases 3 through 5.
 - Switch bar: full mail replacement for one Fastmail/JMAP account.
   Triage, threading, search, folder management, Catkin compose,
@@ -670,7 +670,7 @@ Phase 1 outcomes:
 
 Phase 0 outcomes:
 - Charter committed:
-  `docs/superpowers/specs/2026-07-19-poplar-refounding-charter.md`.
+  `docs/specs/2026-07-19-poplar-refounding-charter.md`.
 - This STATUS created; rebuild STATUS and spec-hardening STATUS carry
   superseded banners.
 - CLAUDE.md and `.claude/rules/poplar-development.md` rewritten to
@@ -697,7 +697,7 @@ fresh-context workflow. The evidence is banked at
 degrade defects, and `cmd/sketch`'s composition are not.
 
 The immediate next action is pass 2c, planned at
-`docs/superpowers/plans/2026-08-21-pass-2c-real-terminal-verification.md`:
+`docs/plans/2026-08-21-pass-2c-real-terminal-verification.md`:
 six tasks, three Geoff interaction points (the 22-item ruling
 sitting, the help wireframe review, the gate sitting). The pass 2
 gate is ruled inside pass 2c's task 6 on re-shot painted evidence,
@@ -722,10 +722,10 @@ session per the standing orchestration ruling):
 
 ```
 Resume poplar pass 2c. Read
-docs/superpowers/specs/poplar-refounding-STATUS.md, then the ledger at
+docs/specs/poplar-refounding-STATUS.md, then the ledger at
 .superpowers/sdd/2026-08-21-pass-2c-real-terminal-verification/progress.md
 (its session-break section is the cursor), then the plan at
-docs/superpowers/plans/2026-08-21-pass-2c-real-terminal-verification.md.
+docs/plans/2026-08-21-pass-2c-real-terminal-verification.md.
 Tasks 1-3 are done; do not re-dispatch them. Put the open rulings
 (rulings-sitting.html in the ledger directory, items 1-23) and the
 task 4 wireframe draft (task-4-wireframe-draft.md there) to Geoff in
@@ -742,8 +742,8 @@ above:
 
 ```
 Run poplar pass 2c. Read
-docs/superpowers/specs/poplar-refounding-STATUS.md, then the plan at
-docs/superpowers/plans/2026-08-21-pass-2c-real-terminal-verification.md
+docs/specs/poplar-refounding-STATUS.md, then the plan at
+docs/plans/2026-08-21-pass-2c-real-terminal-verification.md
 and the evidence it cites (docs/poplar/design/2026-08-21-pass-2-gate-captures/audit.md).
 Task 1 needs no ruling and dispatches first. Then put the plan's 22
 rulings to Geoff in one sitting with the banked PNGs open, record the
@@ -767,7 +767,7 @@ orchestration ruling, AFTER the pass 2 gate is ruled):
 
 ```
 Run poplar pass 2b: onboarding and config. Read
-docs/superpowers/specs/poplar-refounding-STATUS.md's pass 2
+docs/specs/poplar-refounding-STATUS.md's pass 2
 outcomes block first (its gate rulings bind this pass), then the
 design language revision 3, the pinned exemplar
 (docs/poplar/design/2026-08-19-shell-exemplar/), ADR-0011/0012/0017,
@@ -837,7 +837,7 @@ session per the 2026-08-18 orchestration ruling):
 
 ```
 Run poplar pass 1c: measurement and the SQLite driver decision. Read
-docs/superpowers/specs/poplar-refounding-STATUS.md's pass 1c section
+docs/specs/poplar-refounding-STATUS.md's pass 1c section
 first, then author the pass 1c plan from the three carried task briefs
 under .superpowers/sdd/2026-07-28-pass-1b-integration-hardening/
 (task-9-brief.md, task-10-brief.md, task-11b-brief.md plus
@@ -860,7 +860,7 @@ item. Geoff is at the pass gate only.
 ## Superseded: Phase 1, the rendering bet
 
 **In progress (2026-07-19).** Plan:
-`docs/superpowers/plans/2026-07-19-rendering-bet.md`. A fresh session
+`docs/plans/2026-07-19-rendering-bet.md`. A fresh session
 resuming mid-phase executes that plan from the first unchecked task
 via superpowers:subagent-driven-development. Settled with Geoff:
 standard depth (25 per class, 3 ideals per class), harvest from all
@@ -884,7 +884,7 @@ re-founding"):
 
 ```
 Run Phase 1 of the poplar re-founding: the rendering bet. Read the
-charter docs/superpowers/specs/2026-07-19-poplar-refounding-charter.md
+charter docs/specs/2026-07-19-poplar-refounding-charter.md
 first, especially the Phase 1 section and the principles.
 
 The phase answers whether messy modern HTML mail can be turned into
