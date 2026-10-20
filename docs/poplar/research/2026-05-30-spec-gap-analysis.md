@@ -1,9 +1,9 @@
 # Poplar Rebuild: Spec Gap Analysis (Hardening Pass A)
 
 **Date:** 2026-05-30
-**Pass:** Spec-hardening Pass A (gap hunt), tracked in `docs/superpowers/specs/spec-hardening-STATUS.md`.
+**Pass:** Spec-hardening Pass A (gap hunt), tracked in `docs/specs/spec-hardening-STATUS.md`.
 **Status:** Report only. No spec edits land in Pass A. Pass C triages these findings and edits the spec; any change that reopens a locked decision is held for Geoff's sign-off at the Pass C gate.
-**Inputs:** the locked functional spec `docs/superpowers/specs/2026-05-29-poplar-rebuild-functional-spec.md`, the charter `docs/superpowers/specs/2026-05-29-poplar-rebuild-charter.md`, and the prior field survey `docs/poplar/research/2026-05-29-mail-client-gap-analysis.md`.
+**Inputs:** the locked functional spec `docs/specs/2026-05-29-poplar-rebuild-functional-spec.md`, the charter `docs/specs/2026-05-29-poplar-rebuild-charter.md`, and the prior field survey `docs/poplar/research/2026-05-29-mail-client-gap-analysis.md`.
 
 ## How to read this report
 
@@ -1185,7 +1185,7 @@ The spec has no section for non-functional concerns, and that is where the gaps 
 - Field: Thunderbird backup is a profile-directory copy; Apple Mail rides Time Machine; terminal clients back up by copying maildir/config files. The spec already classifies cached bodies/attachments and OAuth refresh tokens as the only non-regenerable data (§1.7), which is exactly the backup-critical set.
 - Why: Most state is a rebuildable projection (§1.7), so a lost cache re-syncs; the precious data is the OAuth refresh token, which lives in the OS keyring or an age-file. The risk is concentrated and small, but a stated backup/restore story (especially for the age-file token store on headless boxes) would prevent a re-consent-everything failure mode. Low because the data model already minimizes irreplaceable state and the keyring is OS-backed.
 - Verify: §1.7 (L190-194) names cached bodies/attachments and OAuth refresh tokens as the only non-regenerable data; §1.6 (L151-152) splits the token store across keyring and an age-file. But grep for backup|restore|migration.export|re.consent: the only 'restore' hits are cache-reset-preserves-tokens (L231), mute-unmute (L467), undo-toast (L867), and draft-reopen (L1347). No backup/restore/export workflow is specced. Genuine low gap. Most state is a rebuildable projection (§1.7) so a lost cache re-syncs; the concentrated risk is the OAuth refresh token, especially the age-file store on headless boxes. A stated backup/restore story would prevent a re-consent-everything failure mode. Low because the keyring is OS-backed and irreplaceable state is minimized.
-- Sources: https://support.mozilla.org/en-US/kb/profiles-where-thunderbird-stores-user-data, /home/glw907/Projects/poplar/docs/superpowers/specs/2026-05-29-poplar-rebuild-functional-spec.md
+- Sources: https://support.mozilla.org/en-US/kb/profiles-where-thunderbird-stores-user-data, /home/glw907/Projects/poplar/docs/specs/2026-05-29-poplar-rebuild-functional-spec.md
 
 **G-XC-12. Cache encryption at rest (message bodies/attachments in plaintext SQLite)**  (omitted, low)
 

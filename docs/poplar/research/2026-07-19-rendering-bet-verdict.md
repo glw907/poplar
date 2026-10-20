@@ -2,7 +2,7 @@
 
 **Date:** 2026-07-19
 **Phase:** Re-founding Phase 1. Charter:
-`docs/superpowers/specs/2026-07-19-poplar-refounding-charter.md`.
+`docs/specs/2026-07-19-poplar-refounding-charter.md`.
 **Question:** Can messy modern HTML mail be turned into prose a user
 reads and answers in a terminal, and where must the comprehension
 intelligence live?

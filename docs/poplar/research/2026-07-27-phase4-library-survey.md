@@ -2,7 +2,7 @@
 
 **Date:** 2026-07-27
 **Phase:** Re-founding Phase 4 (technical design). Charter:
-`docs/superpowers/specs/2026-07-19-poplar-refounding-charter.md`.
+`docs/specs/2026-07-19-poplar-refounding-charter.md`.
 **Purpose:** The exhaustive prior-art and library survey constraint C9
 requires before any design decision: for every subsystem, inventory
 the existing libraries, tools, and prior art at their current

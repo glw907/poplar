@@ -36,7 +36,7 @@ hints that are no-ops). Two degrade defects sit in shipped code
 reverse video). `cmd/sketch` omitted `FullRegion` and so every sketch
 frame showed a phantom rail, which made it invalid evidence for the
 modal, toast, banner, and degrade profiles. Pass 2c
-(`docs/superpowers/plans/2026-08-21-pass-2c-real-terminal-verification.md`)
+(`docs/plans/2026-08-21-pass-2c-real-terminal-verification.md`)
 answers all of it.
 
 ## The method

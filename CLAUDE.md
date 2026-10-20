@@ -8,23 +8,23 @@ The active track is the re-founding: one process, three layers (the
 store, the background engines, the bubbletea UI), rebuilt from a
 settled architecture rather than grown from the archived client. The
 charter is
-`docs/superpowers/specs/2026-07-19-poplar-refounding-charter.md`.
-`docs/superpowers/specs/poplar-refounding-STATUS.md` owns the phase
+`docs/specs/2026-07-19-poplar-refounding-charter.md`.
+`docs/specs/poplar-refounding-STATUS.md` owns the phase
 cursor; read it on "continue" or any phase or pass trigger.
 
 ## Binding docs
 
 The re-founding set is the only binding documentation:
 
-- The charter, vision, and requirements under `docs/superpowers/specs/`.
+- The charter, vision, and requirements under `docs/specs/`.
 - The technical design and its ADRs under
-  `docs/superpowers/specs/adr/`.
+  `docs/specs/adr/`.
 - The design language,
-  `docs/superpowers/specs/2026-07-27-poplar-design-language.md`.
+  `docs/specs/2026-07-27-poplar-design-language.md`.
 - The build machine design,
-  `docs/superpowers/specs/2026-07-27-poplar-build-machine.md`.
+  `docs/specs/2026-07-27-poplar-build-machine.md`.
 
-`docs/superpowers/specs/poplar-refounding-STATUS.md` is what
+`docs/specs/poplar-refounding-STATUS.md` is what
 "continue" reads first. Any other doc under `docs/` predates the
 re-founding and binds nothing.
 

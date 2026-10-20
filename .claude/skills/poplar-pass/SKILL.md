@@ -11,7 +11,7 @@ description: >
 
 Load `pass-core` first; it holds the lifecycle and the rules this adapter fills in. Paths are
 relative to the repo root. The cursor and resume prompt are in
-`docs/superpowers/specs/poplar-refounding-STATUS.md`; plans live under `docs/superpowers/plans/`.
+`docs/specs/poplar-refounding-STATUS.md`; plans live under `docs/plans/`.
 
 ## Adapter
 
@@ -51,8 +51,8 @@ Vale must be on `PATH`, because `scripts/vale-comments.sh` hard-fails without it
   one `make tmux-check` (`CLAUDE.md` "Conventions", `Makefile:189-196`).
 - Read gallery churn (`Makefile:50-58`).
 - Record the `deadcode ./...` count in the PR body (STATUS phase-end ritual, step 2).
-- Archive the plan to `docs/superpowers/archive/plans/`. STATUS stays at
-  `docs/superpowers/specs/poplar-refounding-STATUS.md`.
+- Archive the plan to `docs/archive/plans/`. STATUS stays at
+  `docs/specs/poplar-refounding-STATUS.md`.
 - Product touchpoints: the wireframe review before a screen task dispatches
   (`.claude/rules/poplar-development.md`), plus `pass-core`'s design approval and packet read.
 - Commit specific files only.

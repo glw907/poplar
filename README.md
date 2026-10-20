@@ -11,6 +11,6 @@ The build is in progress. The previous client is archived on branch
 repository.
 
 The re-founding charter is
-`docs/superpowers/specs/2026-07-19-poplar-refounding-charter.md`. A
+`docs/specs/2026-07-19-poplar-refounding-charter.md`. A
 full README, with usage and features, lands once there is a client to
 document.
