@@ -80,7 +80,7 @@ make install   # install poplar into ~/.local/bin/
 Claude's drafting on this repo follows the workstation authoring
 charter at `~/.claude/docs/authoring-charter.md`. The Go comment
 audience is wired: the in-tree `.vale.ini` lints `.go` comment prose
-through the vendored `glw907` overlay in `.vale/styles/glw907`, and
+through the vendored `Survey` overlay in `.vale/styles/Survey`, and
 `make check` runs the Vale comment gate to block a commit on an
 error-level finding.
 

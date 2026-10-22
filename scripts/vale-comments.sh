@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # vale-comments: commit-gate Vale scan of Go comment prose. Vale extracts the
-# comment text from each .go file and lints it through the vendored glw907
+# comment text from each .go file and lints it through the vendored Survey
 # overlay, so the em dash and the banned lexicon block the gate. This catches
 # what the voice-check.sh T33 grep cannot: an em dash in a comment that also
 # carries a slash (a path, a date, an a/b list), where the negated-slash regex
@@ -11,7 +11,7 @@
 # silent-decay class this gate exists to close, and "installed on the
 # workstation" is not portability.
 #
-# Pass --check-vendor to additionally assert the vendored glw907 overlay
+# Pass --check-vendor to additionally assert the vendored Survey overlay
 # matches the workstation's canonical copy. Off by default: a fresh clone
 # or CI has no workstation dotfiles to compare against, and the committed
 # overlay is the source of truth there.

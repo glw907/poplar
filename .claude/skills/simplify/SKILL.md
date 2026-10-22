@@ -63,7 +63,7 @@ Skip this agent if the diff has no Go files.
 
 The voice system is Vale plus the `go-conventions` skill: `make check` already runs the Vale
 comment gate over Go comment prose, so a mechanical style-guide finding (banned em dash,
-labeled comment prefixes, apologetic phrasing, and every other rule Vale's `glw907` overlay
+labeled comment prefixes, apologetic phrasing, and every other rule Vale's `Survey` overlay
 encodes) will surface there and does not need re-scanning here. This agent's job is the
 pattern-matching Vale cannot do: whether a comment is worth having at all, and whether the
 code around it reads as one experienced Go developer's work rather than a generated one.
